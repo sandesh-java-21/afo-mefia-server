@@ -3,14 +3,18 @@ const express = require("express");
 const { default: mongoose } = require("mongoose");
 const dotenv = require("dotenv").config();
 
+const morgan = require("morgan");
+
 const app = express();
 
 app.use(express.json());
 
 app.use(express.urlencoded({ extended: false }));
+app.use(morgan("tiny"));
 
-const videoUploadRoutes = require("./routes/Videos");
-app.use("/api/video", videoUploadRoutes);
+const movieRoutes = require("./routes/Movie");
+
+app.use("/api/movie", movieRoutes);
 
 var DB_URL = process.env.DB_URL;
 

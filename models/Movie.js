@@ -44,4 +44,38 @@ const movieSchema = mongoose.Schema({
     get: (val) => val.getFullYear(),
     set: (val) => new Date(val, 0, 1),
   },
+  media_id: {
+    type: String,
+    required: true,
+    default: "",
+  },
+  upload_link: {
+    type: String,
+    required: false,
+    default: "",
+  },
+  subtitles: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "subtitles",
+      default: [],
+    },
+  ],
+
+  audio_tracks: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "audio_tracks",
+      default: [],
+    },
+  ],
+  video_url: {
+    type: String,
+    required: false,
+    default: "",
+  },
 });
+
+var movieModal = mongoose.model("movies", movieSchema);
+
+module.exports = movieModal;
