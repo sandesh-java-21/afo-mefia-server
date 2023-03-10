@@ -94,6 +94,7 @@ router.post("/upload-movie-via-url", async (req, res) => {
               message: "New movie uploaded!",
               movie: savedMovie,
               success: true,
+              result: result.data,
             });
           })
           .catch((error) => {
