@@ -1,0 +1,15 @@
+Work 1
+
+1. first upload video and get the media id 
+2. after this send a thumbnail get request and get the motion and static thumbnail
+3. after getting both save all the data in database
+
+
+Work 2
+
+1. get the thumbnail static url from database for a specific media using media id
+
+Work 3
+
+1. get the motion thumbnail from database for a specific media using media id
+

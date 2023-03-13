@@ -13,8 +13,12 @@ app.use(express.urlencoded({ extended: false }));
 app.use(morgan("tiny"));
 
 const movieRoutes = require("./routes/Movie");
+const thumbnailRoutes = require("./routes/Thumnail");
+const subtitlesRoutes = require("./routes/Subtitles");
 
 app.use("/api/movie", movieRoutes);
+app.use("/api/thumbnail", thumbnailRoutes);
+app.use("/api/subtitles", subtitlesRoutes);
 
 var DB_URL = process.env.DB_URL;
 

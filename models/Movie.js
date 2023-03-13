@@ -23,12 +23,6 @@ const movieSchema = mongoose.Schema({
     default: "",
   },
 
-  thumbnail_url: {
-    type: String,
-    required: false,
-    default: "",
-  },
-
   category: {
     type: String,
     required: true,

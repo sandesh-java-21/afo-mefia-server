@@ -72,15 +72,12 @@ router.post("/upload-movie-via-url", async (req, res) => {
             var { author, category, description, language, tags, title } =
               result.data.metadata;
             var { duration, id } = result.data;
-            var { banner_url, thumbnail_url } =
-              result.data.metadata.custom_params;
 
             var movieObj = new Movie({
               title,
               description,
               duration,
               banner_url,
-              thumbnail_url,
               category,
               default_language: language,
               release_year: release_year,

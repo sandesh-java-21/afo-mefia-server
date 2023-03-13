@@ -1,13 +1,13 @@
 const mongoose = require("mongoose");
 
-const audioTracksSchema = mongoose.Schema({
-  tracks_id: {
+const subtitlessSchema = mongoose.Schema({
+  track_id: {
     type: String,
     required: true,
   },
   delivery_url: {
     type: String,
-    required: true,
+    required: false,
     default: "",
   },
   track_kind: {
@@ -22,6 +22,6 @@ const audioTracksSchema = mongoose.Schema({
   },
 });
 
-var audioTracksModel = mongoose.model("audio_tracks", audioTracksSchema);
+var subtitlesModel = mongoose.model("subtitles", subtitlessSchema);
 
-module.exports = audioTracksModel;
+module.exports = subtitlesModel;
