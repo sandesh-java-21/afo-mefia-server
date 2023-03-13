@@ -20,6 +20,11 @@ const subtitlessSchema = mongoose.Schema({
     required: true,
     default: "",
   },
+  movie: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "movies",
+    required: true,
+  },
 });
 
 var subtitlesModel = mongoose.model("subtitles", subtitlessSchema);
