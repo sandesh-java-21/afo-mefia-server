@@ -1,11 +1,7 @@
 const mongoose = require("mongoose");
 
 const audioTracksSchema = mongoose.Schema({
-  upload_id: {
-    type: String,
-    required: true,
-  },
-  track_id: {
+  original_id: {
     type: String,
     required: true,
     default: "",
@@ -29,6 +25,12 @@ const audioTracksSchema = mongoose.Schema({
     type: String,
     required: false,
     default: "",
+  },
+
+  movie: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "movies",
+    required: true,
   },
 });
 

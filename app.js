@@ -15,10 +15,12 @@ app.use(morgan("tiny"));
 const movieRoutes = require("./routes/Movie");
 const thumbnailRoutes = require("./routes/Thumnail");
 const subtitlesRoutes = require("./routes/Subtitles");
+const audioTracksRoutes = require("./routes/AudioTracks");
 
 app.use("/api/movie", movieRoutes);
 app.use("/api/thumbnail", thumbnailRoutes);
 app.use("/api/subtitles", subtitlesRoutes);
+app.use("/api/audio", audioTracksRoutes);
 
 var DB_URL = process.env.DB_URL;
 
