@@ -52,8 +52,6 @@ router.post("/upload-movie-via-url", async (req, res) => {
           },
           metadata: {
             custom_params: {
-              thumbnail_url: `${thumbnail_url}`,
-              banner_url: `${banner_url}`,
               category: "sfhgs",
               sub_category: "kjfgf",
             },

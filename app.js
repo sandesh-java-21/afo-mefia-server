@@ -17,12 +17,14 @@ const thumbnailRoutes = require("./routes/Thumnail");
 const subtitlesRoutes = require("./routes/Subtitles");
 const audioTracksRoutes = require("./routes/AudioTracks");
 const slidersRoutes = require("./routes/Sliders");
+const subCategoriesRoutes = require("./routes/SubCategories");
 
 app.use("/api/movie", movieRoutes);
 app.use("/api/thumbnail", thumbnailRoutes);
 app.use("/api/subtitles", subtitlesRoutes);
 app.use("/api/audio", audioTracksRoutes);
 app.use("/api/sliders", slidersRoutes);
+app.use("/api/sub-categories", subCategoriesRoutes);
 
 var DB_URL = process.env.DB_URL;
 

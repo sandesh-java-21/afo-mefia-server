@@ -6,12 +6,13 @@ const Slider = require("../models/Slider");
 
 router.post("/add-slider", async (req, res) => {
   try {
-    var { page_name, movie_id, banner_url } = req.body;
+    var { page_name, movie_id, banner_url, language } = req.body;
 
     var sliderObj = new Slider({
       banner_url,
       page_name,
       movie: movie_id,
+      language,
     });
 
     var savedSlider = await sliderObj.save();

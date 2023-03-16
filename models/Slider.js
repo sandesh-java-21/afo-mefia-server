@@ -12,6 +12,12 @@ const sliderSchema = mongoose.Schema({
     default: "",
   },
 
+  language: {
+    type: String,
+    required: true,
+    default: "",
+  },
+
   movie: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "movies",
