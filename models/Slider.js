@@ -24,6 +24,10 @@ const sliderSchema = mongoose.Schema({
     required: true,
     default: "",
   },
+  createdAt: {
+    type: Date,
+    default: Date.now(),
+  },
 });
 
 var sliderModel = mongoose.model("sliders", sliderSchema);

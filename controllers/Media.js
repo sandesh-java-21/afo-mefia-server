@@ -1,40 +1,38 @@
-const { default: axios } = require("axios");
-const express = require("express");
-const router = express.Router();
-const { getVideoDurationInSeconds } = require("get-video-duration");
-const Movie = require("../models/Media");
+const Media = require("../models/Media");
+const GeneralContent = require("../models/GeneralContent");
+const LanguagesContent = require("../models/LanguagesContent");
 
-router.post("/upload-movie-via-url", async (req, res) => {
+const { getVideoDurationInSeconds } = require("get-video-duration");
+
+const axios = require("axios");
+
+const uploadMediaOld = async (req, res) => {
   try {
     var {
       title,
       description,
-      thumbnail_url,
-      banner_url,
-      tags,
+      jw_tags,
       category,
       default_language,
       release_year,
-      subtitles,
-      audio_tracks,
-      download_url,
-      author,
+      genres,
+      seo_tags,
+      rating,
+      status,
     } = req.body;
 
     console.log(
       "Data body: ",
       title,
       description,
-      thumbnail_url,
-      banner_url,
-      tags,
+      jw_tags,
       category,
       default_language,
       release_year,
-      subtitles,
-      audio_tracks,
-      download_url,
-      author
+      genres,
+      seo_tags,
+      rating,
+      status
     );
     console.log("API Key: ", process.env.JW_PLAYER_API_KEY);
 
@@ -111,9 +109,9 @@ router.post("/upload-movie-via-url", async (req, res) => {
       error: error,
     });
   }
-});
+};
 
-router.delete("/delete-movie/:movie_id", async (req, res) => {
+const deleteMedia = async (req, res) => {
   try {
     var movie_id = req.params.movie_id;
 
@@ -178,9 +176,9 @@ router.delete("/delete-movie/:movie_id", async (req, res) => {
       error: error,
     });
   }
-});
+};
 
-router.put("/update-movie/:movie_id", async (req, res) => {
+const updateMedia = async (req, res) => {
   try {
     var movie_id = req.params.movie_id;
     var { title, description, category, default_language, release_year, tags } =
@@ -285,6 +283,191 @@ router.put("/update-movie/:movie_id", async (req, res) => {
       error: error,
     });
   }
-});
+};
 
-module.exports = router;
+const createMedia = async (req, res) => {
+  try {
+    var {
+      title,
+      description,
+      jw_tags,
+      category,
+      default_language,
+      release_year,
+      genres,
+      seo_tags,
+      rating,
+      status,
+    } = req.body;
+
+    console.log(
+      "Data body: ",
+      title,
+      description,
+      jw_tags,
+      category,
+      default_language,
+      release_year,
+      genres,
+      seo_tags,
+      rating,
+      status
+    );
+
+    if (
+      !title ||
+      !description ||
+      !jw_tags ||
+      !category ||
+      !default_language ||
+      !release_year ||
+      !genres ||
+      !seo_tags ||
+      !rating ||
+      !status
+    ) {
+      res.json({
+        message: "Required fields are empty!",
+        status: "400",
+      });
+    } else {
+      var languagesContentObj = new LanguagesContent({
+        title_translated: title,
+        description_translated: description,
+      });
+
+      var savedLanguagesContent = await languagesContentObj.save();
+
+      var mediaObj = new Media({
+        title: title,
+        description: description,
+        duration: 0,
+        default_language: default_language,
+        release_year: release_year,
+        subtitles: [],
+        audio_tracks: [],
+        jw_tags: jw_tags,
+        seo_tags: seo_tags,
+        translated_content: [savedLanguagesContent._id],
+        rating: rating,
+      });
+
+      var savedMedia = await mediaObj.save();
+
+      var generalContentObj = new GeneralContent({
+        media: savedMedia._id,
+        category: category,
+        genre: genres,
+        rating: rating,
+        status: status,
+      });
+
+      var savedGeneralContent = await generalContentObj.save();
+
+      res.json({
+        message: "Media and general content created!",
+        status: "200",
+        savedGeneralContent,
+        savedMedia,
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      message: "Internal server error!",
+      status: "500",
+      error: error,
+    });
+  }
+};
+
+const uploadMedia = async (req, res) => {
+  try {
+    var general_content_id = req.params.general_content_id;
+    var { download_url } = req.body;
+
+    var generalContentObj = await GeneralContent.findById({
+      _id: general_content_id,
+    });
+
+    var mediaObj = await Media.findById({
+      _id: generalContentObj.media,
+    });
+
+    var headers = {
+      Authorization: `Bearer ${process.env.JW_PLAYER_API_KEY}`,
+    };
+
+    var video_duration = getVideoDurationInSeconds(`${download_url}`).then(
+      async (duration) => {
+        var data = {
+          upload: {
+            method: "fetch",
+            download_url: `${download_url}`,
+          },
+          metadata: {
+            custom_params: {
+              category: `${generalContentObj.category}`,
+            },
+            title: mediaObj.title,
+            description: mediaObj.description,
+            // author: author,
+            duration: duration * 1000,
+            // category: `${category}`,
+            tags: mediaObj.jw_tags,
+            language: mediaObj.default_language,
+          },
+        };
+
+        var apiResponse = await axios
+          .post("https://api.jwplayer.com/v2/sites/yP9ghzCy/media", data, {
+            headers: headers,
+          })
+          .then(async (result) => {
+            var { duration, id } = result.data;
+            var filter = {
+              _id: mediaObj._id,
+            };
+            var updateData = {
+              media_id: id,
+            };
+            var updatedMedia = await Media.findByIdAndUpdate(
+              filter,
+              updateData,
+              {
+                new: true,
+              }
+            ).then((resultObj) => {
+              console.log("Updated Doc: ", resultObj);
+
+              res.json({
+                message: "Video uploaded successfully!",
+                status: "200",
+                updatedMedia: resultObj,
+              });
+            });
+          })
+          .catch((error) => {
+            console.log("Error: ", error.data);
+            res.json({
+              error,
+              message: "Error occurred while uploading movie",
+              status: "400",
+            });
+          });
+      }
+    );
+  } catch (error) {
+    res.status(500).json({
+      message: "Internal server error!",
+      status: "500",
+      error: error,
+    });
+  }
+};
+
+module.exports = {
+  uploadMedia,
+  deleteMedia,
+  updateMedia,
+  createMedia,
+};

@@ -27,10 +27,14 @@ const audioTracksSchema = mongoose.Schema({
     default: "",
   },
 
-  movie: {
+  media: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "movies",
+    ref: "medias",
     required: true,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now(),
   },
 });
 

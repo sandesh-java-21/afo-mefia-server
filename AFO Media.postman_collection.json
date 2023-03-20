@@ -1,0 +1,412 @@
+{
+	"info": {
+		"_postman_id": "56b5b7f3-63bc-4dc3-a546-331f1905eaaa",
+		"name": "AFO Media",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "26270903"
+	},
+	"item": [
+		{
+			"name": "Subtitles",
+			"item": [
+				{
+					"name": "Add Subtitles To A Media",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"file_format\":\"srt\",\r\n    \"download_url\":\"https://aykatech.000webhostapp.com/testcc.srt\",\r\n    \"label\":\"italian\",\r\n    \"language\":\"it\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:4000/api/subtitles/add-subtitles/6417a4bbb832b8acf949f20b",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"subtitles",
+								"add-subtitles",
+								"6417a4bbb832b8acf949f20b"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Subtitle Of  A Media",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "localhost:4000/api/subtitles/delete-subtitles/6417a4bbb832b8acf949f20b/64185ac5eb968a499c03e95c",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"subtitles",
+								"delete-subtitles",
+								"6417a4bbb832b8acf949f20b",
+								"64185ac5eb968a499c03e95c"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Subtitles Of A Movie",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:4000/api/subtitles/get-subtitles/640f065b595a86db290d17b8",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"subtitles",
+								"get-subtitles",
+								"640f065b595a86db290d17b8"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Audio Tracks",
+			"item": [
+				{
+					"name": "Add Audio Track To A Media",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\":\"Sindhi\",\r\n    \"type\":\"language\",\r\n    \"download_url\":\"https://aykatech.000webhostapp.com/Dr_Dre_Still-e1460704-f0a6-3d6e-a748-2a6667b01137.mp3\",\r\n    \"language\":\"sindhi\",\r\n    \"language_code\":\"si\",\r\n    \"default_language\":\"en\"\r\n    }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:4000/api/audio/add-audio-track/6411b5fbb0ee3a7ad3d2f60c",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"audio",
+								"add-audio-track",
+								"6411b5fbb0ee3a7ad3d2f60c"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Audio Track Of A Media",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "localhost:4000/api/audio/delete-audio-track/6417a4bbb832b8acf949f20b/64185d88d0749d840d899371",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"audio",
+								"delete-audio-track",
+								"6417a4bbb832b8acf949f20b",
+								"64185d88d0749d840d899371"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Audio Tracks Of A Movie",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Thumbnails",
+			"item": [
+				{
+					"name": "Add Thumbnail To A Movie From JW Platform",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "localhost:4000/api/thumbnail/add-thumbnail/640a17ef76127e9962c4dfb0",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"thumbnail",
+								"add-thumbnail",
+								"640a17ef76127e9962c4dfb0"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Thumbnail Of A General Content",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:4000/api/thumbnail/get-thumbnail/6417a4bcb832b8acf949f20d",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"thumbnail",
+								"get-thumbnail",
+								"6417a4bcb832b8acf949f20d"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Generate Motion Thumbnail For A General Content",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "localhost:4000/api/thumbnail/generate-motion-thumbnail/6417a4bcb832b8acf949f20d",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"thumbnail",
+								"generate-motion-thumbnail",
+								"6417a4bcb832b8acf949f20d"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Upload Custom Thumbnail For A General Content",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"download_url\":\"https://edit.org/images/cat/custom-youtube-thumbnails-big-2018062108.jpg\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:4000/api/thumbnail/upload-custom-thumbnail/6417a4bcb832b8acf949f20d",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"thumbnail",
+								"upload-custom-thumbnail",
+								"6417a4bcb832b8acf949f20d"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Sliders",
+			"item": [
+				{
+					"name": "Add A Slider",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"page_name\":\"home\",}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:4000/api/sliders/add-slider",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"sliders",
+								"add-slider"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "General Contents",
+			"item": [
+				{
+					"name": "Add General Content",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Genres",
+			"item": [
+				{
+					"name": "Add Genre",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\":\"comedy\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:4000/api/genre/add-genre",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"genre",
+								"add-genre"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Medias",
+			"item": [
+				{
+					"name": "Create Media",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\":\"testing title 1\",\r\n    \"description\":\"testing description 1\",\r\n    \"jw_tags\":[\r\n        \"action\",\r\n        \"comedy\",\r\n        \"thrill\"\r\n    ],\r\n    \"category\":\"action\",\r\n    \"default_language\":\"en\",\r\n    \"release_year\":\"2024\",\r\n    \"genres\":[\r\n        \"6414a5837bf24600b23a9831\"\r\n    ],\r\n    \"seo_tags\":[\r\n        \"watch testing\",\r\n        \"testing 1\",\r\n        \"online watch testing title 1\",\r\n        \"title 1\",\r\n        \"title 1 comedy\"\r\n    ],\r\n    \"rating\":\"3\",\r\n    \"status\":\"upcoming\"\r\n\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:4000/api/media/create-media",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"media",
+								"create-media"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Upload Media",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Trailers",
+			"item": [
+				{
+					"name": "Upload Trailer Of A General Content",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"download_url\":\"https://aykatech.000webhostapp.com/Movie%20Trailer%20Sample.mp4\",\r\n    \"type\":\"trailer\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:4000/api/trailer/upload-trailer/6417a4bcb832b8acf949f20d",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"trailer",
+								"upload-trailer",
+								"6417a4bcb832b8acf949f20d"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

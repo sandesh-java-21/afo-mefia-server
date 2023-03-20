@@ -1,19 +1,33 @@
 const mongoose = require("mongoose");
 
 const thumbnailSchema = mongoose.Schema({
-  movie: {
+  general_content: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "movies",
+    ref: "general_content",
   },
-  static_url: {
+  thumbnail_id: {
+    type: String,
+    required: false,
+    default: "",
+  },
+  static_thumbnail_url: {
     type: String,
     require: true,
     default: "",
   },
-  motion_url: {
+  motion_thumbnail_url: {
     type: String,
     require: true,
     default: "",
+  },
+  banner_thumbnail_url: {
+    type: String,
+    require: true,
+    default: "",
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now(),
   },
 });
 

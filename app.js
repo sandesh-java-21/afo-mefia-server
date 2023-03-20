@@ -12,19 +12,25 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(morgan("tiny"));
 
-const movieRoutes = require("./routes/Movie");
-const thumbnailRoutes = require("./routes/Thumnail");
-const subtitlesRoutes = require("./routes/Subtitles");
-const audioTracksRoutes = require("./routes/AudioTracks");
-const slidersRoutes = require("./routes/Sliders");
-const subCategoriesRoutes = require("./routes/SubCategories");
+const allRoutes = require("./routes/index");
 
-app.use("/api/movie", movieRoutes);
-app.use("/api/thumbnail", thumbnailRoutes);
-app.use("/api/subtitles", subtitlesRoutes);
-app.use("/api/audio", audioTracksRoutes);
-app.use("/api/sliders", slidersRoutes);
-app.use("/api/sub-categories", subCategoriesRoutes);
+app.use("/api", allRoutes);
+
+// const movieRoutes = require("./routes/Movie");
+// const thumbnailRoutes = require("./routes/Thumnail");
+// const subtitlesRoutes = require("./routes/Subtitles");
+// const audioTracksRoutes = require("./routes/AudioTracks");
+// const slidersRoutes = require("./routes/Sliders");
+// const genreRoutes = require("./routes/Genres");
+// const generalContentRoutes = require("./routes/GeneralContent");
+
+// app.use("/api/movie", movieRoutes);
+// app.use("/api/thumbnail", thumbnailRoutes);
+// app.use("/api/subtitles", subtitlesRoutes);
+// app.use("/api/audio", audioTracksRoutes);
+// app.use("/api/sliders", slidersRoutes);
+// app.use("/api/genre", genreRoutes);
+// app.use("/api/general-content", generalContentRoutes);
 
 var DB_URL = process.env.DB_URL;
 

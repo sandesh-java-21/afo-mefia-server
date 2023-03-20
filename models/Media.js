@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const movieSchema = mongoose.Schema({
+const mediaSchema = mongoose.Schema({
   title: {
     type: String,
     required: true,
@@ -17,17 +17,6 @@ const movieSchema = mongoose.Schema({
     default: 0,
   },
 
-  banner_url: {
-    type: String,
-    required: false,
-    default: "",
-  },
-
-  category: {
-    type: String,
-    required: true,
-    default: "",
-  },
   default_language: {
     type: String,
     required: false,
@@ -39,11 +28,6 @@ const movieSchema = mongoose.Schema({
     set: (val) => new Date(val, 0, 1),
   },
   media_id: {
-    type: String,
-    required: true,
-    default: "",
-  },
-  upload_link: {
     type: String,
     required: false,
     default: "",
@@ -63,13 +47,27 @@ const movieSchema = mongoose.Schema({
       default: [],
     },
   ],
-  video_url: {
-    type: String,
+
+  jw_tags: [String],
+  seo_tags: [String],
+  translated_content: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "languages_content",
+      default: [],
+    },
+  ],
+  rating: {
+    type: Number,
     required: false,
-    default: "",
+    default: 0,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now(),
   },
 });
 
-var movieModal = mongoose.model("movies", movieSchema);
+var mediaModal = mongoose.model("medias", mediaSchema);
 
-module.exports = movieModal;
+module.exports = mediaModal;
