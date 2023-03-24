@@ -465,9 +465,90 @@ const uploadMedia = async (req, res) => {
   }
 };
 
+const reUploadMediaByMediaId = async (req, res) => {
+  try {
+    var media_id = req.params.media_id;
+    var { download_url } = req.body;
+
+    if (!media_id || media_id === "") {
+      res.json({
+        message: "Required fields are empty!",
+        status: "400",
+      });
+    } else {
+      var site_id = process.env.SITE_ID;
+      var media_id = media_id;
+
+      var headers = {
+        Authorization: `Bearer ${process.env.JW_PLAYER_API_KEY}`,
+      };
+
+      var data = {
+        upload: {
+          method: "fetch",
+          download_url: `${download_url}`,
+        },
+      };
+
+      var apiResponse = await axios
+        .put(
+          `https://api.jwplayer.com/v2/sites/${site_id}/media/${media_id}/reupload/`,
+          data,
+          {
+            headers: headers,
+          }
+        )
+        .then(async (result) => {
+          var { id } = result.data;
+
+          var filter = {
+            _id: media_id,
+          };
+
+          var updateData = {
+            media_id: id,
+          };
+
+          var updatedMedia = await Media.findByIdAndUpdate(filter, updateData, {
+            new: true,
+          })
+            .then((updateResult) => {
+              res.json({
+                message: "Media reuploaded successfully!",
+                status: "200",
+                updatedMedia: updateResult,
+              });
+            })
+            .catch((error) => {
+              res.json({
+                message: "Something went wrong while updating media!",
+                status: "400",
+                error,
+              });
+            });
+        })
+        .catch((error) => {
+          console.log("JW Error: ", error);
+          res.json({
+            message: "Something went wrong while reuploading media!",
+            status: "400",
+            error,
+          });
+        });
+    }
+  } catch (error) {
+    res.status(500).json({
+      message: "Internal server error!",
+      status: "500",
+      error: error,
+    });
+  }
+};
+
 module.exports = {
   uploadMedia,
   deleteMedia,
   updateMedia,
   createMedia,
+  reUploadMediaByMediaId,
 };

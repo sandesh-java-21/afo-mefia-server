@@ -1,5 +1,6 @@
 const Subtitles = require("../models/Subtitles");
 const Media = require("../models/Media");
+const GeneralContent = require("../models/GeneralContent");
 
 const axios = require("axios");
 
@@ -199,7 +200,72 @@ const deletedSubtitles = async (req, res) => {
   }
 };
 
+const getSubtitlesByGeneralContentId = async (req, res) => {
+  try {
+    var general_content_id = req.params.general_content_id;
+    if (!general_content_id || general_content_id === "") {
+      res.json({
+        message: "Required fields are empty!",
+        status: "400",
+      });
+    } else {
+      var general_content = await GeneralContent.findById({
+        _id: general_content_id,
+      }).populate("media");
+
+      var media = general_content.media;
+
+      var populatedMedia = Media.findById({
+        _id: media._id,
+      }).populate("subtitles");
+
+      res.json({
+        message: "Subtitles found!",
+        status: "200",
+        subtitles: populatedMedia.subtitles,
+      });
+    }
+  } catch (error) {
+    res.json({
+      message: "Internal server error!",
+      status: "500",
+      error,
+    });
+  }
+};
+
+const getSubtitlesByGeneralMediaId = async (req, res) => {
+  try {
+    var media_id = req.params.media_id;
+
+    if (!media_id || media_id === "") {
+      res.json({
+        message: "Required fields are empty!",
+        status: "400",
+      });
+    } else {
+      var media = await Media.findById({
+        _id: media_id,
+      }).populate("subtitles");
+
+      res.json({
+        message: "Subtitles found!",
+        status: "200",
+        subtitles: media.subtitles,
+      });
+    }
+  } catch (error) {
+    res.json({
+      message: "Internal server error!",
+      status: "500",
+      error,
+    });
+  }
+};
+
 module.exports = {
   addSubtitles,
   deletedSubtitles,
+  getSubtitlesByGeneralContentId,
+  getSubtitlesByGeneralMediaId,
 };

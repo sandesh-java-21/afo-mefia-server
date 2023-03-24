@@ -1,26 +1,15 @@
 const mongoose = require("mongoose");
 
 const sliderSchema = mongoose.Schema({
-  banner_url: {
-    type: String,
-    required: true,
-    default: "",
-  },
-  page_name: {
+  slider_type: {
     type: String,
     required: true,
     default: "",
   },
 
-  language: {
-    type: String,
-    required: true,
-    default: "",
-  },
-
-  movie: {
+  general_content: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "movies",
+    ref: "general_content",
     required: true,
     default: "",
   },

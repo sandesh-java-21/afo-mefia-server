@@ -3,9 +3,6 @@ const express = require("express");
 
 const router = express.Router();
 
-const Media = require("../models/Media");
-
-const Subtitles = require("../models/Subtitles");
 const subtitlesControllers = require("../controllers/Subtitles");
 
 router.post(
@@ -16,6 +13,15 @@ router.post(
 router.delete(
   "/delete-subtitles/:media_object_id/:subtitles_id",
   subtitlesControllers.deletedSubtitles
+);
+
+router.get(
+  "/get-subtitles-by-general-content/:general_content_id",
+  subtitlesControllers.getSubtitlesByGeneralContentId
+);
+router.get(
+  "/get-subtitles-by-media/:media_id",
+  subtitlesControllers.getSubtitlesByGeneralMediaId
 );
 
 // router.get("/get-subtitles/:movie_id", async (req, res) => {

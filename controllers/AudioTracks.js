@@ -223,7 +223,72 @@ const deletedAudioTrack = async (req, res) => {
   }
 };
 
+const getAudioTracksByGeneralMediaId = async (req, res) => {
+  try {
+    var media_id = req.params.media_id;
+
+    if (!media_id || media_id === "") {
+      res.json({
+        message: "Required fields are empty!",
+        status: "400",
+      });
+    } else {
+      var media = await Media.findById({
+        _id: media_id,
+      }).populate("audio_tracks");
+
+      res.json({
+        message: "Audio tracks found!",
+        status: "200",
+        audio_tracks: media.audio_tracks,
+      });
+    }
+  } catch (error) {
+    res.json({
+      message: "Internal server error!",
+      status: "500",
+      error,
+    });
+  }
+};
+
+const getAudioTracksByGeneralContentId = async (req, res) => {
+  try {
+    var general_content_id = req.params.general_content_id;
+    if (!general_content_id || general_content_id === "") {
+      res.json({
+        message: "Required fields are empty!",
+        status: "400",
+      });
+    } else {
+      var general_content = await GeneralContent.findById({
+        _id: general_content_id,
+      }).populate("media");
+
+      var media = general_content.media;
+
+      var populatedMedia = Media.findById({
+        _id: media._id,
+      }).populate("audio_tracks");
+
+      res.json({
+        message: "Subtitles found!",
+        status: "200",
+        audio_tracks: populatedMedia.audio_tracks,
+      });
+    }
+  } catch (error) {
+    res.json({
+      message: "Internal server error!",
+      status: "500",
+      error,
+    });
+  }
+};
+
 module.exports = {
   addAudioTrack,
   deletedAudioTrack,
+  getAudioTracksByGeneralMediaId,
+  getAudioTracksByGeneralContentId,
 };
