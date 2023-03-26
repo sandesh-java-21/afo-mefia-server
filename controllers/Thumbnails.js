@@ -319,8 +319,95 @@ const getGeneralContentThumbnail = async (req, res) => {
   }
 };
 
+const deleteThumbnailById = async (req, res) => {
+  try {
+    var thumbnail_id = req.params.thumbnail_id;
+
+    if (!thumbnail_id || thumbnail_id === "") {
+      res.json({
+        message: "Required fields are empty!",
+        status: "400",
+      });
+    } else {
+      var thumbnail = await Thumbnail.findById({
+        _id: thumbnail_id,
+      })
+        .then(async (onThumbnailFound) => {
+          var searchedThumbnail = onThumbnailFound;
+
+          var gcObj = await GeneralContent.findById({
+            _id: searchedThumbnail.general_content,
+          })
+            .then(async (onGcFound) => {
+              var general_content_obj = onGcFound;
+              var filter = {
+                _id: general_content_obj._id,
+              };
+              var update = {
+                thumbnail: null,
+              };
+              var updatedGeneralContent =
+                await GeneralContent.findByIdAndUpdate(filter, update, {
+                  new: true,
+                })
+                  .then(async (onUpdateGc) => {
+                    var deletedThumbnail = await Thumbnail.findByIdAndDelete({
+                      _id: searchedThumbnail._id,
+                    })
+                      .then((onDeleteThumbnail) => {
+                        res.json({
+                          message: "Thumbnail deleted!",
+                          status: "200",
+                          updatedGc: onUpdateGc,
+                          onDeleteThumbnail,
+                        });
+                      })
+                      .catch((onNotDelete) => {
+                        res.json({
+                          message:
+                            "Something went wrong while deleting thumbnail from database!",
+                          status: "400",
+                          onNotDelete,
+                        });
+                      });
+                  })
+                  .catch((onNotUpdateGc) => {
+                    res.json({
+                      message:
+                        "Something went wrong while deleting thumbnail from database!",
+                      status: "400",
+                      onNotUpdateGc,
+                    });
+                  });
+            })
+            .catch((error) => {
+              res.json({
+                message: "No general content found for provided thumbnail!",
+                status: "404",
+                error,
+              });
+            });
+        })
+        .catch((onNotFound) => {
+          res.json({
+            message: "No thumbnail found with provided id!",
+            status: "404",
+            onNotFound,
+          });
+        });
+    }
+  } catch (error) {
+    res.json({
+      message: "Internal server error!",
+      status: "500",
+      error,
+    });
+  }
+};
+
 module.exports = {
   generateJwMotionThumbnail,
   uploadCustomThumbnail,
   getGeneralContentThumbnail,
+  deleteThumbnailById,
 };

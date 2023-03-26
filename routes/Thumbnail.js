@@ -19,4 +19,9 @@ router.post(
   thumbnailControllers.uploadCustomThumbnail
 );
 
+router.delete(
+  "/delete-thumbnail/:thumbnail_id",
+  thumbnailControllers.deleteThumbnailById
+);
+
 module.exports = router;
