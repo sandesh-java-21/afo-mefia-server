@@ -101,6 +101,7 @@ const generateJwMotionThumbnail = async (req, res) => {
 const uploadCustomThumbnail = async (req, res) => {
   try {
     var general_content_id = req.params.general_content_id;
+    console.log(general_content_id);
 
     var { download_url } = req.body;
 

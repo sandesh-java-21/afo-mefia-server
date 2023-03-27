@@ -30,33 +30,4 @@ router.get(
   audioTracksControllers.getAudioTracksByGeneralMediaId
 );
 
-// router.get("/get-audio-tracks/:movie_id", async (req, res) => {
-//   try {
-//     var movie_id = req.params.movie_id;
-//     var movie = await Movie.findById({
-//       _id: movie_id,
-//     }).populate("audio_tracks");
-
-//     if (!movie) {
-//       res.json({
-//         message: "No movie found with provided id1",
-//         status: "404",
-//       });
-//     } else {
-//       res.json({
-//         message: "Audio tracks found!",
-//         status: "200",
-//         audio_tracks: movie.audio_tracks,
-//         movie: movie,
-//       });
-//     }
-//   } catch (error) {
-//     res.json({
-//       message: "Internal server error!",
-//       status: "500",
-//       error,
-//     });
-//   }
-// });
-
 module.exports = router;

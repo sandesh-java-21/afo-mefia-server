@@ -338,6 +338,9 @@ const createMedia = async (req, res) => {
 
       var savedLanguagesContent = await languagesContentObj.save();
 
+      var customTags = jw_tags.map((tag) => tag + `-${category}`);
+      var jw_tags = [...jw_tags, ...customTags];
+
       var mediaObj = new Media({
         title: title,
         description: description,
