@@ -20,13 +20,23 @@ const addGeneralContentToSlider = async (req, res) => {
         slider_type: slider_type,
       });
 
-      var savedSlider = sliderObj.save();
+      var savedSlider = sliderObj
+        .save()
+        .then((onSliderAdded) => {
+          res.json({
+            message: "New slider item added!",
+            status: "200",
+            savedSliderItem: onSliderAdded,
+          });
+        })
 
-      res.json({
-        message: "New slider item added!",
-        status: "200",
-        savedSlider,
-      });
+        .catch((error) => {
+          res.json({
+            message: "Something went wrong while adding this time to slider!",
+            status: "400",
+            savedSlider: null,
+          });
+        });
     }
   } catch (error) {
     res.json({
@@ -64,6 +74,7 @@ const deleteSliderById = async (req, res) => {
           .then((result) => {
             res.json({
               message: "Slider item deleted!",
+              status: "200",
             });
           })
           .catch((error) => {
@@ -102,6 +113,7 @@ const getSliderBySliderType = async (req, res) => {
         res.json({
           message: "No sliders found for the provided slider type!",
           status: "404",
+          allSliders: [],
         });
       } else {
         res.json({
@@ -123,4 +135,5 @@ const getSliderBySliderType = async (req, res) => {
 module.exports = {
   addGeneralContentToSlider,
   deleteSliderById,
+  getSliderBySliderType,
 };

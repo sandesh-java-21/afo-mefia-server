@@ -1,5 +1,6 @@
 const AudioTracks = require("../models/AudioTracks");
 const Media = require("../models/Media");
+const GeneralContent = require("../models/GeneralContent");
 
 const axios = require("axios");
 
@@ -237,11 +238,19 @@ const getAudioTracksByGeneralMediaId = async (req, res) => {
         _id: media_id,
       }).populate("audio_tracks");
 
-      res.json({
-        message: "Audio tracks found!",
-        status: "200",
-        audio_tracks: media.audio_tracks,
-      });
+      if (media) {
+        res.json({
+          message: "Audio tracks found!",
+          status: "200",
+          audio_tracks: media.audio_tracks,
+        });
+      } else {
+        res.json({
+          message: "No audio tracks found!",
+          status: "404",
+          audio_tracks: [],
+        });
+      }
     }
   } catch (error) {
     res.json({
@@ -265,17 +274,34 @@ const getAudioTracksByGeneralContentId = async (req, res) => {
         _id: general_content_id,
       }).populate("media");
 
-      var media = general_content.media;
+      if (!general_content) {
+        res.json({
+          message: "No general content found for provided general content id!",
+          status: "404",
+          general_content: null,
+        });
+      } else {
+        console.log("general content: ", general_content);
+        var media = general_content.media;
 
-      var populatedMedia = Media.findById({
-        _id: media._id,
-      }).populate("audio_tracks");
+        var populatedMedia = await Media.findById({
+          _id: media._id,
+        }).populate("audio_tracks");
 
-      res.json({
-        message: "Subtitles found!",
-        status: "200",
-        audio_tracks: populatedMedia.audio_tracks,
-      });
+        if (populatedMedia) {
+          res.json({
+            message: "Subtitles found!",
+            status: "200",
+            audio_tracks: populatedMedia.audio_tracks,
+          });
+        } else {
+          res.json({
+            message: "No audio tracks found!",
+            status: "404",
+            audio_tracks: [],
+          });
+        }
+      }
     }
   } catch (error) {
     res.json({

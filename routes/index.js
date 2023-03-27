@@ -9,6 +9,7 @@ const subtitlesRoutes = require("../routes/Subtitles");
 const audioTracksRoutes = require("../routes/AudioTracks");
 const signUrlsRoutes = require("../routes/SignUrl");
 const analyticsRoutes = require("../routes/Analytics");
+const slidersRoutes = require("../routes/Sliders");
 
 router.use("/general-content", generalContentRoutes);
 router.use("/media", mediaRoutes);
@@ -18,5 +19,6 @@ router.use("/subtitles", subtitlesRoutes);
 router.use("/audio", audioTracksRoutes);
 router.use("/protection", signUrlsRoutes);
 router.use("/analytics", analyticsRoutes);
+router.use("/sliders", slidersRoutes);
 
 module.exports = router;

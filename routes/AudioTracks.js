@@ -20,6 +20,16 @@ router.delete(
   audioTracksControllers.deletedAudioTrack
 );
 
+router.get(
+  "/get-audio-tracks-by-general-content/:general_content_id",
+  audioTracksControllers.getAudioTracksByGeneralContentId
+);
+
+router.get(
+  "/get-audio-tracks-by-media/:media_id",
+  audioTracksControllers.getAudioTracksByGeneralMediaId
+);
+
 // router.get("/get-audio-tracks/:movie_id", async (req, res) => {
 //   try {
 //     var movie_id = req.params.movie_id;

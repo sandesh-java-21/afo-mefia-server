@@ -213,17 +213,33 @@ const getSubtitlesByGeneralContentId = async (req, res) => {
         _id: general_content_id,
       }).populate("media");
 
-      var media = general_content.media;
+      if (!general_content) {
+        res.json({
+          message: "General content not found with provided id!",
+          status: "404",
+          subtitles: [],
+        });
+      } else {
+        var media = general_content.media;
 
-      var populatedMedia = Media.findById({
-        _id: media._id,
-      }).populate("subtitles");
+        var populatedMedia = Media.findById({
+          _id: media._id,
+        }).populate("subtitles");
 
-      res.json({
-        message: "Subtitles found!",
-        status: "200",
-        subtitles: populatedMedia.subtitles,
-      });
+        if (!populatedMedia.subtitles) {
+          res.json({
+            message: "Subtitles found!",
+            status: "200",
+            subtitles: [],
+          });
+        } else {
+          res.json({
+            message: "Subtitles found!",
+            status: "200",
+            subtitles: populatedMedia.subtitles,
+          });
+        }
+      }
     }
   } catch (error) {
     res.json({
@@ -234,7 +250,7 @@ const getSubtitlesByGeneralContentId = async (req, res) => {
   }
 };
 
-const getSubtitlesByGeneralMediaId = async (req, res) => {
+const getSubtitlesByMediaId = async (req, res) => {
   try {
     var media_id = req.params.media_id;
 
@@ -248,11 +264,19 @@ const getSubtitlesByGeneralMediaId = async (req, res) => {
         _id: media_id,
       }).populate("subtitles");
 
-      res.json({
-        message: "Subtitles found!",
-        status: "200",
-        subtitles: media.subtitles,
-      });
+      if (media) {
+        res.json({
+          message: "Subtitles found!",
+          status: "200",
+          subtitles: media.subtitles,
+        });
+      } else {
+        res.json({
+          message: "Media not found!",
+          status: "404",
+          subtitles: [],
+        });
+      }
     }
   } catch (error) {
     res.json({
@@ -267,5 +291,5 @@ module.exports = {
   addSubtitles,
   deletedSubtitles,
   getSubtitlesByGeneralContentId,
-  getSubtitlesByGeneralMediaId,
+  getSubtitlesByMediaId,
 };

@@ -21,7 +21,7 @@ router.get(
 );
 router.get(
   "/get-subtitles-by-media/:media_id",
-  subtitlesControllers.getSubtitlesByGeneralMediaId
+  subtitlesControllers.getSubtitlesByMediaId
 );
 
 // router.get("/get-subtitles/:movie_id", async (req, res) => {

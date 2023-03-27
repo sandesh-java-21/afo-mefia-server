@@ -6,7 +6,6 @@ const sliderSchema = mongoose.Schema({
     required: true,
     default: "",
   },
-
   general_content: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "general_content",
