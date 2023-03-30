@@ -40,6 +40,18 @@ const generalContentSchema = mongoose.Schema({
     required: false,
     default: 0,
   },
+  comments: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "comments",
+      default: [],
+    },
+  ],
+  total_likes: {
+    type: Number,
+    required: false,
+    default: 0,
+  },
   createdAt: {
     type: Date,
     default: Date.now(),

@@ -11,6 +11,8 @@ const signUrlsRoutes = require("../routes/SignUrl");
 const analyticsRoutes = require("../routes/Analytics");
 const slidersRoutes = require("../routes/Sliders");
 const genresRoutes = require("../routes/Genres");
+const commentsRoutes = require("../routes/Comments");
+const likesRoutes = require("../routes/Likes");
 
 router.use("/general-content", generalContentRoutes);
 router.use("/media", mediaRoutes);
@@ -22,5 +24,7 @@ router.use("/protection", signUrlsRoutes);
 router.use("/analytics", analyticsRoutes);
 router.use("/sliders", slidersRoutes);
 router.use("/genres", genresRoutes);
+router.use("/comments", commentsRoutes);
+router.use("/likes", likesRoutes);
 
 module.exports = router;

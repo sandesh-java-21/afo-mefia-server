@@ -312,9 +312,129 @@ const getAudioTracksByGeneralContentId = async (req, res) => {
   }
 };
 
+const addAudioTrackUpdated = async (req, res) => {
+  try {
+    var media_object_id = req.params.media_object_id;
+    var { original_id, name, type, language, language_code } = req.body;
+
+    var mediaObj = await Media.findById({
+      _id: media_object_id,
+    });
+
+    if (!media_object_id || media_object_id === "") {
+      res.json({
+        message: "Required fields are empty, Please provide media id!",
+        status: "400",
+      });
+    } else if (!mediaObj) {
+      res.json({
+        message: "No media found with provided id!",
+        status: "404",
+      });
+    } else {
+      var audioTrack = new AudioTracks({
+        original_id: original_id,
+        name,
+        type,
+        language,
+        language_code,
+        media: mediaObj._id,
+      });
+
+      var savedAudioTrack = await audioTrack.save();
+      var filter = {
+        _id: mediaObj._id,
+      };
+
+      var updatedMedia = await Media.findByIdAndUpdate(
+        filter,
+        {
+          $push: { audio_tracks: savedAudioTrack._id },
+        },
+        {
+          new: true,
+        }
+      )
+        .then((result) => {
+          res.json({
+            message: "Audio track added!",
+            status: "200",
+            savedAudioTrack,
+            updatedMedia: result,
+          });
+        })
+        .catch((error) => {
+          console.log("Database Error: ", error);
+          res.json({
+            message: "Error Occurred while updating the database!",
+            status: "400",
+            error,
+          });
+        });
+    }
+  } catch (error) {
+    res.json({
+      message: "Internal server error!",
+      status: "500",
+      error,
+    });
+  }
+};
+
+const updateAudioTrack = async (req, res) => {
+  try {
+    var audio_track_id = req.params.audio_track_id;
+
+    var { original_id, name, type, language, language_code } = req.body;
+
+    var filter = {
+      _id: audio_track_id,
+    };
+
+    var updateData = {
+      original_id: original_id,
+      name: name,
+      type: type,
+      language: language,
+      language_code: language_code,
+    };
+
+    var updatedAudioTrack = await AudioTracks.findByIdAndUpdate(
+      filter,
+      updateData,
+      { new: true }
+    )
+      .then(async (onAudioUpdate) => {
+        console.log("audio track updated: ", onAudioUpdate);
+        res.json({
+          message: "Audio track updated!",
+          status: "200",
+          updatedAudioTrack: onAudioUpdate,
+        });
+      })
+
+      .catch((onAudioNotFound) => {
+        console.log("audio track not found!", onAudioNotFound);
+        res.json({
+          message: "Audio track not found!",
+          status: "404",
+          error: onAudioNotFound,
+        });
+      });
+  } catch (error) {
+    res.json({
+      message: "Internal server error!",
+      status: "500",
+      error,
+    });
+  }
+};
+
 module.exports = {
   addAudioTrack,
   deletedAudioTrack,
   getAudioTracksByGeneralMediaId,
   getAudioTracksByGeneralContentId,
+  addAudioTrackUpdated,
+  updateAudioTrack,
 };

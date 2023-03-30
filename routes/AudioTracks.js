@@ -30,4 +30,9 @@ router.get(
   audioTracksControllers.getAudioTracksByGeneralMediaId
 );
 
+router.put(
+  "/update-audio-track/:audio_track_id",
+  audioTracksControllers.updateAudioTrack
+);
+
 module.exports = router;

@@ -1,6 +1,7 @@
 const Media = require("../models/Media");
 const GeneralContent = require("../models/GeneralContent");
 const LanguagesContent = require("../models/LanguagesContent");
+const Thumbnail = require("../models/Thumbnail");
 
 const { getVideoDurationInSeconds } = require("get-video-duration");
 
@@ -548,10 +549,168 @@ const reUploadMediaByMediaId = async (req, res) => {
   }
 };
 
+const createMediaUpdated = async (req, res) => {
+  try {
+    var {
+      title,
+      description,
+      jw_tags,
+      category,
+      default_language,
+      release_year,
+      genres,
+      seo_tags,
+      rating,
+      status,
+      isThumbanilSelected,
+    } = req.body;
+
+    console.log(
+      "Data body: ",
+      title,
+      description,
+      jw_tags,
+      category,
+      default_language,
+      release_year,
+      genres,
+      seo_tags,
+      rating,
+      status
+    );
+
+    if (
+      !title ||
+      !description ||
+      !jw_tags ||
+      !category ||
+      !default_language ||
+      !release_year ||
+      !genres ||
+      !seo_tags ||
+      !rating ||
+      !status
+    ) {
+      res.json({
+        message: "Required fields are empty!",
+        status: "400",
+      });
+    } else {
+      if (isThumbanilSelected) {
+        var { thumbnail_id, static_thumbnail_url, banner_thumbnail_url } =
+          req.body;
+
+        var thumbnail = new Thumbnail({
+          thumbnail_id: thumbnail_id,
+          static_thumbnail_url: static_thumbnail_url,
+          banner_thumbnail_url: banner_thumbnail_url,
+          motion_thumbnail_url: "",
+        });
+
+        var savedThumbnail = await thumbnail.save();
+
+        var languagesContentObj = new LanguagesContent({
+          title_translated: title,
+          description_translated: description,
+        });
+
+        var savedLanguagesContent = await languagesContentObj.save();
+
+        var customTags = jw_tags.map((tag) => tag + `-${category}`);
+        var jw_tags = [...jw_tags, ...customTags];
+
+        var mediaObj = new Media({
+          title: title,
+          description: description,
+          duration: 0,
+          default_language: default_language,
+          release_year: release_year,
+          subtitles: [],
+          audio_tracks: [],
+          jw_tags: jw_tags,
+          seo_tags: seo_tags,
+          translated_content: [savedLanguagesContent._id],
+          rating: rating,
+        });
+
+        var savedMedia = await mediaObj.save();
+
+        var generalContentObj = new GeneralContent({
+          media: savedMedia._id,
+          category: category,
+          genre: genres,
+          rating: rating,
+          status: status,
+          thumbnail: savedThumbnail._id,
+        });
+
+        var savedGeneralContent = await generalContentObj.save();
+
+        res.json({
+          message: "Media and general content created!",
+          status: "200",
+          savedGeneralContent,
+          savedMedia,
+        });
+      } else {
+        var languagesContentObj = new LanguagesContent({
+          title_translated: title,
+          description_translated: description,
+        });
+
+        var savedLanguagesContent = await languagesContentObj.save();
+
+        var customTags = jw_tags.map((tag) => tag + `-${category}`);
+        var jw_tags = [...jw_tags, ...customTags];
+
+        var mediaObj = new Media({
+          title: title,
+          description: description,
+          duration: 0,
+          default_language: default_language,
+          release_year: release_year,
+          subtitles: [],
+          audio_tracks: [],
+          jw_tags: jw_tags,
+          seo_tags: seo_tags,
+          translated_content: [savedLanguagesContent._id],
+          rating: rating,
+        });
+
+        var savedMedia = await mediaObj.save();
+
+        var generalContentObj = new GeneralContent({
+          media: savedMedia._id,
+          category: category,
+          genre: genres,
+          rating: rating,
+          status: status,
+        });
+
+        var savedGeneralContent = await generalContentObj.save();
+
+        res.json({
+          message: "Media and general content created!",
+          status: "200",
+          savedGeneralContent,
+          savedMedia,
+        });
+      }
+    }
+  } catch (error) {
+    res.status(500).json({
+      message: "Internal server error!",
+      status: "500",
+      error: error,
+    });
+  }
+};
+
 module.exports = {
   uploadMedia,
   deleteMedia,
   updateMedia,
   createMedia,
   reUploadMediaByMediaId,
+  createMediaUpdated,
 };

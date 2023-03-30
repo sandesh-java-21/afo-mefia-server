@@ -279,8 +279,108 @@ const getGeneralContent = async (req, res) => {
   }
 };
 
+const updateGeneralContent = async (req, res) => {
+  try {
+    var general_content_id = req.params.general_content_id;
+
+    var {
+      title,
+      description,
+      jw_tags,
+      category,
+      default_language,
+      release_year,
+      genres,
+      seo_tags,
+      rating,
+      status,
+    } = req.body;
+
+    var general_content = await GeneralContent.findById({
+      _id: general_content_id,
+    })
+      .then(async (onGcFound) => {
+        console.log("on gc found: ");
+        var general_content_obj = onGcFound;
+
+        var media = await Media.findById({
+          _id: general_content_obj.media,
+        })
+          .then(async (onMediaFound) => {
+            console.log("media found: ");
+
+            var mediaObj = onMediaFound;
+
+            var filter = {
+              _id: mediaObj._id,
+            };
+
+            var updateData = {
+              title,
+              description,
+              jw_tags,
+              category,
+              default_language,
+              release_year,
+              genres,
+              seo_tags,
+              rating,
+              status,
+            };
+
+            var updatedMedia = await Media.findByIdAndUpdate(
+              filter,
+              updateData,
+              { new: true }
+            )
+              .then(async (onMediaUpdate) => {
+                console.log("media update: ", onMediaUpdate);
+
+                res.json({
+                  message: "General content updated!",
+                  status: "200",
+                  updatedMedia: onMediaUpdate,
+                });
+              })
+              .catch((onMediaNotUpdate) => {
+                console.log("media not update: ", onMediaNotUpdate);
+                res.json({
+                  message:
+                    "Something went wrong while updating general content!",
+                  status: "400",
+                  error: onMediaNotUpdate,
+                });
+              });
+          })
+          .catch((onMediaNotFound) => {
+            console.log("media not found: ");
+            res.json({
+              message: "Media not found!",
+              status: "404",
+              error: onMediaNotFound,
+            });
+          });
+      })
+      .catch((onNotFoundGc) => {
+        console.log("gc not found: ");
+        res.json({
+          message: "General content not found!",
+          status: "404",
+          error: onNotFoundGc,
+        });
+      });
+  } catch (error) {
+    res.json({
+      message: "Internal server error!",
+      status: "500",
+      error,
+    });
+  }
+};
+
 module.exports = {
   addGeneralContent,
   deleteGeneralContentById,
   getGeneralContent,
+  updateGeneralContent,
 };

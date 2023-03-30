@@ -24,6 +24,11 @@ router.get(
   subtitlesControllers.getSubtitlesByMediaId
 );
 
+router.put(
+  "/update-subtitles/:subtitles_id",
+  subtitlesControllers.updateSubtitles
+);
+
 // router.get("/get-subtitles/:movie_id", async (req, res) => {
 //   try {
 //     var movie_id = req.params.movie_id;

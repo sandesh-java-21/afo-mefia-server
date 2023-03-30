@@ -287,9 +287,120 @@ const getSubtitlesByMediaId = async (req, res) => {
   }
 };
 
+const addSubtitlesUpdated = async (req, res) => {
+  try {
+    var mediaObjId = req.params.media_object_id;
+    var { track_id, delivery_url, track_kind, language, media_obj_id } =
+      req.body;
+    var mediaObj = await Media.findById({
+      _id: mediaObjId,
+    });
+
+    if (!mediaObj) {
+      res.json({
+        message: "No media found!",
+        status: "404",
+      });
+    } else {
+      console.log(delivery_url);
+      var subtitlesObj = new Subtitles({
+        track_id: track_id,
+        delivery_url: delivery_url,
+        track_kind: track_kind,
+        language: language,
+        media: media_obj_id,
+      });
+
+      var savedSubtitles = subtitlesObj.save();
+
+      var filter = {
+        _id: mediaObj._id,
+      };
+
+      var updatedMedia = await Media.findByIdAndUpdate(
+        filter,
+        {
+          $push: { subtitles: subtitlesObj._id },
+        },
+        {
+          new: true,
+        }
+      )
+        .then((updatedMediaResult) => {
+          console.log("Saved Subtitles: ", savedSubtitles);
+          res.json({
+            message: "Subtitles Created!",
+            status: "200",
+            savedSubtitles,
+            updatedMediaResult,
+          });
+        })
+        .catch((error) => {
+          res.json({
+            error,
+          });
+        });
+    }
+  } catch (error) {
+    res.json({
+      message: "Internal server error!",
+      status: "500",
+      error,
+    });
+  }
+};
+
+const updateSubtitles = async (req, res) => {
+  try {
+    var subtitles_id = req.params.subtitles_id;
+
+    var { track_id, delivery_url, track_kind, language, media_obj_id } =
+      req.body;
+
+    var filter = {
+      _id: subtitles_id,
+    };
+
+    var updateData = {
+      track_id: track_id,
+      delivery_url: delivery_url,
+      track_kind: track_kind,
+      language: language,
+      media: media_obj_id,
+    };
+
+    var subtitles = await Subtitles.findByIdAndUpdate(filter, updateData, {
+      new: true,
+    })
+      .then(async (onSubtitlesUpdate) => {
+        res.json({
+          message: "Subtitle updated!",
+          status: "200",
+          updatedSubtitles: onSubtitlesUpdate,
+        });
+      })
+      .catch((onSubtitlesNotFound) => {
+        console.log("subtitle not found!"),
+          res.json({
+            message: "Subtitle not found!",
+            status: "404",
+            error: onSubtitlesNotFound,
+          });
+      });
+  } catch (error) {
+    res.json({
+      message: "Internal server error!",
+      status: "500",
+      error,
+    });
+  }
+};
+
 module.exports = {
   addSubtitles,
   deletedSubtitles,
   getSubtitlesByGeneralContentId,
   getSubtitlesByMediaId,
+  addSubtitlesUpdated,
+  updateSubtitles,
 };
