@@ -94,7 +94,7 @@ const disLikeGeneralContent = async (req, res) => {
           .then(async (onGcUpdate) => {
             console.log("gc liked: ", onGcUpdate);
             res.json({
-              message: "You liked this general content!",
+              message: "You dis liked this general content!",
               status: "200",
               updatedGc: onGcUpdate,
               total_likes: onGcUpdate.total_likes,
@@ -105,7 +105,7 @@ const disLikeGeneralContent = async (req, res) => {
 
             res.json({
               message:
-                "Something went wrong while liking this general content!",
+                "Something went wrong while dis liking this general content!",
               status: "400",
               error: onNotGcUpdate,
             });

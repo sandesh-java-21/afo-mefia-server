@@ -195,7 +195,7 @@ const getCommentsForGeneralContent = async (req, res) => {
 };
 
 module.exports = {
-  addComment,
+  addComment, 
   deleteComment,
   getCommentsForGeneralContent,
 };

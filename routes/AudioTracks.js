@@ -12,7 +12,7 @@ const { default: axios } = require("axios");
 
 router.post(
   "/add-audio-track/:media_object_id",
-  audioTracksControllers.addAudioTrack
+  audioTracksControllers.addAudioTrackUpdated_V2
 );
 
 router.delete(

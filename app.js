@@ -6,6 +6,8 @@ const dotenv = require("dotenv").config();
 const morgan = require("morgan");
 
 const app = express();
+const server = require("http").createServer(app);
+const io = require("socket.io")(server);
 
 app.use(express.json());
 
@@ -34,7 +36,11 @@ app.use("/api", allRoutes);
 
 var DB_URL = process.env.DB_URL;
 
-app.listen(4000, (err) => {
+io.on("connection", () => {
+  console.log("user connected!");
+});
+
+server.listen(4000, (err) => {
   if (err) {
     console.log("Error Occurred: ", err);
   } else {

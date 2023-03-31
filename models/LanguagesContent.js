@@ -16,6 +16,12 @@ const languagesContentSchema = mongoose.Schema({
     required: false,
     default: "",
   },
+
+  language_code: {
+    type: String,
+    required: false,
+    default: "",
+  },
 });
 
 var languagesContentModel = mongoose.model(

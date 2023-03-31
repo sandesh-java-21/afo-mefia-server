@@ -1,6 +1,9 @@
 const AudioTracks = require("../models/AudioTracks");
 const Media = require("../models/Media");
 const GeneralContent = require("../models/GeneralContent");
+const LanguagesContent = require("../models/LanguagesContent");
+
+const { translate } = require("free-translate");
 
 const axios = require("axios");
 
@@ -381,6 +384,188 @@ const addAudioTrackUpdated = async (req, res) => {
   }
 };
 
+const addAudioTrackUpdated_V2 = async (req, res) => {
+  // try {
+  var media_object_id = req.params.media_object_id;
+  var { original_id, name, type, language, language_code } = req.body;
+
+  var mediaObj = await Media.findById({
+    _id: media_object_id,
+  }).populate(["audio_tracks", "translated_content"]);
+
+  if (!mediaObj) {
+    res.json({
+      message: "No media found!",
+      status: "404",
+    });
+  } else {
+    var translated_contents = mediaObj.translated_content;
+
+    var isTranslationAvailable = translated_contents.some(
+      (obj) => obj.language_type === language
+    );
+
+    console.log(isTranslationAvailable);
+
+    if (isTranslationAvailable) {
+      var audioTrack = new AudioTracks({
+        original_id: original_id,
+        name,
+        type,
+        language,
+        language_code,
+        media: mediaObj._id,
+      });
+
+      var savedAudioTrack = await audioTrack.save();
+
+      var filter = {
+        _id: mediaObj._id,
+      };
+
+      var updatedMedia = await Media.findByIdAndUpdate(
+        filter,
+        {
+          $push: { audio_tracks: savedAudioTrack._id },
+        },
+        {
+          new: true,
+        }
+      )
+        .then((updatedMediaResult) => {
+          console.log("Saved audio tracks: ", savedAudioTrack);
+          res.json({
+            message: "Audio track Created!",
+            status: "200",
+            savedAudioTrack,
+            updatedMediaResult,
+          });
+        })
+        .catch((error) => {
+          res.json({
+            error,
+          });
+        });
+    } else {
+      var translated_title = await translate(mediaObj.title, {
+        to: language_code,
+      });
+      var translated_description = await translate(mediaObj.description, {
+        to: language_code,
+      });
+
+      var translated_content_obj = new LanguagesContent({
+        title_translated: translated_title,
+        description_translated: translated_description,
+        language_type: language,
+        language_code: language_code,
+      });
+
+      var savedTranslation = translated_content_obj
+        .save()
+        .then(async (onSaveTranslation) => {
+          var audioTrackObj = new AudioTracks({
+            original_id: original_id,
+            name,
+            type,
+            language,
+            language_code,
+            media: mediaObj._id,
+          });
+
+          var savedAudioTrackObj = await audioTrackObj
+            .save()
+            .then(async (onSaveAudioTrack) => {
+              var filter = {
+                _id: mediaObj._id,
+              };
+              console.log(
+                "subtitles and content:  ",
+                onSaveAudioTrack._id,
+                onSaveTranslation._id
+              );
+
+              var updatedMedia = await Media.findByIdAndUpdate(
+                filter,
+                {
+                  $push: { audio_tracks: onSaveAudioTrack._id },
+                  $push: { translated_content: onSaveTranslation._id },
+                },
+                {
+                  new: true,
+                }
+              )
+                .then((updatedMediaResult) => {
+                  console.log("Saved Subtitles: ", onSaveAudioTrack);
+                  res.json({
+                    message: "Subtitles Created!",
+                    status: "200",
+                    updatedMediaResult,
+                    onSaveAudioTrack,
+                    onSaveTranslation,
+                  });
+                })
+                .catch((error) => {
+                  res.json({
+                    error,
+                  });
+                });
+            });
+        })
+        .catch((onSaveTranslationError) => {
+          res.json({
+            onSaveTranslationError,
+          });
+        });
+    }
+
+    // var subtitlesObj = new Subtitles({
+    //   track_id: track_id,
+    //   delivery_url: delivery_url,
+    //   track_kind: track_kind,
+    //   language: language,
+    //   media: media_obj_id,
+    // });
+
+    // var savedSubtitles = subtitlesObj.save();
+
+    // var filter = {
+    //   _id: mediaObj._id,
+    // };
+
+    // var updatedMedia = await Media.findByIdAndUpdate(
+    //   filter,
+    //   {
+    //     $push: { subtitles: subtitlesObj._id },
+    //   },
+    //   {
+    //     new: true,
+    //   }
+    // )
+    //   .then((updatedMediaResult) => {
+    //     console.log("Saved Subtitles: ", savedSubtitles);
+    //     res.json({
+    //       message: "Subtitles Created!",
+    //       status: "200",
+    //       savedSubtitles,
+    //       updatedMediaResult,
+    //     });
+    //   })
+    //   .catch((error) => {
+    //     res.json({
+    //       error,
+    //     });
+    //   });
+  }
+  // } catch (error) {
+  //   res.json({
+  //     message: "Internal server error!",
+  //     status: "500",
+  //     error,
+  //   });
+  // }
+};
+
 const updateAudioTrack = async (req, res) => {
   try {
     var audio_track_id = req.params.audio_track_id;
@@ -437,4 +622,5 @@ module.exports = {
   getAudioTracksByGeneralContentId,
   addAudioTrackUpdated,
   updateAudioTrack,
+  addAudioTrackUpdated_V2,
 };

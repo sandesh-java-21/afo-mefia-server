@@ -21,6 +21,7 @@ router.post(
 
 router.delete(
   "/delete-thumbnail/:thumbnail_id",
+  
   thumbnailControllers.deleteThumbnailById
 );
 

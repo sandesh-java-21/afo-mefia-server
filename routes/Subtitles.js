@@ -7,7 +7,7 @@ const subtitlesControllers = require("../controllers/Subtitles");
 
 router.post(
   "/add-subtitles/:media_object_id",
-  subtitlesControllers.addSubtitles
+  subtitlesControllers.addSubtitlesUpdated_V2
 );
 
 router.delete(
