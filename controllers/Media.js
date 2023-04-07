@@ -5,6 +5,10 @@ const Thumbnail = require("../models/Thumbnail");
 
 const { getVideoDurationInSeconds } = require("get-video-duration");
 
+const cloudinary = require("cloudinary").v2;
+
+const cloudinaryConfigObj = require("../configurations/Cloudinary");
+
 const axios = require("axios");
 
 const uploadMediaOld = async (req, res) => {
@@ -564,6 +568,7 @@ const createMediaUpdated = async (req, res) => {
       status,
       isThumbanilSelected,
       language_code,
+      imageBase64,
     } = req.body;
 
     console.log(
@@ -580,81 +585,219 @@ const createMediaUpdated = async (req, res) => {
       status
     );
 
-    if (
-      !title ||
-      !description ||
-      !jw_tags ||
-      !category ||
-      !default_language ||
-      !release_year ||
-      !genres ||
-      !seo_tags ||
-      !rating ||
-      !status
-    ) {
+    if (!title) {
       res.json({
         message: "Required fields are empty!",
         status: "400",
       });
     } else {
       if (isThumbanilSelected) {
-        var { thumbnail_id, static_thumbnail_url, banner_thumbnail_url } =
-          req.body;
+        cloudinary.config(cloudinaryConfigObj);
 
-        var thumbnail = new Thumbnail({
-          thumbnail_id: thumbnail_id,
-          static_thumbnail_url: static_thumbnail_url,
-          banner_thumbnail_url: banner_thumbnail_url,
-          motion_thumbnail_url: "",
-        });
+        cloudinary.uploader
+          .upload(imageBase64)
+          .then(async (result) => {
+            console.log("cloudinary result : ", result);
 
-        var savedThumbnail = await thumbnail.save();
+            var publicId = result.public_id;
 
-        var languagesContentObj = new LanguagesContent({
-          title_translated: title,
-          description_translated: description,
-          language_type: default_language,
-          language_code: language_code,
-        });
+            var headers = {
+              Authorization: `Bearer ${process.env.JW_PLAYER_API_KEY}`,
+            };
 
-        var savedLanguagesContent = await languagesContentObj.save();
+            var data = {
+              relationships: {
+                media: [
+                  {
+                    id: `${mediaObj.media_id}`,
+                  },
+                ],
+              },
+              upload: {
+                source_type: "custom_upload",
+                method: "fetch",
+                thumbnail_type: "static",
+                download_url: `${result.secure_url}`,
+              },
+            };
 
-        var customTags = jw_tags.map((tag) => tag + `-${category}`);
-        var jw_tags = [...jw_tags, ...customTags];
+            var site_id = process.env.SITE_ID;
+            var apiResponse = await axios
+              .post(
+                `https://api.jwplayer.com/v2/sites/${site_id}/thumbnails/`,
+                data,
+                {
+                  headers: headers,
+                }
+              )
+              .then(async (result) => {
+                console.log("JW Thumbnail Success: ", result.data);
+                var { id } = result.data;
+                var site_id = process.env.SITE_ID;
+                var thumbnail_id = id;
 
-        var mediaObj = new Media({
-          title: title,
-          description: description,
-          duration: 0,
-          default_language: default_language,
-          release_year: release_year,
-          subtitles: [],
-          audio_tracks: [],
-          jw_tags: jw_tags,
-          seo_tags: seo_tags,
-          translated_content: [savedLanguagesContent._id],
-          rating: rating,
-        });
+                setTimeout(async () => {
+                  var apiResponse_2 = await axios
+                    .get(
+                      `https://api.jwplayer.com/v2/sites/${site_id}/thumbnails/${thumbnail_id}/`,
+                      {
+                        headers: headers,
+                      }
+                    )
 
-        var savedMedia = await mediaObj.save();
+                    .then(async (result) => {
+                      cloudinary.config(cloudinaryConfigObj);
 
-        var generalContentObj = new GeneralContent({
-          media: savedMedia._id,
-          category: category,
-          genre: genres,
-          rating: rating,
-          status: status,
-          thumbnail: savedThumbnail._id,
-        });
+                      cloudinary.uploader
+                        .destroy(publicId)
+                        .then((deleteResult) => {
+                          console.log(deleteResult);
+                        })
+                        .catch((deleteError) => {
+                          console.log("delete error: ", deleteError);
+                        });
 
-        var savedGeneralContent = await generalContentObj.save();
+                      console.log("JW Get Thumbnail Success: ", result.data);
+                      console.log(
+                        "JW Get Thumbnail Success URL: ",
+                        result.data.delivery_url
+                      );
 
-        res.json({
-          message: "Media and general content created!",
-          status: "200",
-          savedGeneralContent,
-          savedMedia,
-        });
+                      var thumbnail = new Thumbnail({
+                        thumbnail_id: thumbnail_id,
+                        static_thumbnail_url: result.data.delivery_url,
+                        banner_thumbnail_url: result.data.delivery_url,
+                        motion_thumbnail_url: "",
+                      });
+
+                      var savedThumbnail = await thumbnail.save();
+
+                      var languagesContentObj = new LanguagesContent({
+                        title_translated: title,
+                        description_translated: description,
+                        language_type: default_language,
+                        language_code: language_code,
+                      });
+
+                      var savedLanguagesContent =
+                        await languagesContentObj.save();
+
+                      var customTags = jw_tags.map(
+                        (tag) => tag + `-${category}`
+                      );
+                      var jw_tags = [...jw_tags, ...customTags];
+
+                      var mediaObj = new Media({
+                        title: title,
+                        description: description,
+                        duration: 0,
+                        default_language: default_language,
+                        release_year: release_year,
+                        subtitles: [],
+                        audio_tracks: [],
+                        jw_tags: jw_tags,
+                        seo_tags: seo_tags,
+                        translated_content: [savedLanguagesContent._id],
+                        rating: rating,
+                      });
+
+                      var savedMedia = await mediaObj.save();
+
+                      var generalContentObj = new GeneralContent({
+                        media: savedMedia._id,
+                        category: category,
+                        genre: genres,
+                        rating: rating,
+                        status: status,
+                        thumbnail: savedThumbnail._id,
+                      });
+
+                      var savedGeneralContent = await generalContentObj.save();
+
+                      res.json({
+                        message: "Media and general content created!",
+                        status: "200",
+                        savedGeneralContent,
+                        savedMedia,
+                      });
+                    })
+                    .catch(async (jwGetThumbnailError) => {
+                      res.json({
+                        jwGetThumbnailError,
+                      });
+                    });
+                }, 10000);
+              })
+              .catch(async (jwThumbnailError) => {
+                res.json({
+                  jwThumbnailError,
+                });
+              });
+          })
+          .catch((cloudinaryError) => {
+            console.log("cloudinary error: ", cloudinaryError);
+            res.json({
+              cloudinaryError,
+            });
+          });
+
+        // var { thumbnail_id, static_thumbnail_url, banner_thumbnail_url } =
+        //   req.body;
+
+        // var thumbnail = new Thumbnail({
+        //   thumbnail_id: thumbnail_id,
+        //   static_thumbnail_url: static_thumbnail_url,
+        //   banner_thumbnail_url: banner_thumbnail_url,
+        //   motion_thumbnail_url: "",
+        // });
+
+        // var savedThumbnail = await thumbnail.save();
+
+        // var languagesContentObj = new LanguagesContent({
+        //   title_translated: title,
+        //   description_translated: description,
+        //   language_type: default_language,
+        //   language_code: language_code,
+        // });
+
+        // var savedLanguagesContent = await languagesContentObj.save();
+
+        // var customTags = jw_tags.map((tag) => tag + `-${category}`);
+        // var jw_tags = [...jw_tags, ...customTags];
+
+        // var mediaObj = new Media({
+        //   title: title,
+        //   description: description,
+        //   duration: 0,
+        //   default_language: default_language,
+        //   release_year: release_year,
+        //   subtitles: [],
+        //   audio_tracks: [],
+        //   jw_tags: jw_tags,
+        //   seo_tags: seo_tags,
+        //   translated_content: [savedLanguagesContent._id],
+        //   rating: rating,
+        // });
+
+        // var savedMedia = await mediaObj.save();
+
+        // var generalContentObj = new GeneralContent({
+        //   media: savedMedia._id,
+        //   category: category,
+        //   genre: genres,
+        //   rating: rating,
+        //   status: status,
+        //   thumbnail: savedThumbnail._id,
+        // });
+
+        // var savedGeneralContent = await generalContentObj.save();
+
+        // res.json({
+        //   message: "Media and general content created!",
+        //   status: "200",
+        //   savedGeneralContent,
+        //   savedMedia,
+        // });
       } else {
         var languagesContentObj = new LanguagesContent({
           title_translated: title,
@@ -701,10 +844,70 @@ const createMediaUpdated = async (req, res) => {
       }
     }
   } catch (error) {
-    res.status(500).json({
+    console.log(error);
+    res.json({
       message: "Internal server error!",
       status: "500",
       error: error,
+    });
+  }
+};
+
+const uploadMediaId = async (req, res) => {
+  try {
+    var mediaObjId = req.params.media_Obj_Id;
+
+    var { media_id } = req.body;
+
+    console.log(">>>>>>>>>  ", media_id, mediaObjId);
+
+    var media = await Media.findById({
+      _id: mediaObjId,
+    })
+
+      .then(async (onMediaFound) => {
+        console.log("media found: ", onMediaFound);
+
+        var filter = {
+          _id: onMediaFound._id,
+        };
+
+        var updateData = {
+          media_id: media_id,
+        };
+
+        var updatedMedia = await Media.findByIdAndUpdate(filter, updateData, {
+          new: true,
+        })
+          .then((onMediaUpdate) => {
+            console.log("media updated: ", onMediaUpdate);
+            res.json({
+              message: "Media Uploaded!",
+              status: "200",
+              updateMedia: onMediaUpdate,
+            });
+          })
+          .catch((onMediaNotUpdate) => {
+            console.log("media not update: ", onMediaNotUpdate);
+            res.json({
+              message: "Something went wrong while uploading media!",
+              status: "400",
+              error: onMediaNotUpdate,
+            });
+          });
+      })
+      .catch((onMediaNotFound) => {
+        console.log("media not found: ", onMediaNotFound);
+        res.json({
+          message: "General info not submitted yet!",
+          status: "404",
+        });
+      });
+  } catch (error) {
+    res.json({
+      message: "Internal server error!",
+      status: "500",
+      error,
     });
   }
 };
@@ -716,4 +919,5 @@ module.exports = {
   createMedia,
   reUploadMediaByMediaId,
   createMediaUpdated,
+  uploadMediaId,
 };

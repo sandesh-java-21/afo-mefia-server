@@ -19,6 +19,7 @@
   "homepage": "https://github.com/sandesh-java-21/stream-it#readme",
   "dependencies": {
     "axios": "^1.3.4",
+    "cloudinary": "^1.35.0",
     "cors": "^2.8.5",
     "crypto-js": "^4.1.1",
     "dotenv": "^16.0.3",

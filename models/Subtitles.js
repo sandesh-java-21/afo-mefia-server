@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const subtitlessSchema = mongoose.Schema({
   track_id: {
     type: String,
-    required: true,
+    required: false,
   },
   delivery_url: {
     type: String,
@@ -12,12 +12,12 @@ const subtitlessSchema = mongoose.Schema({
   },
   track_kind: {
     type: String,
-    required: true,
+    required: false,
     default: "",
   },
   language: {
     type: String,
-    required: true,
+    required: false,
     default: "",
   },
   media: {

@@ -5,7 +5,7 @@ const trailerControllers = require("../controllers/Trailer");
 
 router.post(
   "/upload-trailer/:general_content_id",
-  trailerControllers.uploadTrailerOfGeneralContent
+  trailerControllers.uploadTrailerOfGeneralContentUpdated
 );
 
 module.exports = router;

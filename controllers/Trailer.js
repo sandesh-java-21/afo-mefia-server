@@ -142,6 +142,74 @@ const uploadTrailerOfGeneralContent = async (req, res) => {
   }
 };
 
+const uploadTrailerOfGeneralContentUpdated = async (req, res) => {
+  try {
+    var general_content_id = req.params.general_content_id;
+    var { trailer_media_id, type } = req.body;
+
+    var general_content = await GeneralContent.findById({
+      _id: general_content_id,
+    })
+      .then(async (onGcFound) => {
+        var generalContentObj = onGcFound;
+
+        var trailerObj = new Trailer({
+          media_id: trailer_media_id,
+          subtitles: [],
+          audio_tracks: [],
+          type: "Trailer",
+        });
+
+        var savedTrailer = await trailerObj.save();
+
+        var filter = {
+          _id: generalContentObj._id,
+        };
+        var updateGcData = {
+          trailer: savedTrailer._id,
+        };
+
+        var updatedGc = await GeneralContent.findByIdAndUpdate(
+          filter,
+          updateGcData,
+          {
+            new: true,
+          }
+        )
+          .then((result2) => {
+            res.json({
+              message: "Trailer uploaded!",
+              status: "200",
+              savedTrailer,
+              updatedGc: result2,
+            });
+          })
+          .catch((error) => {
+            console.log("Database update error: ", error);
+            res.json({
+              message: "Something went wrong while saving trailet to database!",
+              status: "400",
+              error,
+            });
+          });
+      })
+      .catch((onGcNotFound) => {
+        console.log("gc not found: ", onGcNotFound);
+        res.json({
+          message: "General content not found!",
+          status: "404",
+        });
+      });
+  } catch (error) {
+    res.json({
+      message: "internal server error!",
+      status: "500",
+      error,
+    });
+  }
+};
+
 module.exports = {
   uploadTrailerOfGeneralContent,
+  uploadTrailerOfGeneralContentUpdated,
 };

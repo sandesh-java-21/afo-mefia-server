@@ -9,7 +9,7 @@ const generalContentSchema = mongoose.Schema({
   },
   category: {
     type: String,
-    required: true,
+    required: false,
     default: "",
   },
   genre: [

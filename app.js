@@ -1,4 +1,3 @@
-const e = require("express");
 const express = require("express");
 const { default: mongoose } = require("mongoose");
 const dotenv = require("dotenv").config();
@@ -11,8 +10,12 @@ const io = require("socket.io")(server);
 
 app.use(express.json());
 
+const cors = require("cors");
+
 app.use(express.urlencoded({ extended: false }));
 app.use(morgan("tiny"));
+
+app.use(cors());
 
 const allRoutes = require("./routes/index");
 

@@ -2,6 +2,10 @@ const GeneralContent = require("../models/GeneralContent");
 const Media = require("../models/Media");
 const Thumbnail = require("../models/Thumbnail");
 
+const cloudinary = require("cloudinary").v2;
+
+const cloudinaryConfigObj = require("../configurations/Cloudinary");
+
 const axios = require("axios");
 
 const generateJwMotionThumbnail = async (req, res) => {
@@ -103,7 +107,7 @@ const uploadCustomThumbnail = async (req, res) => {
     var general_content_id = req.params.general_content_id;
     console.log(general_content_id);
 
-    var { download_url } = req.body;
+    var { imageBase64 } = req.body;
 
     var searchedGeneralContent = await GeneralContent.findById({
       _id: general_content_id,
@@ -123,121 +127,261 @@ const uploadCustomThumbnail = async (req, res) => {
 
               .then(async (mediaFound) => {
                 var mediaObj = mediaFound;
+                cloudinary.config(cloudinaryConfigObj);
 
-                var headers = {
-                  Authorization: `Bearer ${process.env.JW_PLAYER_API_KEY}`,
-                };
-
-                var data = {
-                  relationships: {
-                    media: [
-                      {
-                        id: `${mediaObj.media_id}`,
-                      },
-                    ],
-                  },
-                  upload: {
-                    source_type: "custom_upload",
-                    method: "fetch",
-                    thumbnail_type: "static",
-                    download_url: `${download_url}`,
-                  },
-                };
-
-                var site_id = process.env.SITE_ID;
-                var apiResponse = await axios
-                  .post(
-                    `https://api.jwplayer.com/v2/sites/${site_id}/thumbnails/`,
-                    data,
-                    {
-                      headers: headers,
-                    }
-                  )
+                cloudinary.uploader
+                  .upload(imageBase64)
                   .then(async (result) => {
-                    console.log("JW Thumbnail Success: ", result.data);
-                    var { id } = result.data;
-                    var site_id = process.env.SITE_ID;
-                    var thumbnail_id = id;
+                    console.log("cloudinary result : ", result);
 
-                    setTimeout(async () => {
-                      console.log("now start");
+                    var publicId = result.public_id;
 
-                      var apiResponse_2 = await axios
-                        .get(
-                          `https://api.jwplayer.com/v2/sites/${site_id}/thumbnails/${thumbnail_id}/`,
+                    var headers = {
+                      Authorization: `Bearer ${process.env.JW_PLAYER_API_KEY}`,
+                    };
+
+                    var data = {
+                      relationships: {
+                        media: [
                           {
-                            headers: headers,
-                          }
-                        )
+                            id: `${mediaObj.media_id}`,
+                          },
+                        ],
+                      },
+                      upload: {
+                        source_type: "custom_upload",
+                        method: "fetch",
+                        thumbnail_type: "static",
+                        download_url: `${result.secure_url}`,
+                      },
+                    };
 
-                        .then(async (result) => {
-                          console.log(
-                            "JW Get Thumbnail Success: ",
-                            result.data
-                          );
-                          console.log(
-                            "JW Get Thumbnail Success URL: ",
-                            result.data.delivery_url
-                          );
-                          var filter = {
-                            _id: thumbnailObj._id,
-                          };
+                    var site_id = process.env.SITE_ID;
+                    var apiResponse = await axios
+                      .post(
+                        `https://api.jwplayer.com/v2/sites/${site_id}/thumbnails/`,
+                        data,
+                        {
+                          headers: headers,
+                        }
+                      )
+                      .then(async (result) => {
+                        console.log("JW Thumbnail Success: ", result.data);
+                        var { id } = result.data;
+                        var site_id = process.env.SITE_ID;
+                        var thumbnail_id = id;
 
-                          var updatedData = {
-                            thumbnail_id: thumbnail_id,
-                            static_thumbnail_url: result.data.delivery_url,
-                            banner_thumbnail_url: result.data.delivery_url,
-                          };
-                          var updatedThumbnail =
-                            await Thumbnail.findByIdAndUpdate(
-                              filter,
-                              updatedData,
+                        setTimeout(async () => {
+                          console.log("now start");
+
+                          var apiResponse_2 = await axios
+                            .get(
+                              `https://api.jwplayer.com/v2/sites/${site_id}/thumbnails/${thumbnail_id}/`,
                               {
-                                new: true,
+                                headers: headers,
                               }
                             )
-                              .then((updatedThumbnailResult) => {
-                                console.log(
-                                  "New updated doc thumbnail: ",
-                                  updatedThumbnailResult
-                                );
-                                res.json({
-                                  message: "Custom thumbnail uploaded!",
-                                  status: "200",
-                                  updatedThumbnail: updatedThumbnailResult,
-                                  uploadedCustomThumbnailUrl:
-                                    result.data.delivery_url,
+
+                            .then(async (result) => {
+                              cloudinary.config(cloudinaryConfigObj);
+
+                              cloudinary.uploader
+                                .destroy(publicId)
+                                .then((deleteResult) => {
+                                  console.log(deleteResult);
+                                })
+                                .catch((deleteError) => {
+                                  console.log("delete error: ", deleteError);
                                 });
-                              })
-                              .catch((error) => {
-                                console.log("Database error: ", error);
-                                res.json({
-                                  message:
-                                    "Something went wrong while saving in database!",
-                                  status: "400",
-                                  error,
-                                });
+
+                              console.log(
+                                "JW Get Thumbnail Success: ",
+                                result.data
+                              );
+                              console.log(
+                                "JW Get Thumbnail Success URL: ",
+                                result.data.delivery_url
+                              );
+                              var filter = {
+                                _id: thumbnailObj._id,
+                              };
+
+                              var updatedData = {
+                                thumbnail_id: thumbnail_id,
+                                static_thumbnail_url: result.data.delivery_url,
+                                banner_thumbnail_url: result.data.delivery_url,
+                              };
+                              var updatedThumbnail =
+                                await Thumbnail.findByIdAndUpdate(
+                                  filter,
+                                  updatedData,
+                                  {
+                                    new: true,
+                                  }
+                                )
+                                  .then((updatedThumbnailResult) => {
+                                    console.log(
+                                      "New updated doc thumbnail: ",
+                                      updatedThumbnailResult
+                                    );
+                                    res.json({
+                                      message: "Custom thumbnail uploaded!",
+                                      status: "200",
+                                      updatedThumbnail: updatedThumbnailResult,
+                                      uploadedCustomThumbnailUrl:
+                                        result.data.delivery_url,
+                                    });
+                                  })
+                                  .catch((error) => {
+                                    console.log("Database error: ", error);
+                                    res.json({
+                                      message:
+                                        "Something went wrong while saving in database!",
+                                      status: "400",
+                                      error,
+                                    });
+                                  });
+                            })
+                            .catch((error) => {
+                              res.json({
+                                message:
+                                  "Something went wrong while uploading custom thumbnail!",
+                                status: "400",
+                                error,
                               });
-                        })
-                        .catch((error) => {
-                          res.json({
-                            message:
-                              "Something went wrong while uploading custom thumbnail!",
-                            status: "400",
-                            error,
-                          });
+                            });
+                        }, 10000);
+                      })
+                      .catch((error) => {
+                        console.log("JW Thumbnail Error: ", error);
+                        res.json({
+                          message:
+                            "Something went wrong while uploading custom thumbnail!",
+                          status: "400",
+                          error,
                         });
-                    }, 5000);
+                      });
                   })
-                  .catch((error) => {
-                    console.log("JW Thumbnail Error: ", error);
+                  .catch((cloudinaryError) => {
                     res.json({
-                      message:
-                        "Something went wrong while uploading custom thumbnail!",
-                      status: "400",
-                      error,
+                      cloudinaryError,
                     });
                   });
+
+                // var headers = {
+                //   Authorization: `Bearer ${process.env.JW_PLAYER_API_KEY}`,
+                // };
+
+                // var data = {
+                //   relationships: {
+                //     media: [
+                //       {
+                //         id: `${mediaObj.media_id}`,
+                //       },
+                //     ],
+                //   },
+                //   upload: {
+                //     source_type: "custom_upload",
+                //     method: "fetch",
+                //     thumbnail_type: "static",
+                //     download_url: `${download_url}`,
+                //   },
+                // };
+
+                // var site_id = process.env.SITE_ID;
+                // var apiResponse = await axios
+                //   .post(
+                //     `https://api.jwplayer.com/v2/sites/${site_id}/thumbnails/`,
+                //     data,
+                //     {
+                //       headers: headers,
+                //     }
+                //   )
+                //   .then(async (result) => {
+                //     console.log("JW Thumbnail Success: ", result.data);
+                //     var { id } = result.data;
+                //     var site_id = process.env.SITE_ID;
+                //     var thumbnail_id = id;
+
+                //     setTimeout(async () => {
+                //       console.log("now start");
+
+                //       var apiResponse_2 = await axios
+                //         .get(
+                //           `https://api.jwplayer.com/v2/sites/${site_id}/thumbnails/${thumbnail_id}/`,
+                //           {
+                //             headers: headers,
+                //           }
+                //         )
+
+                //         .then(async (result) => {
+                //           console.log(
+                //             "JW Get Thumbnail Success: ",
+                //             result.data
+                //           );
+                //           console.log(
+                //             "JW Get Thumbnail Success URL: ",
+                //             result.data.delivery_url
+                //           );
+                //           var filter = {
+                //             _id: thumbnailObj._id,
+                //           };
+
+                //           var updatedData = {
+                //             thumbnail_id: thumbnail_id,
+                //             static_thumbnail_url: result.data.delivery_url,
+                //             banner_thumbnail_url: result.data.delivery_url,
+                //           };
+                //           var updatedThumbnail =
+                //             await Thumbnail.findByIdAndUpdate(
+                //               filter,
+                //               updatedData,
+                //               {
+                //                 new: true,
+                //               }
+                //             )
+                //               .then((updatedThumbnailResult) => {
+                //                 console.log(
+                //                   "New updated doc thumbnail: ",
+                //                   updatedThumbnailResult
+                //                 );
+                //                 res.json({
+                //                   message: "Custom thumbnail uploaded!",
+                //                   status: "200",
+                //                   updatedThumbnail: updatedThumbnailResult,
+                //                   uploadedCustomThumbnailUrl:
+                //                     result.data.delivery_url,
+                //                 });
+                //               })
+                //               .catch((error) => {
+                //                 console.log("Database error: ", error);
+                //                 res.json({
+                //                   message:
+                //                     "Something went wrong while saving in database!",
+                //                   status: "400",
+                //                   error,
+                //                 });
+                //               });
+                //         })
+                //         .catch((error) => {
+                //           res.json({
+                //             message:
+                //               "Something went wrong while uploading custom thumbnail!",
+                //             status: "400",
+                //             error,
+                //           });
+                //         });
+                //     }, 5000);
+                //   })
+                //   .catch((error) => {
+                //     console.log("JW Thumbnail Error: ", error);
+                //     res.json({
+                //       message:
+                //         "Something went wrong while uploading custom thumbnail!",
+                //       status: "400",
+                //       error,
+                //     });
+                //   });
               })
               .catch((notFoundMedia) => {
                 res.json({
