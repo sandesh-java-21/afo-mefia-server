@@ -227,6 +227,116 @@ const deletedAudioTrack = async (req, res) => {
   }
 };
 
+const updateAudioTrack_V2 = async (req, res) => {
+  try {
+    var media_object_id = req.params.media_object_id;
+    var audio_track_id = req.params.audio_track_id;
+
+    var { original_id_body, name, type, language, language_code } = req.body;
+
+    if (!media_object_id || media_object_id === "") {
+      res.json({
+        message: "Required fields are empty, please provide a movie id!",
+        status: "400",
+      });
+    } else {
+      var mediaObj = await Media.findById({
+        _id: media_object_id,
+      });
+
+      if (!mediaObj) {
+        res.json({
+          message: "No media found with provided media id!",
+          status: "404",
+        });
+      } else {
+        var site_id = process.env.SITE_ID;
+        var media_id = mediaObj.media_id;
+
+        var audioTrack = await AudioTracks.findOne({
+          _id: audio_track_id,
+        });
+        if (!audioTrack) {
+          res.json({
+            message: "No audio track found with provided media id!",
+            status: "404",
+          });
+        } else {
+          var original_id = audioTrack.original_id;
+          var headers = {
+            Authorization: `Bearer ${process.env.JW_PLAYER_API_KEY}`,
+          };
+          var apiResponse = await axios
+            .delete(
+              `https://api.jwplayer.com/v2/sites/${site_id}/media/${media_id}/originals/${original_id}/`,
+              {
+                headers: headers,
+              }
+            )
+            .then(async (result) => {
+              console.log("JW API Success: ", result.data);
+
+              var filter = {
+                _id: audio_track_id,
+              };
+
+              var updateData = {
+                original_id: original_id_body,
+                name: name,
+                type: type,
+                language: language,
+                language_code: language_code,
+                media: mediaObj._id,
+              };
+
+              var updatedAudioTrack = await AudioTracks.findByIdAndUpdate(
+                filter,
+                updateData,
+                { new: true }
+              )
+                .then(async (onAudioTrackUpdateSuccess) => {
+                  console.log(
+                    "on audio update success: ",
+                    onAudioTrackUpdateSuccess
+                  );
+                  res.json({
+                    message: "Audio track updated!",
+                    status: "200",
+                    updatedAudioTrack: onAudioTrackUpdateSuccess,
+                  });
+                })
+                .catch(async (onAudioTrackUpdateError) => {
+                  console.log(
+                    "on audio track update error: ",
+                    onAudioTrackUpdateError
+                  );
+                  res.json({
+                    message:
+                      "Something went wrong while updating the audio track!",
+                    status: "400",
+                    error: onAudioTrackUpdateError,
+                  });
+                });
+            })
+            .catch((error) => {
+              console.log("JW API Error: ", error);
+              res.json({
+                message: "Something went wrong!",
+                status: "503",
+              });
+            });
+        }
+      }
+    }
+  } catch (error) {
+    res.json({
+      message: "Internal server error!",
+      status: "500",
+      error,
+    });
+  }
+};
+
 const getAudioTracksByGeneralMediaId = async (req, res) => {
   try {
     var media_id = req.params.media_id;
@@ -623,4 +733,5 @@ module.exports = {
   addAudioTrackUpdated,
   updateAudioTrack,
   addAudioTrackUpdated_V2,
+  updateAudioTrack_V2,
 };

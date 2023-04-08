@@ -585,6 +585,89 @@ const addSubtitlesUpdated_V2 = async (req, res) => {
   }
 };
 
+const updateSubtitles_V2 = async (req, res) => {
+  try {
+    var media_object_id = req.params.media_object_id;
+    var subtitles_id = req.params.subtitles_id;
+
+    var { track_id_body, delivery_url, track_kind, language, media_obj_id } =
+      req.body;
+
+    var mediaObj = await Media.findById({
+      _id: media_object_id,
+    });
+    var media_id = mediaObj.media_id;
+    var subtitles = await Subtitles.findOne({
+      _id: subtitles_id,
+    });
+
+    var site_id = process.env.SITE_ID;
+    var track_id = subtitles?.track_id;
+
+    var headers = {
+      Authorization: `Bearer ${process.env.JW_PLAYER_API_KEY}`,
+    };
+
+    var apiResponse = await axios
+      .delete(
+        `https://api.jwplayer.com/v2/sites/${site_id}/media/${media_id}/text_tracks/${track_id}/`,
+        {
+          headers: headers,
+        }
+      )
+      .then(async (result) => {
+        console.log("jw success response: ", result.data);
+
+        var filter = {
+          _id: subtitles._id,
+        };
+
+        var updateSubtitlesData = {
+          track_id: track_id_body,
+          delivery_url: delivery_url,
+          track_kind: track_kind,
+          language: language,
+          media: mediaObj._id,
+        };
+
+        var updatedSubtitles2 = await Subtitles.findByIdAndUpdate(
+          filter,
+          updateSubtitlesData,
+          {
+            new: true,
+          }
+        )
+          .then(async (onSubtitlesUpdate2) => {
+            console.log("on subtitles update success: ", onSubtitlesUpdate2);
+
+            res.json({
+              message: "Subtitles updated!",
+              status: "200",
+              updatedSubtitles: onSubtitlesUpdate2,
+            });
+          })
+          .catch(async (onSubtitlesUpdateError) => {
+            console.log("on subtitles update error: ", onSubtitlesUpdateError);
+            res.json({
+              message: "Something went wrong while updating the subtitles!",
+              status: "400",
+              error: onSubtitlesUpdateError,
+            });
+          });
+      })
+      .catch((error) => {
+        console.log("JW Error: ", error);
+        res.send(error);
+      });
+  } catch (error) {
+    res.json({
+      message: "Internal server error!",
+      status: "500",
+      error,
+    });
+  }
+};
+
 module.exports = {
   addSubtitles,
   deletedSubtitles,
@@ -593,4 +676,5 @@ module.exports = {
   addSubtitlesUpdated,
   updateSubtitles,
   addSubtitlesUpdated_V2,
+  updateSubtitles_V2,
 };
