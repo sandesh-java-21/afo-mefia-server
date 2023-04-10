@@ -668,6 +668,7 @@ const createMediaUpdated = async (req, res) => {
                         static_thumbnail_url: result.data.delivery_url,
                         banner_thumbnail_url: result.data.delivery_url,
                         motion_thumbnail_url: "",
+                        thumbnail_type: "jw_player",
                       });
 
                       var savedThumbnail = await thumbnail.save();
@@ -830,6 +831,8 @@ const createMediaUpdated = async (req, res) => {
           static_thumbnail_url: "",
           banner_thumbnail_url: "",
           motion_thumbnail_url: "",
+          thumbnail_type: "",
+          cloudinary_public_id: "",
         });
 
         var savedThumbnail = await thumbnail.save();
@@ -889,13 +892,80 @@ const uploadMediaId = async (req, res) => {
         var updatedMedia = await Media.findByIdAndUpdate(filter, updateData, {
           new: true,
         })
-          .then((onMediaUpdate) => {
-            console.log("media updated: ", onMediaUpdate);
-            res.json({
-              message: "Media Uploaded!",
-              status: "200",
-              updateMedia: onMediaUpdate,
-            });
+          .then(async (onMediaUpdate) => {
+            var headers = {
+              Authorization: `Bearer ${process.env.JW_PLAYER_API_KEY}`,
+            };
+
+            var apiResponse = await axios
+              .get(
+                `https://api.jwplayer.com/v2/sites/yP9ghzCy/thumbnails/?q=media_id:${media_id}`,
+                {
+                  headers: headers,
+                }
+              )
+              .then(async (thumbnailResult) => {
+                var { thumbnails } = thumbnailResult.data;
+
+                var general_content = await GeneralContent.findOne({
+                  media: onMediaFound._id,
+                })
+                  .then(async (onGcFound) => {
+                    console.log("on gc found: ", onGcFound);
+
+                    var thumbnailObj = onGcFound.thumbnail;
+
+                    var filter = {
+                      _id: onGcFound.thumbnail,
+                    };
+
+                    var updatedData = {
+                      general_content: generalContentObj._id,
+                      motion_thumbnail_url: thumbnails[1].delivery_url,
+                    };
+
+                    var updatedThumbnail = await Thumbnail.findByIdAndUpdate(
+                      filter,
+                      updatedData,
+                      {
+                        new: true,
+                      }
+                    )
+                      .then(async (onThumbnailGenerated) => {
+                        console.log(
+                          "on thumbnail generated: ",
+                          onThumbnailGenerated
+                        );
+
+                        res.json({
+                          message: "Media Reuploaded!",
+                          status: "200",
+                          updatedMedia: onMediaUpdate,
+                          updatedThumbnail: onThumbnailGenerated,
+                        });
+                      })
+                      .catch(async (onThumbnailGenerateError) => {
+                        console.log(
+                          "on thumbnail generate error: ",
+                          onThumbnailGenerateError
+                        );
+                        res.json({
+                          message:
+                            "Something went wrong while generating motion thumbnail!",
+                          status: "400",
+                          error: onThumbnailGenerateError,
+                        });
+                      });
+                  })
+                  .catch(async (onGcNotFound) => {
+                    console.log("on gc not found: ", onGcNotFound);
+                    res.json({
+                      message: "No general content found with provided id!",
+                      status: "404",
+                      error: onGcNotFound,
+                    });
+                  });
+              });
           })
           .catch((onMediaNotUpdate) => {
             console.log("media not update: ", onMediaNotUpdate);
