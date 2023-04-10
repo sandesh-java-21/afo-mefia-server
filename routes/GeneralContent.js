@@ -19,4 +19,9 @@ router.get(
   generalContentControllers.getGeneralContent
 );
 
+router.put(
+  "/update-general-content/:general_content_id",
+  generalContentControllers.updateGeneralContent
+);
+
 module.exports = router;

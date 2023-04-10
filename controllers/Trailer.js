@@ -1,6 +1,7 @@
 const Media = require("../models/Media");
 const Trailer = require("../models/Trailer");
 const GeneralContent = require("../models/GeneralContent");
+const Thumbnail = require("../models/Thumbnail");
 
 const axios = require("axios");
 const { getVideoDurationInSeconds } = require("get-video-duration");
@@ -153,45 +154,128 @@ const uploadTrailerOfGeneralContentUpdated = async (req, res) => {
       .then(async (onGcFound) => {
         var generalContentObj = onGcFound;
 
-        var trailerObj = new Trailer({
-          media_id: trailer_media_id,
-          subtitles: [],
-          audio_tracks: [],
-          type: "Trailer",
-        });
+        var media = await Media.findById(generalContentObj.media)
+          .then(async (onMediaFound) => {
+            console.log("on media found: ", onMediaFound);
 
-        var savedTrailer = await trailerObj.save();
+            var mediaObj2 = onMediaFound;
 
-        var filter = {
-          _id: generalContentObj._id,
-        };
-        var updateGcData = {
-          trailer: savedTrailer._id,
-        };
+            var apiResponse = await axios
+              .get(
+                `https://api.jwplayer.com/v2/sites/yP9ghzCy/thumbnails/?q=media_id:${mediaObj2.media_id}`,
+                {
+                  headers: headers,
+                }
+              )
+              .then(async (thumbnailResult) => {
+                var { thumbnails } = thumbnailResult.data;
 
-        var updatedGc = await GeneralContent.findByIdAndUpdate(
-          filter,
-          updateGcData,
-          {
-            new: true,
-          }
-        )
-          .then((result2) => {
-            res.json({
-              message: "Trailer uploaded!",
-              status: "200",
-              savedTrailer,
-              updatedGc: result2,
-            });
+                var thumbnailObj = new Thumbnail({
+                  general_content: generalContentObj._id,
+                  trailer_motion_url: thumbnails[1].delivery_url,
+                });
+
+                var savedThumbnail = await thumbnailObj.save();
+
+                var trailerObj = new Trailer({
+                  media_id: trailer_media_id,
+                  subtitles: [],
+                  audio_tracks: [],
+                  type: "Trailer",
+                });
+
+                var savedTrailer = await trailerObj.save();
+
+                var filter = {
+                  _id: generalContentObj._id,
+                };
+                var updateGcData = {
+                  trailer: savedTrailer._id,
+                };
+
+                var updatedGc = await GeneralContent.findByIdAndUpdate(
+                  filter,
+                  updateGcData,
+                  {
+                    new: true,
+                  }
+                )
+                  .then((result2) => {
+                    res.json({
+                      message: "Trailer uploaded!",
+                      status: "200",
+                      savedTrailer,
+                      updatedGc: result2,
+                      trailer_motion_url: thumbnails[1].delivery_url,
+                    });
+                  })
+                  .catch((error) => {
+                    console.log("Database update error: ", error);
+                    res.json({
+                      message:
+                        "Something went wrong while saving trailet to database!",
+                      status: "400",
+                      error,
+                    });
+                  });
+              })
+              .catch(async (jwUploadError) => {
+                console.log("jw upload error: ", jwUploadError);
+                res.json({
+                  message:
+                    "Something went wrong while generating motion video!",
+                  status: "400",
+                  error: jwUploadError,
+                });
+              });
           })
-          .catch((error) => {
-            console.log("Database update error: ", error);
+          .catch(async (onMediaNotFound) => {
+            console.log("on media not found: ", onMediaNotFound);
             res.json({
-              message: "Something went wrong while saving trailet to database!",
-              status: "400",
-              error,
+              message: "Media not found!",
+              status: "404",
             });
           });
+
+        // var trailerObj = new Trailer({
+        //   media_id: trailer_media_id,
+        //   subtitles: [],
+        //   audio_tracks: [],
+        //   type: "Trailer",
+        // });
+
+        // var savedTrailer = await trailerObj.save();
+
+        // var filter = {
+        //   _id: generalContentObj._id,
+        // };
+        // var updateGcData = {
+        //   trailer: savedTrailer._id,
+        // };
+
+        // var updatedGc = await GeneralContent.findByIdAndUpdate(
+        //   filter,
+        //   updateGcData,
+        //   {
+        //     new: true,
+        //   }
+        // )
+        //   .then((result2) => {
+        //     res.json({
+        //       message: "Trailer uploaded!",
+        //       status: "200",
+        //       savedTrailer,
+        //       updatedGc: result2,
+        //     });
+        //   })
+        //   .catch((error) => {
+        //     console.log("Database update error: ", error);
+        //     res.json({
+        //       message: "Something went wrong while saving trailet to database!",
+        //       status: "400",
+        //       error,
+        //     });
+        //   });
       })
       .catch((onGcNotFound) => {
         console.log("gc not found: ", onGcNotFound);

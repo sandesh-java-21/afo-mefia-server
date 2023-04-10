@@ -12,17 +12,35 @@ const thumbnailSchema = mongoose.Schema({
   },
   static_thumbnail_url: {
     type: String,
-    require: true,
+    required: false,
     default: "",
   },
   motion_thumbnail_url: {
     type: String,
-    require: true,
+    required: false,
     default: "",
   },
   banner_thumbnail_url: {
     type: String,
-    require: true,
+    required: false,
+    default: "",
+  },
+
+  trailer_motion_url: {
+    type: String,
+    required: false,
+    default: "",
+  },
+
+  thumbnail_type: {
+    type: String,
+    required: false,
+    default: "",
+  },
+
+  cloudinary_public_id: {
+    type: String,
+    required: false,
     default: "",
   },
   createdAt: {

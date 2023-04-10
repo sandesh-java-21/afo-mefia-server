@@ -825,12 +825,22 @@ const createMediaUpdated = async (req, res) => {
 
         var savedMedia = await mediaObj.save();
 
+        var thumbnail = new Thumbnail({
+          thumbnail_id: "",
+          static_thumbnail_url: "",
+          banner_thumbnail_url: "",
+          motion_thumbnail_url: "",
+        });
+
+        var savedThumbnail = await thumbnail.save();
+
         var generalContentObj = new GeneralContent({
           media: savedMedia._id,
           category: category,
           genre: genres,
           rating: rating,
           status: status,
+          thumbnail: savedThumbnail._id,
         });
 
         var savedGeneralContent = await generalContentObj.save();
