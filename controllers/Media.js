@@ -906,6 +906,7 @@ const uploadMediaId = async (req, res) => {
               )
               .then(async (thumbnailResult) => {
                 var { thumbnails } = thumbnailResult.data;
+                console.log("thumbnails: ", thumbnailResult.data);
 
                 var general_content = await GeneralContent.findOne({
                   media: onMediaFound._id,
@@ -920,8 +921,8 @@ const uploadMediaId = async (req, res) => {
                     };
 
                     var updatedData = {
-                      general_content: generalContentObj._id,
-                      motion_thumbnail_url: thumbnails[1].delivery_url,
+                      general_content: onGcFound._id,
+                      motion_thumbnail_url: thumbnails[0].delivery_url,
                     };
 
                     var updatedThumbnail = await Thumbnail.findByIdAndUpdate(

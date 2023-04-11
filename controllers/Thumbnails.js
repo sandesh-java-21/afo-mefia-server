@@ -1,6 +1,7 @@
 const GeneralContent = require("../models/GeneralContent");
 const Media = require("../models/Media");
 const Thumbnail = require("../models/Thumbnail");
+const Video = require("../models/Video");
 
 const cloudinary = require("cloudinary").v2;
 
@@ -428,6 +429,52 @@ const getGeneralContentThumbnail = async (req, res) => {
 
       .then(async (foundGc) => {
         var thumbnail = foundGc.thumbnail;
+
+        var thumbnailobj = await Thumbnail.findOne({
+          _id: thumbnail._id,
+        })
+          .then((thumbnail) => {
+            res.json({
+              message: "Thumbnail Found!",
+              status: "200",
+              thumbnail,
+            });
+          })
+
+          .catch((error) => {
+            res.json({
+              message: "Something went wrong!",
+              status: "400",
+              error,
+            });
+          });
+      })
+      .catch((error) => {
+        res.json({
+          message: "General content not found!",
+          status: "404",
+          error,
+        });
+      });
+  } catch (error) {
+    res.json({
+      message: "Internal server error!",
+      status: "500",
+      error,
+    });
+  }
+};
+
+const getVideoContentThumbnail = async (req, res) => {
+  try {
+    var video_content_id = req.params.video_content_id;
+
+    var video_content = await Video.findById({
+      _id: video_content_id,
+    })
+
+      .then(async (foundVc) => {
+        var thumbnail = foundVc.thumbnail;
 
         var thumbnailobj = await Thumbnail.findOne({
           _id: thumbnail._id,

@@ -2,6 +2,7 @@ const AudioTracks = require("../models/AudioTracks");
 const Media = require("../models/Media");
 const GeneralContent = require("../models/GeneralContent");
 const LanguagesContent = require("../models/LanguagesContent");
+const Video = require("../models/Video");
 
 const { translate } = require("free-translate");
 
@@ -396,6 +397,57 @@ const getAudioTracksByGeneralContentId = async (req, res) => {
       } else {
         console.log("general content: ", general_content);
         var media = general_content.media;
+
+        var populatedMedia = await Media.findById({
+          _id: media._id,
+        }).populate("audio_tracks");
+
+        if (populatedMedia) {
+          res.json({
+            message: "Subtitles found!",
+            status: "200",
+            audio_tracks: populatedMedia.audio_tracks,
+          });
+        } else {
+          res.json({
+            message: "No audio tracks found!",
+            status: "404",
+            audio_tracks: [],
+          });
+        }
+      }
+    }
+  } catch (error) {
+    res.json({
+      message: "Internal server error!",
+      status: "500",
+      error,
+    });
+  }
+};
+
+const getAudioTracksByVideoContentId = async (req, res) => {
+  try {
+    var video_content_id = req.params.video_content_id;
+    if (!video_content_id || video_content_id === "") {
+      res.json({
+        message: "Required fields are empty!",
+        status: "400",
+      });
+    } else {
+      var video_content = await Video.findById({
+        _id: video_content_id,
+      }).populate("media");
+
+      if (!video_content) {
+        res.json({
+          message: "No video content found for provided general content id!",
+          status: "404",
+          video_content: null,
+        });
+      } else {
+        console.log("video content: ", video_content);
+        var media = video_content.media;
 
         var populatedMedia = await Media.findById({
           _id: media._id,

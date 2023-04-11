@@ -2,6 +2,7 @@ const Subtitles = require("../models/Subtitles");
 const Media = require("../models/Media");
 const GeneralContent = require("../models/GeneralContent");
 const LanguagesContent = require("../models/LanguagesContent");
+const Video = require("../models/Video");
 
 const { translate } = require("free-translate");
 
@@ -205,15 +206,15 @@ const deletedSubtitles = async (req, res) => {
 
 const getSubtitlesByGeneralContentId = async (req, res) => {
   try {
-    var general_content_id = req.params.general_content_id;
-    if (!general_content_id || general_content_id === "") {
+    var video_content_id = req.params.video_content_id;
+    if (!video_content_id || video_content_id === "") {
       res.json({
         message: "Required fields are empty!",
         status: "400",
       });
     } else {
-      var general_content = await GeneralContent.findById({
-        _id: general_content_id,
+      var video_content = await Video.findById({
+        _id: video_content_id,
       }).populate("media");
 
       if (!general_content) {
