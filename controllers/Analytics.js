@@ -234,7 +234,80 @@ const getAnalysisForTags = async (req, res) => {
   // }
 };
 
+const getAnalysisForTagsUpdated_V2 = async (req, res) => {
+  try {
+    var { start_date, end_date } = req.body;
+
+    // date format is yyyy-mm-dd
+
+    var headers = {
+      Authorization: `Bearer ${process.env.JW_PLAYER_API_KEY}`,
+    };
+
+    var site_id = process.env.SITE_ID;
+    var bodyData = {
+      dimensions: ["tag"],
+      metrics: [
+        {
+          field: "plays",
+          operation: "sum",
+        },
+      ],
+      end_date: `${end_date}`,
+      start_date: `${start_date}`,
+    };
+
+    var apiResponse = await axios.post(
+      `https://api.jwplayer.com/v2/sites/yP9ghzCy/analytics/queries/?format=json`,
+      bodyData,
+      {
+        headers: headers,
+      }
+    );
+
+    var rows = apiResponse.data.data.rows;
+    var tagTotals = {};
+
+    // calculate total number of plays for each tag
+    rows.forEach((row) => {
+      var tagName = row[0];
+      var totalPlays = row[1];
+      tagTotals[tagName] = totalPlays;
+    });
+
+    // sort tags based on total number of plays
+    var sortedTags = Object.keys(tagTotals).sort(
+      (a, b) => tagTotals[b] - tagTotals[a]
+    );
+
+    // get top 6 tags
+    var topTags = sortedTags.slice(0, 6);
+
+    var responseData = topTags.map((tagName) => {
+      return {
+        tagName: tagName,
+        totalPlays: tagTotals[tagName],
+      };
+    });
+
+    res.json({
+      message: "Top 6 tags based on total number of plays!",
+      status: "200",
+      analysis: responseData,
+      start_date: start_date,
+      end_date: end_date,
+    });
+  } catch (error) {
+    res.json({
+      message: "Internal server error!",
+      status: "500",
+      error,
+    });
+  }
+};
+
 module.exports = {
   getAnalysisForMediaIds,
   getAnalysisForTags,
+  getAnalysisForTagsUpdated_V2,
 };

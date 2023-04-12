@@ -9,6 +9,9 @@ router.post(
   analyticsControllers.getAnalysisForMediaIds
 );
 
-router.post("/get-analysis-for-tags", analyticsControllers.getAnalysisForTags);
+router.post(
+  "/get-analysis-for-tags",
+  analyticsControllers.getAnalysisForTagsUpdated_V2
+);
 
 module.exports = router;
