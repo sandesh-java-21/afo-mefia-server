@@ -8,4 +8,9 @@ router.post(
   trailerControllers.uploadTrailerOfGeneralContentUpdated
 );
 
+router.patch(
+  "/upload-trailer-media-id/:general_content_id",
+  trailerControllers.uploadTrailerMediaIdToMediaObject
+);
+
 module.exports = router;
