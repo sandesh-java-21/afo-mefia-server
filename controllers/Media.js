@@ -566,7 +566,7 @@ const createMediaUpdated = async (req, res) => {
       seo_tags,
       rating,
       status,
-      isThumbanilSelected,
+      isThumbnailSelected,
       language_code,
       imageBase64,
     } = req.body;
@@ -582,7 +582,8 @@ const createMediaUpdated = async (req, res) => {
       genres,
       seo_tags,
       rating,
-      status
+      status,
+      isThumbnailSelected
     );
 
     if (!title) {
@@ -591,8 +592,9 @@ const createMediaUpdated = async (req, res) => {
         status: "400",
       });
     } else {
-      if (isThumbanilSelected) {
+      if (isThumbnailSelected) {
         cloudinary.config(cloudinaryConfigObj);
+        console.log(" image base 64 : ", imageBase64);
 
         cloudinary.uploader
           .upload(imageBase64)
@@ -920,9 +922,15 @@ const uploadMediaId = async (req, res) => {
                       _id: onGcFound.thumbnail,
                     };
 
+                    console.log(
+                      "url >>>> ",
+                      thumbnailResult.data.thumbnails[0]
+                    );
+
                     var updatedData = {
                       general_content: onGcFound._id,
-                      motion_thumbnail_url: thumbnails[0].delivery_url,
+                      motion_thumbnail_url:
+                        thumbnailResult.data.thumbnails[0].delivery_url,
                     };
 
                     var updatedThumbnail = await Thumbnail.findByIdAndUpdate(

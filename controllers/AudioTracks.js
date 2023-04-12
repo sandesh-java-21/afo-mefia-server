@@ -650,8 +650,10 @@ const addAudioTrackUpdated_V2 = async (req, res) => {
               var updatedMedia = await Media.findByIdAndUpdate(
                 filter,
                 {
-                  $push: { audio_tracks: onSaveAudioTrack._id },
-                  $push: { translated_content: onSaveTranslation._id },
+                  $push: {
+                    audio_tracks: onSaveAudioTrack._id,
+                    translated_content: onSaveTranslation._id,
+                  },
                 },
                 {
                   new: true,

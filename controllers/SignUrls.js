@@ -20,8 +20,16 @@ function get_response(mediaid, playerid) {
 
 const signUrl = async (req, res) => {
   try {
-    var response = get_response("GlvU0mXm", "P6dCVDaO");
-    res.send(response);
+    var media_id = req.params.media_id;
+
+    console.log("media id: ", media_id);
+
+    var response = get_response(media_id, "P6dCVDaO");
+    res.json({
+      message: "Signed URL Generated!",
+      status: "200",
+      signed_url: response,
+    });
   } catch (error) {
     res.send(error);
   }
