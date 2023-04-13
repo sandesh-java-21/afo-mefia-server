@@ -788,4 +788,5 @@ module.exports = {
   updateAudioTrack,
   addAudioTrackUpdated_V2,
   updateAudioTrack_V2,
+  getAudioTracksByVideoContentId,
 };

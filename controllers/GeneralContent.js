@@ -367,9 +367,9 @@ const updateGeneralContent = async (req, res) => {
                                 var publicId =
                                   cloudinaryUploadSuccess.public_id;
 
-                                var headers = {
-                                  Authorization: `Bearer ${process.env.JW_PLAYER_API_KEY}`,
-                                };
+                                // var headers = {
+                                //   Authorization: `Bearer ${process.env.JW_PLAYER_API_KEY}`,
+                                // };
 
                                 var data = {
                                   relationships: {
@@ -406,7 +406,7 @@ const updateGeneralContent = async (req, res) => {
                                     setTimeout(async () => {
                                       var apiResponse_2 = await axios
                                         .get(
-                                          `https://api.jwplayer.com/v2/sites/${site_id}/thumbnails/${thumbnail_id}/`,
+                                          `https://api.jwplayer.com/v2/sites/${site_id}/thumbnails/${id}/`,
                                           {
                                             headers: headers,
                                           }
@@ -465,110 +465,106 @@ const updateGeneralContent = async (req, res) => {
                                                 {
                                                   new: true,
                                                 }
-                                              )
-                                                .then(
-                                                  async (onThumbnailUpdate) => {
-                                                    console.log(
-                                                      "on thumbnail update: ",
-                                                      onThumbnailUpdate
-                                                    );
-                                                    var updatedThumbnailObj =
-                                                      onThumbnailUpdate;
+                                              ).then(
+                                                async (onThumbnailUpdate) => {
+                                                  console.log(
+                                                    "on thumbnail update: ",
+                                                    onThumbnailUpdate
+                                                  );
+                                                  var updatedThumbnailObj =
+                                                    onThumbnailUpdate;
 
-                                                    // new general info update code here
+                                                  // new general info update code here
 
-                                                    var filter = {
-                                                      _id: mediaObj._id,
-                                                    };
+                                                  var filter = {
+                                                    _id: mediaObj._id,
+                                                  };
 
-                                                    var updateData = {
-                                                      title,
-                                                      description,
-                                                      jw_tags,
-                                                      category,
-                                                      default_language,
-                                                      release_year,
-                                                      genres,
-                                                      seo_tags,
-                                                      rating,
-                                                      status,
-                                                    };
+                                                  var updateData = {
+                                                    title,
+                                                    description,
+                                                    jw_tags,
+                                                    category,
+                                                    default_language,
+                                                    release_year,
+                                                    genres,
+                                                    seo_tags,
+                                                    rating,
+                                                    status,
+                                                  };
 
-                                                    var updatedMedia =
-                                                      await Media.findByIdAndUpdate(
-                                                        filter,
-                                                        updateData,
-                                                        { new: true }
-                                                      )
-                                                        .then(
-                                                          async (
-                                                            onGcUpdate
-                                                          ) => {
-                                                            console.log(
-                                                              "on gc update: ",
-                                                              onGcUpdate
-                                                            );
-                                                            res.json({
-                                                              message:
-                                                                "General info updated!",
-                                                              status: "200",
-                                                              updatedMedia:
-                                                                onGcUpdate,
-                                                              updatedThumbnail:
-                                                                updatedThumbnailObj,
-                                                            });
-                                                          }
-                                                        )
-                                                        .catch(
-                                                          async (
-                                                            onGcUpdateError
-                                                          ) => {
-                                                            console.log(
-                                                              "on gc update error: ",
-                                                              onGcUpdateError
-                                                            );
-                                                            res.json({
-                                                              message:
-                                                                "something went wrong while updating general info!",
-                                                              status: "400",
-                                                              error:
-                                                                onGcUpdateError,
-                                                            });
-                                                          }
+                                                  var updatedMedia =
+                                                    await Media.findByIdAndUpdate(
+                                                      filter,
+                                                      updateData,
+                                                      { new: true }
+                                                    ).then(
+                                                      async (onGcUpdate) => {
+                                                        console.log(
+                                                          "on gc update: ",
+                                                          onGcUpdate
                                                         );
-                                                  }
-                                                )
-                                                .catch(
-                                                  async (
-                                                    onThumbnailUpdateError
-                                                  ) => {
-                                                    console.log(
-                                                      "on thumbnail update error: ",
-                                                      onThumbnailUpdateError
+                                                        res.json({
+                                                          message:
+                                                            "General info updated!",
+                                                          status: "200",
+                                                          updatedMedia:
+                                                            onGcUpdate,
+                                                          updatedThumbnail:
+                                                            updatedThumbnailObj,
+                                                        });
+                                                      }
                                                     );
-                                                    res.json({
-                                                      message:
-                                                        "Something went wrong while updating thumbnail!",
-                                                      status: "400",
-                                                      error:
-                                                        onThumbnailUpdateError,
-                                                    });
-                                                  }
-                                                );
+                                                  // .catch(
+                                                  //   async (
+                                                  //     onGcUpdateError
+                                                  //   ) => {
+                                                  //     console.log(
+                                                  //       "on gc update error: ",
+                                                  //       onGcUpdateError
+                                                  //     );
+                                                  //     res.json({
+                                                  //       message:
+                                                  //         "something went wrong while updating general info!",
+                                                  //       status: "400",
+                                                  //       error:
+                                                  //         onGcUpdateError,
+                                                  //     });
+                                                  //   }
+                                                  // );
+                                                }
+                                              );
+                                            // .catch(
+                                            //   async (
+                                            //     onThumbnailUpdateError
+                                            //   ) => {
+                                            //     console.log(
+                                            //       "on thumbnail update error: ",
+                                            //       onThumbnailUpdateError
+                                            //     );
+                                            //     res.json({
+                                            //       message:
+                                            //         "Something went wrong while updating thumbnail!",
+                                            //       status: "400",
+                                            //       error:
+                                            //         onThumbnailUpdateError,
+                                            //     });
+                                            //   }
+                                            // );
                                           }
-                                        )
-                                        .catch(async (onJwThumbnailError) => {
-                                          console.log(
-                                            "on jw thumbnail error: ",
-                                            onJwThumbnailError
-                                          );
-                                          res.json({
-                                            message:
-                                              "Something went wrong while updating thumbnail!",
-                                            status: "400",
-                                            error: onJwThumbnailError,
-                                          });
-                                        });
+                                        );
+                                      // .catch(async (onJwThumbnailError) => {
+                                      //   console.log(
+                                      //     "on jw thumbnail error: ",
+                                      //     onJwThumbnailError
+                                      //   );
+                                      //   res.json({
+                                      //     message:
+                                      //       "Something went wrong while updating thumbnail!",
+                                      //     status: "400",
+                                      //     error: onJwThumbnailError,
+                                      //   });
+                                      // });
                                     }, 10000);
                                   })
                                   .catch(async (jwThumbnailUploadError) => {
@@ -608,9 +604,9 @@ const updateGeneralContent = async (req, res) => {
 
                         var thumbnail_id = thumbnailObj.thumbnail_id;
                         var site_id = process.env.SITE_ID;
-                        var headers = {
-                          Authorization: `Bearer ${process.env.JW_PLAYER_API_KEY}`,
-                        };
+                        // var headers = {
+                        //   Authorization: `Bearer ${process.env.JW_PLAYER_API_KEY}`,
+                        // };
 
                         var apiResponse_3 = await axios
                           .delete(
@@ -671,6 +667,7 @@ const updateGeneralContent = async (req, res) => {
                                     );
 
                                     var { id } = onJwThumbnailUpload.data;
+                                    var site_id = process.env.SITE_ID;
 
                                     setTimeout(async () => {
                                       var apiResponse_2 = await axios
@@ -810,8 +807,8 @@ const updateGeneralContent = async (req, res) => {
                                   })
                                   .catch(async (onJwThumbnailUploadError) => {
                                     console.log(
-                                      "on jw thumbnail upload error: ",
-                                      onJwThumbnailUploadError
+                                      "on jw thumbnail upload error: 2  ",
+                                      onJwThumbnailUploadError.data.response
                                     );
                                     res.json({
                                       message:
@@ -860,7 +857,7 @@ const updateGeneralContent = async (req, res) => {
                             "on cloudinary upload success: ",
                             onCloudinaryUploadSuccess
                           );
-                          var public_id_3 = onCloudinaryUpload.public_id;
+                          var public_id_3 = onCloudinaryUploadSuccess.public_id;
 
                           var data = {
                             relationships: {
@@ -878,9 +875,13 @@ const updateGeneralContent = async (req, res) => {
                             },
                           };
 
+                          // var headers = {
+                          //   Authorization: `Bearer ${process.env.JW_PLAYER_API_KEY}`,
+                          // };
+
                           var apiResponse_5 = await axios
                             .post(
-                              `https://api.jwplayer.com/v2/sites/${site_id}/thumbnails/`,
+                              `https://api.jwplayer.com/v2/sites/yP9ghzCy/thumbnails`,
                               data,
                               {
                                 headers: headers,
@@ -893,11 +894,18 @@ const updateGeneralContent = async (req, res) => {
                               );
 
                               var { id } = onJwThumbnailUploadSuccess.data;
+                              var site_id = process.env.SITE_ID;
 
                               setTimeout(async () => {
+                                // var headers = {
+                                //   Authorization: `Bearer ${process.env.JW_PLAYER_API_KEY}`,
+                                // };
+
+                                console.log(" headers: ", headers);
+
                                 var apiResponse_6 = await axios
                                   .get(
-                                    `https://api.jwplayer.com/v2/sites/${site_id}/thumbnails/${id}/`,
+                                    `https://api.jwplayer.com/v2/sites/yP9ghzCy/thumbnails/${id}/`,
                                     {
                                       headers: headers,
                                     }
@@ -1021,7 +1029,7 @@ const updateGeneralContent = async (req, res) => {
                                         .catch(
                                           async (onThumbnailUpdateError) => {
                                             console.log(
-                                              "on thumbnail update error: ",
+                                              "on thumbnail update error: 1  ",
                                               onThumbnailUpdateError
                                             );
                                             res.json({
@@ -1049,8 +1057,8 @@ const updateGeneralContent = async (req, res) => {
                             })
                             .catch(async (onJwThumbnailUploadError) => {
                               console.log(
-                                "on jw thumbnail upload error: ",
-                                onJwThumbnailUploadError
+                                "on jw thumbnail upload error: 3  ",
+                                onJwThumbnailUploadError.response.data
                               );
                               res.json({
                                 message:
@@ -1390,81 +1398,81 @@ const updateGeneralContent = async (req, res) => {
             error: onNotFoundGc,
           });
         });
-    }
-
-    var general_content = await GeneralContent.findById({
-      _id: general_content_id,
-    })
-      .then(async (onGcFound) => {
-        console.log("on gc found: ");
-        var general_content_obj = onGcFound;
-
-        var media = await Media.findById({
-          _id: general_content_obj.media,
-        })
-          .then(async (onMediaFound) => {
-            console.log("media found: ");
-
-            var mediaObj = onMediaFound;
-
-            var filter = {
-              _id: mediaObj._id,
-            };
-
-            var updateData = {
-              title,
-              description,
-              jw_tags,
-              category,
-              default_language,
-              release_year,
-              genres,
-              seo_tags,
-              rating,
-              status,
-            };
-
-            var updatedMedia = await Media.findByIdAndUpdate(
-              filter,
-              updateData,
-              { new: true }
-            )
-              .then(async (onMediaUpdate) => {
-                console.log("media update: ", onMediaUpdate);
-
-                res.json({
-                  message: "General content updated!",
-                  status: "200",
-                  updatedMedia: onMediaUpdate,
-                });
-              })
-              .catch((onMediaNotUpdate) => {
-                console.log("media not update: ", onMediaNotUpdate);
-                res.json({
-                  message:
-                    "Something went wrong while updating general content!",
-                  status: "400",
-                  error: onMediaNotUpdate,
-                });
-              });
-          })
-          .catch((onMediaNotFound) => {
-            console.log("media not found: ");
-            res.json({
-              message: "Media not found!",
-              status: "404",
-              error: onMediaNotFound,
-            });
-          });
+    } else {
+      var general_content = await GeneralContent.findById({
+        _id: general_content_id,
       })
-      .catch((onNotFoundGc) => {
-        console.log("gc not found: ");
-        res.json({
-          message: "General content not found!",
-          status: "404",
-          error: onNotFoundGc,
+        .then(async (onGcFound) => {
+          console.log("on gc found: ");
+          var general_content_obj = onGcFound;
+
+          var media = await Media.findById({
+            _id: general_content_obj.media,
+          })
+            .then(async (onMediaFound) => {
+              console.log("media found: ");
+
+              var mediaObj = onMediaFound;
+
+              var filter = {
+                _id: mediaObj._id,
+              };
+
+              var updateData = {
+                title,
+                description,
+                jw_tags,
+                category,
+                default_language,
+                release_year,
+                genres,
+                seo_tags,
+                rating,
+                status,
+              };
+
+              var updatedMedia = await Media.findByIdAndUpdate(
+                filter,
+                updateData,
+                { new: true }
+              )
+                .then(async (onMediaUpdate) => {
+                  console.log("media update: ", onMediaUpdate);
+
+                  res.json({
+                    message: "General content updated!",
+                    status: "200",
+                    updatedMedia: onMediaUpdate,
+                  });
+                })
+                .catch((onMediaNotUpdate) => {
+                  console.log("media not update: ", onMediaNotUpdate);
+                  res.json({
+                    message:
+                      "Something went wrong while updating general content!",
+                    status: "400",
+                    error: onMediaNotUpdate,
+                  });
+                });
+            })
+            .catch((onMediaNotFound) => {
+              console.log("media not found: ");
+              res.json({
+                message: "Media not found!",
+                status: "404",
+                error: onMediaNotFound,
+              });
+            });
+        })
+        .catch((onNotFoundGc) => {
+          console.log("gc not found: ");
+          res.json({
+            message: "General content not found!",
+            status: "404",
+            error: onNotFoundGc,
+          });
         });
-      });
+    }
   } catch (error) {
     res.json({
       message: "Internal server error!",

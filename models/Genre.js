@@ -6,6 +6,26 @@ const genreSchema = mongoose.Schema({
     required: true,
     default: "",
   },
+
+  genre_image: {
+    url: {
+      type: String,
+      required: false,
+      default: "",
+    },
+    public_id: {
+      type: String,
+      required: false,
+      default: "",
+    },
+  },
+
+  genre_type: {
+    type: String,
+    required: false,
+    default: "",
+  },
+
   createdAt: {
     type: Date,
     default: Date.now(),

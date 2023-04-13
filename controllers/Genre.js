@@ -1,10 +1,14 @@
 const Genre = require("../models/Genre");
 
+const cloudinary = require("cloudinary").v2;
+const cloudinaryConfigObj = require("../configurations/Cloudinary");
+
 const addGenre = async (req, res) => {
   try {
-    var { name } = req.body;
+    var { name, type, imageBase64 } = req.body;
     var existingGenre = await Genre.findOne({
       name: name,
+      genre_type: type,
     });
 
     if (existingGenre) {
@@ -14,17 +18,40 @@ const addGenre = async (req, res) => {
         genreFound: true,
       });
     } else {
-      var genreObj = new Genre({
-        name: name,
-      });
+      cloudinary.config(cloudinaryConfigObj);
 
-      var savedGenre = await genreObj.save();
+      cloudinary.uploader
+        .upload(imageBase64, {
+          folder: "genre",
+        })
+        .then(async (onImageUpload) => {
+          console.log("on image upload:  ", onImageUpload);
 
-      res.json({
-        message: "New genre created!",
-        status: "200",
-        savedGenre: savedGenre,
-      });
+          var genreObj = new Genre({
+            name: name,
+            genre_type: type,
+            genre_image: {
+              url: onImageUpload.secure_url,
+              public_id: onImageUpload.public_id,
+            },
+          });
+
+          var savedGenre = await genreObj.save();
+
+          res.json({
+            message: "New genre created!",
+            status: "200",
+            savedGenre: savedGenre,
+          });
+        })
+        .catch(async (onImageNotUpload) => {
+          console.log("on image not upload: ", onImageNotUpload);
+          res.json({
+            message: "Something went wrong while uploading genre image!",
+            status: "400",
+            error: onImageNotUpload,
+          });
+        });
     }
   } catch (error) {
     res.json({
@@ -39,16 +66,44 @@ const deleteGenre = async (req, res) => {
   try {
     var genre_id = req.params.id;
 
-    var genre = await Genre.findByIdAndDelete({
-      _id: genre_id,
-    })
-      .then((result) => {
-        res.json({
-          message: "Genre deleted!",
-          status: "200",
-          genreDeleted: true,
-          genreFound: true,
-        });
+    var genre = await Genre.findById(genre_id)
+      .then(async (result) => {
+        var genreObj = result;
+
+        cloudinary.config(cloudinaryConfigObj);
+
+        cloudinary.uploader
+          .destroy(genreObj.genre_image.public_id)
+          .then(async (deleteResult) => {
+            console.log("cloudinary delete result: ", deleteResult);
+
+            var deletedGenre = await Genre.findByIdAndDelete(genreObj._id)
+              .then(async (onGenreDelete) => {
+                console.log("on genre delete: ", onGenreDelete);
+                res.json({
+                  message: "Genre deleted!",
+                  status: "200",
+                  genreDeleted: true,
+                  genreFound: true,
+                });
+              })
+              .catch(async (onGenreNotDelete) => {
+                console.log("on genre not delete: ", onGenreNotDelete);
+                res.json({
+                  message: "Something went wrong while deleting genre!",
+                  status: "400",
+                  error: onGenreNotDelete,
+                });
+              });
+          })
+          .catch(async (deleteError) => {
+            console.log("cloudinary delete error: ", deleteError);
+            res.json({
+              message: "Something went wrong while deleting the genre!",
+              status: "400",
+              error: deleteError,
+            });
+          });
       })
       .catch((error) => {
         res.json({
@@ -56,6 +111,7 @@ const deleteGenre = async (req, res) => {
           status: "404",
           genreDeleted: false,
           genreFound: false,
+          error,
         });
       });
   } catch (error) {
@@ -68,51 +124,142 @@ const deleteGenre = async (req, res) => {
 };
 
 const updateGenre = async (req, res) => {
-  try {
-    var genre_id = req.params.id;
-    var { name } = req.body;
+  var genre_id = req.params.id;
+  var { name, imageBase64, type, isImageSelected } = req.body;
 
-    if (!genre_id || genre_id === "") {
-      res.json({
-        message: "No genre found with provided id!",
-        status: "404",
-        genreUpdated: false,
-        genreFound: false,
-      });
-    } else {
-      var filter = {
-        _id: genre_id,
-      };
-      var updateData = {
-        name: name,
-      };
-      var updatedGenre = await Genre.findByIdAndUpdate(filter, updateData, {
-        new: true,
-      })
-        .then((result) => {
-          res.json({
-            message: "Genre updated!",
-            status: "200",
-            genreUpdated: true,
-            genreFound: true,
-          });
-        })
-        .catch((error) => {
-          res.json({
-            message: "No genre found with provided id!",
-            status: "404",
-            genreUpdated: false,
-            genreFound: false,
-            error,
-          });
-        });
-    }
-  } catch (error) {
+  if (!genre_id || genre_id === "") {
     res.json({
-      message: "Internal server error!",
-      status: "500",
-      error,
+      message: "No genre found with provided id!",
+      status: "404",
+      genreUpdated: false,
+      genreFound: false,
     });
+  } else {
+    var genre = await Genre.findById(genre_id)
+      .then(async (result) => {
+        var genreObj = result;
+        console.log("genre obj: ", genreObj);
+
+        if (isImageSelected) {
+          cloudinary.config(cloudinaryConfigObj);
+
+          cloudinary.uploader
+            .destroy(genreObj.genre_image.public_id)
+            .then(async (onImageDelete) => {
+              console.log("on image delete: ", onImageDelete);
+
+              cloudinary.config(cloudinaryConfigObj);
+
+              cloudinary.uploader
+                .upload(imageBase64, {
+                  folder: "genre",
+                })
+                .then(async (onImageReUpload) => {
+                  console.log("on image reupload: ", onImageReUpload);
+
+                  var filter = {
+                    _id: genreObj._id,
+                  };
+
+                  var updateData = {
+                    name: name,
+                    genre_type: type,
+                    genre_image: {
+                      url: onImageReUpload.secure_url,
+                      public_id: onImageReUpload.public_id,
+                    },
+                  };
+
+                  var updatedGenre = await Genre.findByIdAndUpdate(
+                    filter,
+                    updateData,
+                    {
+                      new: true,
+                    }
+                  )
+                    .then(async (onGenreUpdate) => {
+                      console.log("on genre update: ", onGenreUpdate);
+                      res.json({
+                        message: "Genre updated!",
+                        status: "200",
+                        genreUpdated: true,
+                        genreFound: true,
+                        updatedGenre: onGenreUpdate,
+                        updatedImage: onImageReUpload.secure_url,
+                      });
+                    })
+                    .catch(async (onGenreNotUpdate) => {
+                      console.log("on genre not update: ", onGenreNotUpdate);
+                      res.json({
+                        message: "Something went wrong while updating genre!",
+                        status: "400",
+                        error: onGenreNotUpdate,
+                      });
+                    });
+                })
+                .catch(async (onImageNotUploadError) => {
+                  console.log(
+                    "on image reupload error: ",
+                    onImageNotUploadError
+                  );
+                  res.json({
+                    message: "Something went wrong while updating genre!",
+                    status: "400",
+                    error: onImageNotUploadError,
+                  });
+                });
+            })
+            .catch(async (onImageNotDelete) => {
+              console.log("on image not delete: ", onImageNotDelete);
+              res.json({
+                message: "Something went wrong while updating genre!",
+                status: "400",
+                error: onImageNotDelete,
+              });
+            });
+        } else {
+          var filter = {
+            _id: genreObj._id,
+          };
+
+          var updateData = {
+            name: name,
+            genre_type: type,
+          };
+
+          var updatedGenre = await Genre.findByIdAndUpdate(filter, updateData, {
+            new: true,
+          })
+            .then(async (onGenreUpdate) => {
+              console.log("on genre update 2:  ", onGenreUpdate);
+
+              res.json({
+                message: "Genre updated!",
+                status: "200",
+                genreUpdated: true,
+                genreFound: true,
+                updatedGenre: onGenreUpdate,
+              });
+            })
+            .catch(async (onGenreNotUpdate) => {
+              console.log("on genre not update 2:  ", onGenreNotUpdate);
+              res.json({
+                message: "Something went wrong while updating genre!",
+                status: "400",
+                error: onGenreNotUpdate,
+              });
+            });
+        }
+      })
+      .catch((error) => {
+        res.json({
+          message: "No genre found with provided id!",
+          status: "404",
+          genreUpdated: false,
+          genreFound: false,
+          error,
+        });
+      });
   }
 };
 
