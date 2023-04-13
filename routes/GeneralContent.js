@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 
 const generalContentControllers = require("../controllers/GeneralContent");
+const crewMembersControllers = require("../controllers/Crew");
 
 router.post(
   "/add-general-content",
@@ -22,6 +23,11 @@ router.get(
 router.put(
   "/update-general-content/:general_content_id",
   generalContentControllers.updateGeneralContent
+);
+
+router.put(
+  "/add-crew-members/:general_content_id",
+  crewMembersControllers.addCrewMembers
 );
 
 module.exports = router;

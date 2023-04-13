@@ -14,4 +14,9 @@ router.post(
   analyticsControllers.getAnalysisForTagsUpdated_V2
 );
 
+router.post(
+  "/get-analysis-for-this-and-last-month",
+  analyticsControllers.getAnalysisForTagsThisAndLastMonth
+);
+
 module.exports = router;

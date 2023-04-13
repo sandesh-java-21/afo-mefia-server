@@ -52,6 +52,18 @@ const generalContentSchema = mongoose.Schema({
     required: false,
     default: 0,
   },
+  crew_members: [
+    {
+      member_name: {
+        type: String,
+        required: false,
+      },
+      member_role: {
+        type: String,
+        required: false,
+      },
+    },
+  ],
   createdAt: {
     type: Date,
     default: Date.now(),

@@ -366,7 +366,6 @@ const uploadTrailerOfGeneralContentUpdated = async (req, res) => {
 const uploadTrailerMediaIdToMediaObject = async (req, res) => {
   try {
     var general_content_id = req.params.general_content_id;
-    z;
 
     var { trailer_media_id } = req.body;
 
