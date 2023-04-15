@@ -6,6 +6,7 @@ const Slider = require("../models/Slider");
 const Thumbnail = require("../models/Thumbnail");
 const LanguagesContent = require("../models/LanguagesContent");
 const Trailer = require("../models/Trailer");
+const Genre = require("../models/Genre");
 
 const axios = require("axios");
 
@@ -1482,9 +1483,110 @@ const updateGeneralContent = async (req, res) => {
   }
 };
 
+const getUpcomingGeneralContent = async (req, res) => {
+  try {
+    const language_code = req.params.language_code;
+
+    const upcomingContent = await GeneralContent.find({ status: "upcoming" })
+      .populate([
+        {
+          path: "media",
+          populate: {
+            path: "translated_content",
+            match: { language_code: language_code },
+          },
+        },
+        { path: "genre" },
+        { path: "trailer" },
+        { path: "thumbnail" },
+        { path: "comments" },
+      ])
+      .exec();
+
+    const filteredContent = upcomingContent.filter((content) => {
+      return content.media.translated_content.length > 0;
+    });
+
+    res.send(filteredContent);
+  } catch (error) {
+    res.json({
+      message: "Internal server error!",
+      status: "500",
+      error,
+    });
+  }
+};
+
+const getLatestGeneralContent = async (req, res) => {
+  try {
+    const language_code = req.params.language_code;
+
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth() + 1;
+
+    const generalContent = await GeneralContentModel.find({
+      "translated_content.language_code": language_code,
+    })
+      .populate("media")
+      .exec();
+
+    const filteredGeneralContent = generalContent.filter((content) => {
+      const releaseYear = content.media.release_year.getFullYear();
+      const releaseMonth = content.media.release_year.getMonth() + 1;
+      return releaseYear === currentYear && releaseMonth === currentMonth;
+    });
+
+    console.log("upcoming content: ", filteredGeneralContent);
+    res.send(filteredGeneralContent);
+
+    // const filteredContent = upcomingContent.filter((content) => {
+    //   return content.media.translated_content.length > 0;
+    // });
+  } catch (error) {
+    res.json({
+      message: "Internal server error!",
+      status: "500",
+      error,
+    });
+  }
+};
+
+const getListOfGeneralContentByGenre = async (req, res) => {
+  try {
+    const genres = await Genre.find({});
+
+    // Create an array to store the list of lists
+    const generalContentList = [];
+
+    // Loop through each genre
+    for (const genre of genres) {
+      // Find all general contents for this genre
+      const generalContents = await GeneralContent.find({
+        genre: genre._id,
+      }).populate("genre");
+
+      // Add the list of general contents to the list of lists
+      generalContentList.push(generalContents);
+    }
+
+    // Return the list of lists
+    res.json(generalContentList);
+  } catch (error) {
+    res.json({
+      message: "Internal server error!",
+      status: "500",
+      error,
+    });
+  }
+};
+
 module.exports = {
   addGeneralContent,
   deleteGeneralContentById,
   getGeneralContent,
   updateGeneralContent,
+  getUpcomingGeneralContent,
+  getLatestGeneralContent,
+  getListOfGeneralContentByGenre,
 };

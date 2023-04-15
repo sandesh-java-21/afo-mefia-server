@@ -868,6 +868,8 @@ const createMediaUpdated = async (req, res) => {
         var languagesContentObj = new LanguagesContent({
           title_translated: title,
           description_translated: description,
+          language_type: default_language,
+          language_code: language_code,
         });
 
         var savedLanguagesContent = await languagesContentObj.save();

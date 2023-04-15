@@ -30,4 +30,19 @@ router.put(
   crewMembersControllers.addCrewMembers
 );
 
+router.post(
+  "/get-upcoming-movies/:language_code",
+  generalContentControllers.getUpcomingGeneralContent
+);
+
+router.post(
+  "/get-latest-movies/:language_code",
+  generalContentControllers.getLatestGeneralContent
+);
+
+router.post(
+  "/get-movies-by-genre",
+  generalContentControllers.getListOfGeneralContentByGenre
+);
+
 module.exports = router;
