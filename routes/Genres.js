@@ -14,4 +14,8 @@ router.put("/update-genre/:id", genreControllers.updateGenre);
 
 router.get("/get-all-genres", genreControllers.getAllGenres);
 
+router.patch("/enable-genre/:genre_id", genreControllers.enableGenre);
+
+router.patch("/disable-genre/:genre_id", genreControllers.disableGenre);
+
 module.exports = router;

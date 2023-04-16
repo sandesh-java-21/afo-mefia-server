@@ -5,7 +5,7 @@ const cloudinaryConfigObj = require("../configurations/Cloudinary");
 
 const addGenre = async (req, res) => {
   try {
-    var { name, type, imageBase64 } = req.body;
+    var { name, type, imageBase64, is_enabled } = req.body;
     var existingGenre = await Genre.findOne({
       name: name,
       genre_type: type,
@@ -30,6 +30,7 @@ const addGenre = async (req, res) => {
           var genreObj = new Genre({
             name: name,
             genre_type: type,
+            is_enabled: is_enabled,
             genre_image: {
               url: onImageUpload.secure_url,
               public_id: onImageUpload.public_id,
@@ -125,7 +126,7 @@ const deleteGenre = async (req, res) => {
 
 const updateGenre = async (req, res) => {
   var genre_id = req.params.id;
-  var { name, imageBase64, type, isImageSelected } = req.body;
+  var { name, imageBase64, type, isImageSelected, is_enabled } = req.body;
 
   if (!genre_id || genre_id === "") {
     res.json({
@@ -164,6 +165,7 @@ const updateGenre = async (req, res) => {
                   var updateData = {
                     name: name,
                     genre_type: type,
+                    is_enabled: is_enabled,
                     genre_image: {
                       url: onImageReUpload.secure_url,
                       public_id: onImageReUpload.public_id,
@@ -225,6 +227,7 @@ const updateGenre = async (req, res) => {
           var updateData = {
             name: name,
             genre_type: type,
+            is_enabled: is_enabled,
           };
 
           var updatedGenre = await Genre.findByIdAndUpdate(filter, updateData, {
@@ -319,10 +322,90 @@ const getGenreById = async (req, res) => {
   }
 };
 
+const enableGenre = async (req, res) => {
+  try {
+    var genre_id = req.params.genre_id;
+
+    var updatedGenre = await Genre.findByIdAndUpdate(
+      { _id: genre_id },
+      {
+        is_enabled: true,
+      },
+      {
+        new: true,
+      }
+    )
+      .then(async (onGenreUpdate) => {
+        console.log("on genre update: ", onGenreUpdate);
+        res.json({
+          message: "Genre is active now!",
+          status: "200",
+          activatedGenre: onGenreUpdate,
+        });
+      })
+      .catch(async (onGenreNotUpdate) => {
+        console.log("on genre not update: ", onGenreNotUpdate);
+
+        res.json({
+          message: "Genre not found with provide id!",
+          status: "404",
+          error: onGenreNotUpdate,
+        });
+      });
+  } catch (error) {
+    res.json({
+      message: "Internal server error!",
+      status: "500",
+      error,
+    });
+  }
+};
+
+const disableGenre = async (req, res) => {
+  try {
+    var genre_id = req.params.genre_id;
+
+    var updatedGenre = await Genre.findByIdAndUpdate(
+      { _id: genre_id },
+      {
+        is_enabled: false,
+      },
+      {
+        new: true,
+      }
+    )
+      .then(async (onGenreUpdate) => {
+        console.log("on genre update: ", onGenreUpdate);
+        res.json({
+          message: "Genre is inactive now!",
+          status: "200",
+          inactivatedGenre: onGenreUpdate,
+        });
+      })
+      .catch(async (onGenreNotUpdate) => {
+        console.log("on genre not update: ", onGenreNotUpdate);
+
+        res.json({
+          message: "Genre not found with provide id!",
+          status: "404",
+          error: onGenreNotUpdate,
+        });
+      });
+  } catch (error) {
+    res.json({
+      message: "Internal server error!",
+      status: "500",
+      error,
+    });
+  }
+};
+
 module.exports = {
   addGenre,
   deleteGenre,
   updateGenre,
   getAllGenres,
   getGenreById,
+  enableGenre,
+  disableGenre,
 };

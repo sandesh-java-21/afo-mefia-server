@@ -26,6 +26,12 @@ const genreSchema = mongoose.Schema({
     default: "",
   },
 
+  is_enabled: {
+    type: Boolean,
+    required: false,
+    default: true,
+  },
+
   createdAt: {
     type: Date,
     default: Date.now(),

@@ -64,11 +64,23 @@ const generalContentSchema = mongoose.Schema({
       },
     },
   ],
+  content_type: {
+    type: String,
+    required: false,
+    default: "",
+  },
+  availability: {
+    type: String,
+    required: false,
+    default: "",
+  },
   createdAt: {
     type: Date,
     default: Date.now(),
   },
 });
+
+// Emma Is Looking So Pretty Today Yahhh!!!
 
 var generalContentModel = mongoose.model(
   "general_content",
