@@ -62,6 +62,10 @@ const mediaSchema = mongoose.Schema({
     required: false,
     default: 0,
   },
+  monetization: {
+    type: Boolean,
+    required: false,
+  },
   createdAt: {
     type: Date,
     default: Date.now(),

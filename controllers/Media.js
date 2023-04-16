@@ -571,6 +571,7 @@ const createMediaUpdated = async (req, res) => {
       imageBase64,
       content_type,
       availability,
+      monetization,
     } = req.body;
 
     console.log(
@@ -587,7 +588,8 @@ const createMediaUpdated = async (req, res) => {
       status,
       isThumbnailSelected,
       content_type,
-      availability
+      availability,
+      monetization
     );
 
     console.log("body req: ", req.body);
@@ -648,6 +650,7 @@ const createMediaUpdated = async (req, res) => {
               seo_tags: seo_tags,
               translated_content: [savedLanguagesContent._id],
               rating: rating,
+              monetization: monetization,
             });
 
             var savedMedia = await mediaObj.save();
@@ -895,6 +898,7 @@ const createMediaUpdated = async (req, res) => {
           seo_tags: seo_tags,
           translated_content: [savedLanguagesContent._id],
           rating: rating,
+          monetization: monetization,
         });
 
         var savedMedia = await mediaObj.save();

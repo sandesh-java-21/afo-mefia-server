@@ -1581,6 +1581,17 @@ const getListOfGeneralContentByGenre = async (req, res) => {
   }
 };
 
+const activateGeneralContent = async (req, res) => {
+  try {
+  } catch (error) {
+    res.json({
+      message: "Internal server error!",
+      status: "500",
+      error,
+    });
+  }
+};
+
 module.exports = {
   addGeneralContent,
   deleteGeneralContentById,
