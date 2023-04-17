@@ -594,6 +594,8 @@ const createMediaUpdated = async (req, res) => {
 
     console.log("body req: ", req.body);
 
+    category = "movie";
+
     if (!title) {
       res.json({
         message: "Required fields are empty!",
@@ -657,7 +659,7 @@ const createMediaUpdated = async (req, res) => {
 
             var generalContentObj = new GeneralContent({
               media: savedMedia._id,
-              category: category,
+              category: "movie",
               genre: genres,
               rating: rating,
               status: status,
@@ -916,7 +918,7 @@ const createMediaUpdated = async (req, res) => {
 
         var generalContentObj = new GeneralContent({
           media: savedMedia._id,
-          category: category,
+          category: "movie",
           genre: genres,
           rating: rating,
           status: status,

@@ -7,12 +7,15 @@ const Thumbnail = require("../models/Thumbnail");
 const LanguagesContent = require("../models/LanguagesContent");
 const Trailer = require("../models/Trailer");
 const Genre = require("../models/Genre");
+const User = require("../models/User");
+const History = require("../models/History");
 
 const axios = require("axios");
 
 const cloudinary = require("cloudinary").v2;
 
 const cloudinaryConfigObj = require("../configurations/Cloudinary");
+const { route } = require("../routes/Analytics");
 
 const addGeneralContent = async (req, res) => {
   try {
@@ -1592,6 +1595,220 @@ const activateGeneralContent = async (req, res) => {
   }
 };
 
+const getTopRatedMovies = async (req, res) => {
+  try {
+    var headers = {
+      Authorization: `Bearer ${process.env.JW_PLAYER_API_KEY}`,
+    };
+
+    console.log("headers: ", headers);
+
+    var site_id = process.env.SITE_ID;
+
+    var bodyData = {
+      dimensions: ["media_id"],
+      metrics: [
+        {
+          field: "plays",
+          operation: "sum",
+        },
+      ],
+      sort: [
+        {
+          field: "plays",
+          operation: "sum",
+          order: "DESCENDING",
+        },
+      ],
+      relative_timeframe: "90 Days",
+    };
+
+    var apiResponse = await axios
+      .post(
+        `https://api.jwplayer.com/v2/sites/${site_id}/analytics/queries/`,
+        bodyData,
+        {
+          headers: headers,
+        }
+      )
+      .then(async (onSuccess) => {
+        console.log("on success: ", onSuccess);
+
+        var rows = onSuccess.data.data.rows;
+        console.log("rows: ", rows);
+
+        var media_ids = [];
+
+        for (let i = 0; i < rows.length; i++) {
+          console.log("media id: ", rows[i][0]);
+
+          media_ids.push(rows[i][0]);
+        }
+
+        console.log("media ids: ", media_ids);
+
+        var medias = await Media.find(
+          {
+            media_id: {
+              $in: media_ids,
+            },
+          },
+          {
+            _id: 1,
+          }
+        )
+          .then(async (onMediaIdsFound) => {
+            console.log("on media ids found: ", onMediaIdsFound);
+
+            var general_contents = await GeneralContent.find({
+              media: {
+                $in: onMediaIdsFound,
+              },
+            })
+              .then(async (onGcsFound) => {
+                console.log("on general contents found: ", onGcsFound);
+                res.json({
+                  message: "Top rated content found!",
+                  status: "200",
+                  rows: rows,
+                  media_ids: media_ids,
+                  general_contents: onGcsFound,
+                });
+              })
+              .catch(async (onGcsNotFound) => {
+                console.log("on general contents not found: ", onGcsNotFound);
+                res.json({
+                  message:
+                    "Something went wrong while getting top rated content!",
+                  status: "400",
+                  error: onGcsNotFound,
+                });
+              });
+          })
+          .catch(async (onMediaIdsNotFound) => {
+            console.log("on media ids not found: ", onMediaIdsNotFound);
+            res.json({
+              message: "Something went wrong while getting top rated content!",
+              status: "400",
+              error: onMediaIdsNotFound,
+            });
+          });
+      })
+      .catch(async (onFail) => {
+        console.log("on fail: ", onFail);
+        res.json({
+          message: "Something went wrong while getting top rated content!",
+          status: "400",
+          error: onFail.data.response,
+        });
+      });
+  } catch (error) {
+    res.json({
+      message: "Internal server error!",
+      status: "500",
+      error,
+    });
+  }
+};
+
+const getSuggestedContent = async (req, res) => {
+  try {
+    console.log("fkhsfksdfhfisdh");
+
+    var user_id = req.params.user_id;
+
+    if (!user_id || user_id === "") {
+      res.json({
+        message: "Required fields are empty!",
+        status: "400",
+      });
+    } else {
+      var user = await User.findById(user_id)
+        .then(async (onUserFound) => {
+          console.log("on user found: ", onUserFound);
+
+          console.log(" history ids: ", onUserFound.history);
+
+          var historyMedias = await History.find(
+            {
+              _id: {
+                $in: onUserFound.history,
+              },
+            },
+            {
+              media: 1,
+              _id: 0,
+            }
+          )
+            .then(async (onMediasFound) => {
+              console.log("on medias found: ", onMediasFound);
+
+              const newArr = onMediasFound.map((obj) => {
+                const { media } = obj;
+                return { _id: media };
+              });
+              console.log("new arr: ", newArr);
+              // res.json({
+              //   medias: onMediasFound[0].media,
+              // });
+
+              var mediaObjs = await Media.find({
+                _id: {
+                  $in: newArr,
+                },
+              })
+
+                .then(async (onMediaObjsFound) => {
+                  console.log("on medias objs found: ", onMediaObjsFound);
+
+                  const userJwTags = [
+                    ...new Set(
+                      onMediaObjsFound.map((obj) => obj.jw_tags).flat()
+                    ),
+                  ];
+
+                  res.json({
+                    userJwTags,
+                  });
+                })
+                .catch(async (onMediaObjsNotFound) => {
+                  console.log("on media objs not found: ", onMediaObjsNotFound);
+                  res.json({
+                    message:
+                      "Something went wrong while getting suggested content for you!",
+                    status: "400",
+                    error: onMediaObjsNotFound,
+                  });
+                });
+            })
+            .catch(async (onMediasNotFound) => {
+              console.log("on medias not found: ", onMediasNotFound);
+              res.json({
+                message:
+                  "Something went wrong while getting suggested content for you!",
+                status: "400",
+                error: onMediasNotFound,
+              });
+            });
+        })
+        .catch(async (onUserNotFound) => {
+          console.log("on user not found: ", onUserNotFound);
+          res.json({
+            message: "User not found with provided id!",
+            status: "404",
+            error: onUserNotFound,
+          });
+        });
+    }
+  } catch (error) {
+    res.json({
+      message: "Internal server error!",
+      status: "500",
+      error,
+    });
+  }
+};
+
 module.exports = {
   addGeneralContent,
   deleteGeneralContentById,
@@ -1600,4 +1817,6 @@ module.exports = {
   getUpcomingGeneralContent,
   getLatestGeneralContent,
   getListOfGeneralContentByGenre,
+  getTopRatedMovies,
+  getSuggestedContent,
 };

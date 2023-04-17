@@ -23,6 +23,22 @@ const userSchema = mongoose.Schema({
       default: "",
     },
   },
+
+  history: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      required: false,
+      ref: "histories",
+    },
+  ],
+
+  tags: [
+    {
+      type: String,
+      required: false,
+      default: "",
+    },
+  ],
 });
 
 var userModel = mongoose.model("users", userSchema);

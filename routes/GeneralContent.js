@@ -45,4 +45,14 @@ router.post(
   generalContentControllers.getListOfGeneralContentByGenre
 );
 
+router.post(
+  "/get-top-rated-content",
+  generalContentControllers.getTopRatedMovies
+);
+
+router.post(
+  "/get-suggested-content/:user_id",
+  generalContentControllers.getSuggestedContent
+);
+
 module.exports = router;

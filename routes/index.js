@@ -14,6 +14,7 @@ const genresRoutes = require("../routes/Genres");
 const commentsRoutes = require("../routes/Comments");
 const likesRoutes = require("../routes/Likes");
 const usersRoutes = require("../routes/Users");
+const homeRoutes = require("../routes/Home");
 
 router.use("/general-content", generalContentRoutes);
 router.use("/media", mediaRoutes);
@@ -28,5 +29,6 @@ router.use("/genres", genresRoutes);
 router.use("/comments", commentsRoutes);
 router.use("/likes", likesRoutes);
 router.use("/user", usersRoutes);
+router.use("/home", homeRoutes);
 
 module.exports = router;
