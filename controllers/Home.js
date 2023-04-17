@@ -14,7 +14,6 @@ const getMixContentByGenreId = async (req, res) => {
     } else {
       var mixContent = await GeneralContent.find({
         genre: { $in: [genre_id] },
-        // category: category,
       })
         .populate("media", {
           title: 1,

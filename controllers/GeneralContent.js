@@ -16,6 +16,7 @@ const cloudinary = require("cloudinary").v2;
 
 const cloudinaryConfigObj = require("../configurations/Cloudinary");
 const { route } = require("../routes/Analytics");
+const { default: getVideoDurationInSeconds } = require("get-video-duration");
 
 const addGeneralContent = async (req, res) => {
   try {
@@ -1716,6 +1717,9 @@ const getSuggestedContent = async (req, res) => {
     console.log("fkhsfksdfhfisdh");
 
     var user_id = req.params.user_id;
+    var headers = {
+      Authorization: `Bearer ${process.env.JW_PLAYER_API_KEY}`,
+    };
 
     if (!user_id || user_id === "") {
       res.json({
@@ -1767,9 +1771,118 @@ const getSuggestedContent = async (req, res) => {
                     ),
                   ];
 
-                  res.json({
-                    userJwTags,
-                  });
+                  var jwAnalyticsData = {
+                    dimensions: ["media_id"],
+                    filter: [
+                      {
+                        value: userJwTags,
+                        field: "tag",
+                        operator: "LIKE",
+                      },
+                    ],
+                    metrics: [
+                      {
+                        field: "plays",
+                        operation: "sum",
+                      },
+                    ],
+                    sort: [
+                      {
+                        field: "plays",
+                        operation: "sum",
+                        order: "DESCENDING",
+                      },
+                    ],
+                    relative_timeframe: "90 Days",
+                  };
+
+                  var site_id = process.env.SITE_ID;
+
+                  var apiResponse = await axios
+                    .post(
+                      `https://api.jwplayer.com/v2/sites/${site_id}/analytics/queries/`,
+                      jwAnalyticsData,
+                      {
+                        headers: headers,
+                      }
+                    )
+                    .then(async (onJwAnalysisReceived) => {
+                      console.log(
+                        "on jw analysis received: ",
+                        JSON.stringify(onJwAnalysisReceived.data)
+                      );
+
+                      const media_ids_jw_player =
+                        onJwAnalysisReceived.data.data.rows.map(
+                          (item) => item[0]
+                        );
+
+                      console.log("jw player media ids: ", media_ids_jw_player);
+                      var media = await Media.find({
+                        media_id: {
+                          $in: media_ids_jw_player,
+                        },
+                      })
+                        .then(async (onMediaFound) => {
+                          console.log("on media found: ", onMediaFound);
+
+                          var idsForGc = onMediaFound.map((media) => media._id);
+                          console.log("ids for gc: ", idsForGc);
+
+                          var general_content = await GeneralContent.find({
+                            media: {
+                              $in: idsForGc,
+                            },
+                          })
+                            .populate("media")
+                            .populate("thumbnail")
+                            .then(async (onGcFound) => {
+                              console.log(
+                                "on general content found: ",
+                                onGcFound
+                              );
+
+                              res.json({
+                                message: "Your suggested content found!",
+                                status: "200",
+                                general_contents: onGcFound,
+                              });
+                            })
+                            .catch(async (onGcsNotFound) => {
+                              console.log(
+                                "on general content not found: ",
+                                onGcsNotFound
+                              );
+                              res.json({
+                                message:
+                                  "Something went wrong while getting suggested content for you!",
+                                status: "400",
+                                error: onGcsNotFound,
+                              });
+                            });
+                        })
+                        .catch(async (onMediaNotFound) => {
+                          console.log("on media not found: ", onMediaNotFound);
+                          res.json({
+                            message:
+                              "Something went wrong while getting suggested content for you!",
+                            status: "400",
+                            error: onMediaNotFound,
+                          });
+                        });
+                    })
+                    .catch(async (onJwAnalysisReceivedError) => {
+                      console.log(
+                        "on jw analysis received error: ",
+                        onJwAnalysisReceivedError
+                      );
+                      res.json({
+                        message:
+                          "Something went wrong while getting suggested content for you!",
+                        status: "400",
+                        error: onJwAnalysisReceivedError,
+                      });
+                    });
                 })
                 .catch(async (onMediaObjsNotFound) => {
                   console.log("on media objs not found: ", onMediaObjsNotFound);
