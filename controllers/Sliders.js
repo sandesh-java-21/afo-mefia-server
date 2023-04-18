@@ -1,4 +1,5 @@
 const Slider = require("../models/Slider");
+const GeneralContent = require("../models/GeneralContent");
 
 const addGeneralContentToSlider = async (req, res) => {
   try {
@@ -132,8 +133,39 @@ const getSliderBySliderType = async (req, res) => {
   }
 };
 
+const getGeneralContentsForSliders = async (req, res) => {
+  try {
+    var general_contents = await GeneralContent.find()
+      .populate("media")
+      .populate("thumbnail")
+      .then(async (onGcsFound) => {
+        console.log("on gcs found: ", onGcsFound);
+        res.json({
+          message: "General contents found!",
+          status: "200",
+          general_contents: onGcsFound,
+        });
+      })
+      .catch(async (onGcsFoundError) => {
+        console.log("on gcs found error: ", onGcsFoundError);
+        res.json({
+          message: "Something went wrong while getting general contents!",
+          status: "400",
+          general_contents: [],
+        });
+      });
+  } catch (error) {
+    res.json({
+      message: "Internal server error!",
+      status: "500",
+      error,
+    });
+  }
+};
+
 module.exports = {
   addGeneralContentToSlider,
   deleteSliderById,
   getSliderBySliderType,
+  getGeneralContentsForSliders,
 };

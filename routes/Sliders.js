@@ -18,4 +18,10 @@ router.delete(
   sliderControllers.deleteSliderById
 );
 
+router.get(
+  "/get-general-contents-for-sliders",
+  sliderControllers.getGeneralContentsForSliders
+);
+
 module.exports = router;
+0;
