@@ -1491,7 +1491,9 @@ const getUpcomingGeneralContent = async (req, res) => {
   try {
     const language_code = req.params.language_code;
 
-    const upcomingContent = await GeneralContent.find({ status: "upcoming" })
+    const upcomingContent = await GeneralContent.find({
+      availability: "upcoming",
+    })
       .populate([
         {
           path: "media",
@@ -1507,11 +1509,17 @@ const getUpcomingGeneralContent = async (req, res) => {
       ])
       .exec();
 
+    console.log("jdhfsgsfdh:   : ", upcomingContent);
+
     const filteredContent = upcomingContent.filter((content) => {
       return content.media.translated_content.length > 0;
     });
 
-    res.send(filteredContent);
+    res.json({
+      message: "Upcoming general content found!",
+      status: "200",
+      upcomingContent: filteredContent,
+    });
   } catch (error) {
     res.json({
       message: "Internal server error!",
@@ -1522,38 +1530,38 @@ const getUpcomingGeneralContent = async (req, res) => {
 };
 
 const getLatestGeneralContent = async (req, res) => {
-  try {
-    const language_code = req.params.language_code;
+  // try {
+  const language_code = req.params.language_code;
 
-    const currentDate = new Date();
-    const currentYear = currentDate.getFullYear();
-    const currentMonth = currentDate.getMonth() + 1;
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear();
+  const currentMonth = currentDate.getMonth() + 1;
 
-    const generalContent = await GeneralContentModel.find({
-      "translated_content.language_code": language_code,
-    })
-      .populate("media")
-      .exec();
+  const generalContent = await GeneralContent.find({
+    "translated_content.language_code": language_code,
+  })
+    .populate("media")
+    .exec();
 
-    const filteredGeneralContent = generalContent.filter((content) => {
-      const releaseYear = content.media.release_year.getFullYear();
-      const releaseMonth = content.media.release_year.getMonth() + 1;
-      return releaseYear === currentYear && releaseMonth === currentMonth;
-    });
+  const filteredGeneralContent = generalContent.filter((content) => {
+    const releaseYear = content.media.release_year.getFullYear();
+    const releaseMonth = content.media.release_year.getMonth() + 1;
+    return releaseYear === currentYear && releaseMonth === currentMonth;
+  });
 
-    console.log("upcoming content: ", filteredGeneralContent);
-    res.send(filteredGeneralContent);
+  console.log("upcoming content: ", filteredGeneralContent);
+  res.send(filteredGeneralContent);
 
-    // const filteredContent = upcomingContent.filter((content) => {
-    //   return content.media.translated_content.length > 0;
-    // });
-  } catch (error) {
-    res.json({
-      message: "Internal server error!",
-      status: "500",
-      error,
-    });
-  }
+  // const filteredContent = upcomingContent.filter((content) => {
+  //   return content.media.translated_content.length > 0;
+  // });
+  // } catch (error) {
+  //   res.json({
+  //     message: "Internal server error!",
+  //     status: "500",
+  //     error,
+  //   });
+  // }
 };
 
 const getListOfGeneralContentByGenre = async (req, res) => {
@@ -1568,7 +1576,10 @@ const getListOfGeneralContentByGenre = async (req, res) => {
       // Find all general contents for this genre
       const generalContents = await GeneralContent.find({
         genre: genre._id,
-      }).populate("genre");
+      })
+        .populate("genre")
+        .populate("media")
+        .populate("thumbnail");
 
       // Add the list of general contents to the list of lists
       generalContentList.push(generalContents);
@@ -1605,6 +1616,8 @@ const getTopRatedMovies = async (req, res) => {
     console.log("headers: ", headers);
 
     var site_id = process.env.SITE_ID;
+
+    var language_code = req.params.language_code;
 
     var bodyData = {
       dimensions: ["media_id"],
@@ -1666,14 +1679,27 @@ const getTopRatedMovies = async (req, res) => {
                 $in: onMediaIdsFound,
               },
             })
+              .populate([
+                {
+                  path: "media",
+                  populate: {
+                    path: "translated_content",
+                    match: { language_code: language_code },
+                  },
+                },
+              ])
               .then(async (onGcsFound) => {
                 console.log("on general contents found: ", onGcsFound);
+
+                const filteredContent = onGcsFound.filter((content) => {
+                  return content.media.translated_content.length > 0;
+                });
                 res.json({
                   message: "Top rated content found!",
                   status: "200",
                   rows: rows,
                   media_ids: media_ids,
-                  general_contents: onGcsFound,
+                  general_contents: filteredContent,
                 });
               })
               .catch(async (onGcsNotFound) => {
@@ -1717,6 +1743,8 @@ const getSuggestedContent = async (req, res) => {
     console.log("fkhsfksdfhfisdh");
 
     var user_id = req.params.user_id;
+    var language_code = req.params.language_code;
+
     var headers = {
       Authorization: `Bearer ${process.env.JW_PLAYER_API_KEY}`,
     };
@@ -1834,7 +1862,15 @@ const getSuggestedContent = async (req, res) => {
                               $in: idsForGc,
                             },
                           })
-                            .populate("media")
+                            .populate([
+                              {
+                                path: "media",
+                                populate: {
+                                  path: "translated_content",
+                                  match: { language_code: language_code },
+                                },
+                              },
+                            ])
                             .populate("thumbnail")
                             .then(async (onGcFound) => {
                               console.log(
@@ -1842,10 +1878,18 @@ const getSuggestedContent = async (req, res) => {
                                 onGcFound
                               );
 
+                              const filteredContent = onGcFound.filter(
+                                (content) => {
+                                  return (
+                                    content.media.translated_content.length > 0
+                                  );
+                                }
+                              );
+
                               res.json({
                                 message: "Your suggested content found!",
                                 status: "200",
-                                general_contents: onGcFound,
+                                general_contents: filteredContent,
                               });
                             })
                             .catch(async (onGcsNotFound) => {

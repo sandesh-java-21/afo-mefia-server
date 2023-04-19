@@ -108,6 +108,16 @@ const getSliderBySliderType = async (req, res) => {
     } else {
       var allSliders = await Slider.find({
         slider_type: slider_type,
+      }).populate({
+        path: "general_content",
+        populate: [
+          {
+            path: "media",
+          },
+          {
+            path: "thumbnail",
+          },
+        ],
       });
 
       if (!allSliders || allSliders.length <= 0) {

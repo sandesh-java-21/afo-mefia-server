@@ -5,7 +5,7 @@ const router = express.Router();
 const homeControllers = require("../controllers/Home");
 
 router.post(
-  "/get-mix-content/:genre_id",
+  "/get-mix-content/:genre_id/:language_code",
   homeControllers.getMixContentByGenreId
 );
 

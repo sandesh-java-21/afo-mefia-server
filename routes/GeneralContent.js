@@ -46,12 +46,12 @@ router.post(
 );
 
 router.post(
-  "/get-top-rated-content",
+  "/get-top-rated-content/:language_code",
   generalContentControllers.getTopRatedMovies
 );
 
 router.post(
-  "/get-suggested-content/:user_id",
+  "/get-suggested-content/:user_id/:language_code",
   generalContentControllers.getSuggestedContent
 );
 

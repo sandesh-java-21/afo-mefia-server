@@ -3,6 +3,7 @@ const GeneralContent = require("../models/GeneralContent");
 const getMixContentByGenreId = async (req, res) => {
   try {
     var genre_id = req.params.genre_id;
+    var language_code = req.params.language_code;
 
     var { category } = req.body;
 
@@ -15,25 +16,38 @@ const getMixContentByGenreId = async (req, res) => {
       var mixContent = await GeneralContent.find({
         genre: { $in: [genre_id] },
       })
-        .populate("media", {
-          title: 1,
-        })
+        .populate([
+          {
+            path: "media",
+            populate: {
+              path: "translated_content",
+              match: { language_code: language_code },
+            },
+          },
+        ])
         .populate("thumbnail")
         .limit(12)
         .then(async (onGcFound) => {
           console.log("on gc found: ", onGcFound);
 
-          for (let i = onGcFound.length - 1; i > 0; i--) {
+          const filteredContent = onGcFound.filter((content) => {
+            return content.media.translated_content.length > 0;
+          });
+
+          for (let i = filteredContent.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
-            [onGcFound[i], onGcFound[j]] = [onGcFound[j], onGcFound[i]];
+            [filteredContent[i], filteredContent[j]] = [
+              filteredContent[j],
+              filteredContent[i],
+            ];
           }
 
-          console.log("general content after shuffle: ", onGcFound);
+          console.log("general content after shuffle: ", filteredContent);
 
           res.json({
             message: "General content found!",
             status: "200",
-            general_content: onGcFound,
+            general_content: filteredContent,
           });
         })
         .catch(async (onGcNotFound) => {
