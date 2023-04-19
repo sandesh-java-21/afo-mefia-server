@@ -9,4 +9,9 @@ router.post(
   homeControllers.getMixContentByGenreId
 );
 
+router.post(
+  "/get-suggested-content-for-non-logged-in-users/:language_code",
+  homeControllers.getSuggestedContentBasedOnHistoryTags
+);
+
 module.exports = router;
