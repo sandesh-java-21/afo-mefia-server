@@ -1,7 +1,8 @@
-const Favorite = require("../models/Favorites");
 const User = require("../models/User");
 
-const addToFavorite = async (req, res) => {
+const WatchList = require("../models/WatchList");
+
+const addToWatchList = async (req, res) => {
   try {
     var user_id = req.params.user_id;
 
@@ -22,29 +23,29 @@ const addToFavorite = async (req, res) => {
         .then(async (onUserFound) => {
           console.log(" on user found: ", onUserFound);
 
-          var favorite = new Favorite({
+          var watch_list = new WatchList({
             general_content: general_content_id,
             user: onUserFound._id,
           });
 
-          var savedFavorite = await favorite
+          var savedWatchList = await watch_list
             .save()
-            .then(async (onFavoriteSave) => {
-              console.log("on favorite save: ", onFavoriteSave);
+            .then(async (onWatchListSave) => {
+              console.log("on watch list save: ", onWatchListSave);
 
               var filter = {
                 _id: onUserFound._id,
               };
 
               var updatedUser = await User.findByIdAndUpdate(filter, {
-                $push: { favorites: onFavoriteSave._id },
+                $push: { watch_list: onWatchListSave._id },
               })
                 .then(async (onUserUpdate) => {
                   console.log("on user update: ", onUserUpdate);
                   res.json({
                     message: "Media added to your favorites!",
                     status: "200",
-                    savedFavorite: onFavoriteSave,
+                    savedWatchListItem: onWatchListSave,
                     updatedUser: onUserUpdate,
                   });
                 })
@@ -58,13 +59,13 @@ const addToFavorite = async (req, res) => {
                   });
                 });
             })
-            .catch(async (onFavoriteSaveError) => {
-              console.log("on favorite save error: ", onFavoriteSaveError);
+            .catch(async (onWatchListSaveError) => {
+              console.log("on watch list save error: ", onWatchListSaveError);
               res.json({
                 message:
                   "Something went wrong while adding media in your favorites!",
                 status: "400",
-                error: onFavoriteSaveError,
+                error: onWatchListSaveError,
               });
             });
         })
@@ -87,5 +88,5 @@ const addToFavorite = async (req, res) => {
 };
 
 module.exports = {
-  addToFavorite,
+  addToWatchList,
 };

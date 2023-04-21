@@ -14,7 +14,7 @@ const addComment = async (req, res) => {
         var generalContentObj = onGcFound;
 
         var commentObj = new Comment({
-          Comment: comment,
+          comment: comment,
           user: user_id,
         });
 
@@ -78,6 +78,7 @@ const deleteComment = async (req, res) => {
     })
       .then(async (onGcFound) => {
         var generalContentObj = onGcFound;
+        console.log(" on gc found: ", onGcFound);
 
         var comment = await Comment.findById({
           _id: comment_id,
@@ -86,13 +87,13 @@ const deleteComment = async (req, res) => {
             console.log("comment found!", onCommentFound);
 
             var filter = {
-              _id: generalContentObj._id,
+              _id: onGcFound._id,
             };
-            var updatedGc = Media.updateOne(
+            var updatedGc = GeneralContent.findByIdAndUpdate(
               filter,
               {
                 $pull: {
-                  comments: comment._id,
+                  comments: onCommentFound._id,
                 },
               },
               {
@@ -103,7 +104,7 @@ const deleteComment = async (req, res) => {
                 console.log("comment removed from gc: ", onGcUpdate);
 
                 var deletedComment = await Comment.findByIdAndDelete({
-                  _id: comment._id,
+                  _id: onCommentFound._id,
                 })
                   .then(async (onCommentDelete) => {
                     console.log("comment deleted!");
@@ -166,16 +167,14 @@ const getCommentsForGeneralContent = async (req, res) => {
   try {
     var general_content_id = req.params.general_content_id;
 
-    var general_content = await GeneralContent.findById({
-      _id: general_content_id,
-    })
+    var general_content = await GeneralContent.findById(general_content_id)
       .populate("comments")
       .then(async (onGcFound) => {
-        console.log * ("gc found: ", onGcFound);
+        console.log("gc found: ", onGcFound);
         res.json({
           message: "Comment found!",
           status: "200",
-          comments: general_content.comments,
+          comments: onGcFound.comments,
         });
       })
       .catch((onGcNotFound) => {
@@ -194,8 +193,97 @@ const getCommentsForGeneralContent = async (req, res) => {
   }
 };
 
+const updateComment = async (req, res) => {
+  try {
+    var general_content_id = req.params.general_content_id;
+    var comment_id = req.params.comment_id;
+
+    var { updatedComment } = req.body;
+
+    if (
+      !general_content_id ||
+      general_content_id === "" ||
+      !comment_id ||
+      comment_id === ""
+    ) {
+      res.json({
+        message: "Required fields are empty!",
+        status: "400",
+      });
+    } else {
+      var general_content = await GeneralContent.findById(general_content_id)
+        .then(async (onGcFound) => {
+          console.log("on gc found: ", onGcFound);
+
+          var comment = await Comment.findById(comment_id)
+            .then(async (onCommentFound) => {
+              console.log("on comment found: ", onCommentFound);
+
+              var filter = {
+                _id: onCommentFound._id,
+              };
+
+              var updateCommentData = {
+                comment: updatedComment,
+              };
+
+              var updatedComment_obj = await Comment.findByIdAndUpdate(
+                filter,
+                updateCommentData,
+                {
+                  new: true,
+                }
+              )
+                .then(async (onCommentUpdate) => {
+                  console.log("on comment update: ", onCommentUpdate);
+                  res.json({
+                    message: "Comment Updated!",
+                    status: "200",
+                    updatedComment: onCommentUpdate,
+                  });
+                })
+                .catch(async (onCommentUpdateError) => {
+                  console.log(
+                    "on comment update error: ",
+                    onCommentUpdateError
+                  );
+                  res.json({
+                    message: "Something went wrong while updating comment!",
+                    status: "400",
+                    error: onCommentUpdateError,
+                  });
+                });
+            })
+            .catch(async (onCommentNotFound) => {
+              console.log("on comment not found: ", onCommentNotFound);
+              res.json({
+                message: "Comment not found with provided id!",
+                status: "404",
+                error: onCommentNotFound,
+              });
+            });
+        })
+        .catch(async (onGcNotFound) => {
+          console.log("on gc not found: ", onGcNotFound);
+          res.json({
+            message: "General content not found with provided id!",
+            status: "404",
+            error: onGcNotFound,
+          });
+        });
+    }
+  } catch (error) {
+    res.json({
+      message: "Internal server error!",
+      status: "500",
+      error,
+    });
+  }
+};
+
 module.exports = {
-  addComment, 
+  addComment,
   deleteComment,
   getCommentsForGeneralContent,
+  updateComment,
 };

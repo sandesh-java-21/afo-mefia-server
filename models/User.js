@@ -39,6 +39,22 @@ const userSchema = mongoose.Schema({
       default: "",
     },
   ],
+
+  favorites: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      required: false,
+      ref: "favorites",
+    },
+  ],
+
+  watch_list: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      required: false,
+      ref: "watch_lists",
+    },
+  ],
 });
 
 var userModel = mongoose.model("users", userSchema);

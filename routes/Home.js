@@ -14,4 +14,29 @@ router.post(
   homeControllers.getSuggestedContentBasedOnHistoryTags
 );
 
+router.post(
+  "/get-upcoming-movies/:language_code",
+  homeControllers.getUpcomingGeneralContent
+);
+
+router.post(
+  "/get-latest-movies/:language_code",
+  homeControllers.getLatestGeneralContent
+);
+
+router.post(
+  "/get-movies-by-genre",
+  homeControllers.getListOfGeneralContentByGenre
+);
+
+router.post(
+  "/get-top-rated-content/:language_code",
+  homeControllers.getTopRatedMovies
+);
+
+router.post(
+  "/get-suggested-content/:user_id/:language_code",
+  homeControllers.getSuggestedContent
+);
+
 module.exports = router;
