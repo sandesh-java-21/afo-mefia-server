@@ -15,6 +15,7 @@ const commentsRoutes = require("../routes/Comments");
 const likesRoutes = require("../routes/Likes");
 const usersRoutes = require("../routes/Users");
 const homeRoutes = require("../routes/Home");
+const videoRoutes = require("../routes/Videos");
 
 router.use("/general-content", generalContentRoutes);
 router.use("/media", mediaRoutes);
@@ -30,5 +31,6 @@ router.use("/comments", commentsRoutes);
 router.use("/likes", likesRoutes);
 router.use("/user", usersRoutes);
 router.use("/home", homeRoutes);
+router.use("/video", videoRoutes);
 
 module.exports = router;
