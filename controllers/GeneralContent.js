@@ -328,7 +328,7 @@ const updateGeneralContent = async (req, res) => {
 
               var mediaObj = onMediaFound;
 
-              if (mediaObj._id || mediaObj.media_id !== "") {
+              if (mediaObj._id && mediaObj.media_id !== "") {
                 // yes media id
 
                 var thumbnail = await Thumbnail.findById(

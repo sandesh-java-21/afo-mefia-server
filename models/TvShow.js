@@ -1,11 +1,26 @@
 const mongoose = require("mongoose");
-
-const generalContentSchema = mongoose.Schema({
-  media: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "medias",
+const tvShowSchema = mongoose.Schema({
+  title: {
+    type: String,
     required: true,
     default: "",
+  },
+  description: {
+    type: String,
+    required: true,
+    default: "",
+  },
+  default_language: {
+    type: String,
+    required: false,
+    default: "english",
+  },
+  jw_tags: [String],
+  seo_tags: [String],
+  release_year: {
+    type: Date,
+    get: (val) => val.getFullYear(),
+    set: (val) => new Date(val, 0, 1),
   },
   category: {
     type: String,
@@ -74,15 +89,20 @@ const generalContentSchema = mongoose.Schema({
     required: false,
     default: "",
   },
+
+  seasons: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "seasons",
+      default: [],
+    },
+  ],
+
   createdAt: {
     type: Date,
     default: Date.now(),
   },
 });
 
-var generalContentModel = mongoose.model(
-  "general_content",
-  generalContentSchema
-);
-
-module.exports = generalContentModel;
+var tvShowModel = mongoose.model("tv_shows", tvShowSchema);
+module.exports = tvShowModel;
