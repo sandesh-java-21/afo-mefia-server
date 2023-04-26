@@ -400,6 +400,50 @@ const disableGenre = async (req, res) => {
   }
 };
 
+const getAllGenresByType = async (req, res) => {
+  try {
+    var genre_type = req.params.genre_type;
+
+    var allGenres = await Genre.find({
+      genre_type: genre_type,
+      is_enabled: true,
+    })
+      .then(async (onGenresFound) => {
+        console.log("on genres found: ", onGenresFound);
+
+        if (onGenresFound.length <= 0) {
+          res.json({
+            message: `No active genres available for ${genre_type}!`,
+            status: "404",
+            genres: [],
+            success: false,
+          });
+        } else {
+          res.json({
+            message: `Active genres found for ${genre_type}!`,
+            status: "200",
+            genres: onGenresFound,
+            success: true,
+          });
+        }
+      })
+      .catch(async (onGenresFoundError) => {
+        console.log("on genre found error: ", onGenresFoundError);
+        res.json({
+          message: `Something went wrong while getting genres for ${genre_type}!`,
+          status: "400",
+          error: onGenresFoundError,
+        });
+      });
+  } catch (error) {
+    res.json({
+      message: "Internal server error!",
+      status: "500",
+      error,
+    });
+  }
+};
+
 module.exports = {
   addGenre,
   deleteGenre,
@@ -408,4 +452,5 @@ module.exports = {
   getGenreById,
   enableGenre,
   disableGenre,
+  getAllGenresByType,
 };
