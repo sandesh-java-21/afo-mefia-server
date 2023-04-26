@@ -67,6 +67,11 @@ const addGeneralContent = async (req, res) => {
 const deleteGeneralContentById = async (req, res) => {
   try {
     var general_content_id = req.params.general_content_id;
+
+    var headers = {
+      Authorization: `Bearer ${process.env.JW_PLAYER_API_KEY}`,
+    };
+
     if (!general_content_id || general_content_id === "") {
       res.json({
         message: "Required fields are empty!",
@@ -90,131 +95,967 @@ const deleteGeneralContentById = async (req, res) => {
 
             var languages_content = mediaObj.languages_content;
 
-            var headers = {
-              Authorization: `Bearer ${process.env.JW_PLAYER_API_KEY}`,
-            };
+            // var headers = {
+            //   Authorization: `Bearer ${process.env.JW_PLAYER_API_KEY}`,
+            // };
             var media_id = mediaObj.media_id;
             var site_id = process.env.SITE_ID;
 
-            var apiResponse = await axios
-              .delete(
-                `https://api.jwplayer.com/v2/sites/${site_id}/media/${media_id}/`,
-                {
-                  headers: headers,
-                }
-              )
-              .then(async (onJwMediaDelete) => {
-                console.log("JW media deleted: ", onJwMediaDelete);
+            if (media_id && media_id !== "") {
+              // if media id is available
 
-                var subtitlesDeleted = await Subtitles.deleteMany({
-                  _id: { $in: subtitles },
-                }).then(async (onSubtitlesDelete) => {
-                  console.log("Subtitles deleted: ", onSubtitlesDelete);
+              var apiResponse = await axios
+                .delete(
+                  `https://api.jwplayer.com/v2/sites/${site_id}/media/${media_id}/`,
+                  {
+                    headers: headers,
+                  }
+                )
+                .then(async (onJwMediaDelete) => {
+                  console.log("JW media deleted: ", onJwMediaDelete);
 
-                  var audioTracksDeleted = await AudioTracks.deleteMany({
-                    _id: { $in: audio_tracks },
-                  }).then(async (onAudioTracksDelete) => {
+                  var subtitlesDeleted = await Subtitles.deleteMany({
+                    _id: { $in: subtitles },
+                  })
+                    .then(async (onSubtitlesDelete) => {
+                      console.log("Subtitles deleted: ", onSubtitlesDelete);
+
+                      var audioTracksDeleted = await AudioTracks.deleteMany({
+                        _id: { $in: audio_tracks },
+                      })
+                        .then(async (onAudioTracksDelete) => {
+                          console.log(
+                            "Audio tracks deleted: ",
+                            onAudioTracksDelete
+                          );
+
+                          var languagesContentDeleted =
+                            await LanguagesContent.deleteMany({
+                              _id: { $in: languages_content },
+                            })
+                              .then(async (onLanguagesContentDelete) => {
+                                console.log(
+                                  "languages content deleted: ",
+                                  onLanguagesContentDelete
+                                );
+
+                                var deletedSliderItem =
+                                  await Slider.findOneAndDelete({
+                                    general_content: general_content_obj._id,
+                                  })
+                                    .then(async (onSliderItemDelete) => {
+                                      console.log(
+                                        "slider item delete: ",
+                                        onSliderItemDelete
+                                      );
+
+                                      var thumbnail =
+                                        general_content_obj.thumbnail;
+
+                                      var searchedThumbnail =
+                                        await Thumbnail.findById(thumbnail)
+                                          .then(async (onThumbnailFound) => {
+                                            console.log(
+                                              "on thumbnail found: >>>> ",
+                                              onThumbnailFound
+                                            );
+
+                                            if (
+                                              onThumbnailFound.thumbnail_type !==
+                                              ""
+                                            ) {
+                                              if (
+                                                onThumbnailFound.thumbnail_type ===
+                                                "cloudinary"
+                                              ) {
+                                                // delete from cloudinary and continue the process
+                                                cloudinary.config(
+                                                  cloudinaryConfigObj
+                                                );
+                                                cloudinary.uploader
+                                                  .destroy(
+                                                    onThumbnailFound.cloudinary_public_id
+                                                  )
+                                                  .then(
+                                                    async (
+                                                      onCloudinaryDelete
+                                                    ) => {
+                                                      console.log(
+                                                        "on cloudinary delete: ",
+                                                        onCloudinaryDelete
+                                                      );
+                                                      var thumbnailDeleted =
+                                                        await Thumbnail.findOneAndDelete(
+                                                          {
+                                                            general_content:
+                                                              general_content_obj._id,
+                                                          }
+                                                        )
+                                                          .then(
+                                                            async (
+                                                              onThumbnailDelete
+                                                            ) => {
+                                                              console.log(
+                                                                "thumbnail delete success: ",
+                                                                onThumbnailDelete
+                                                              );
+
+                                                              var trailerDeleted =
+                                                                await Trailer.findByIdAndDelete(
+                                                                  {
+                                                                    _id: general_content_obj.trailer,
+                                                                  }
+                                                                )
+                                                                  .then(
+                                                                    async (
+                                                                      onTrailerDelete
+                                                                    ) => {
+                                                                      console.log(
+                                                                        "trailer deleted success: ",
+                                                                        onTrailerDelete
+                                                                      );
+
+                                                                      var mediaDeleted =
+                                                                        await Media.findByIdAndDelete(
+                                                                          {
+                                                                            _id: mediaObj._id,
+                                                                          }
+                                                                        )
+                                                                          .then(
+                                                                            async (
+                                                                              onMediaDelete
+                                                                            ) => {
+                                                                              console.log(
+                                                                                "media delete success: ",
+                                                                                onMediaDelete
+                                                                              );
+
+                                                                              var deletedGeneralContent =
+                                                                                await GeneralContent.findByIdAndDelete(
+                                                                                  {
+                                                                                    _id: general_content_obj._id,
+                                                                                  }
+                                                                                )
+                                                                                  .then(
+                                                                                    async (
+                                                                                      onGcDelete
+                                                                                    ) => {
+                                                                                      console.log(
+                                                                                        "gc deleted: ",
+                                                                                        onGcDelete
+                                                                                      );
+                                                                                      res.json(
+                                                                                        {
+                                                                                          message:
+                                                                                            "General content deleted!",
+                                                                                          status:
+                                                                                            "200",
+                                                                                        }
+                                                                                      );
+                                                                                    }
+                                                                                  )
+                                                                                  .catch(
+                                                                                    (
+                                                                                      onGcDeleteError
+                                                                                    ) => {
+                                                                                      console.log(
+                                                                                        "gc delete error: ",
+                                                                                        onGcDeleteError
+                                                                                      );
+                                                                                    }
+                                                                                  );
+                                                                            }
+                                                                          )
+                                                                          .catch(
+                                                                            (
+                                                                              onMediaDeleteError
+                                                                            ) => {
+                                                                              console.log(
+                                                                                "media delete error: ",
+                                                                                onMediaDeleteError
+                                                                              );
+                                                                            }
+                                                                          );
+                                                                    }
+                                                                  )
+                                                                  .catch(
+                                                                    (
+                                                                      onTrailerDeleteError
+                                                                    ) => {
+                                                                      console.log(
+                                                                        "trailer delete error: ",
+                                                                        onTrailerDeleteError
+                                                                      );
+                                                                    }
+                                                                  );
+                                                            }
+                                                          )
+                                                          .catch(
+                                                            (
+                                                              onThumbnailDeleteError
+                                                            ) => {
+                                                              console.log(
+                                                                "On thumbnail delete error: ",
+                                                                onThumbnailDeleteError
+                                                              );
+                                                            }
+                                                          );
+                                                    }
+                                                  );
+                                              } else {
+                                                // delete from
+
+                                                var site_id =
+                                                  process.env.SITE_ID;
+                                                var thumbnail_id =
+                                                  onThumbnailFound.thumbnail_id;
+
+                                                var apiResponse_7 = await axios
+                                                  .delete(
+                                                    `https://api.jwplayer.com/v2/sites/${site_id}/thumbnails/${thumbnail_id}/`,
+                                                    {
+                                                      headers: headers,
+                                                    }
+                                                  )
+                                                  .then(
+                                                    async (
+                                                      onThumbnailDeleteJw
+                                                    ) => {
+                                                      console.log(
+                                                        "on thumbnail delete jw: ",
+                                                        onThumbnailDeleteJw
+                                                      );
+                                                      var thumbnailDeleted =
+                                                        await Thumbnail.findOneAndDelete(
+                                                          {
+                                                            general_content:
+                                                              general_content_obj._id,
+                                                          }
+                                                        )
+                                                          .then(
+                                                            async (
+                                                              onThumbnailDelete
+                                                            ) => {
+                                                              console.log(
+                                                                "thumbnail delete success: ",
+                                                                onThumbnailDelete
+                                                              );
+
+                                                              var trailerDeleted =
+                                                                await Trailer.findByIdAndDelete(
+                                                                  {
+                                                                    _id: general_content_obj.trailer,
+                                                                  }
+                                                                )
+                                                                  .then(
+                                                                    async (
+                                                                      onTrailerDelete
+                                                                    ) => {
+                                                                      console.log(
+                                                                        "trailer deleted success: ",
+                                                                        onTrailerDelete
+                                                                      );
+
+                                                                      var mediaDeleted =
+                                                                        await Media.findByIdAndDelete(
+                                                                          {
+                                                                            _id: mediaObj._id,
+                                                                          }
+                                                                        )
+                                                                          .then(
+                                                                            async (
+                                                                              onMediaDelete
+                                                                            ) => {
+                                                                              console.log(
+                                                                                "media delete success: ",
+                                                                                onMediaDelete
+                                                                              );
+
+                                                                              var deletedGeneralContent =
+                                                                                await GeneralContent.findByIdAndDelete(
+                                                                                  {
+                                                                                    _id: general_content_obj._id,
+                                                                                  }
+                                                                                )
+                                                                                  .then(
+                                                                                    async (
+                                                                                      onGcDelete
+                                                                                    ) => {
+                                                                                      console.log(
+                                                                                        "gc deleted: ",
+                                                                                        onGcDelete
+                                                                                      );
+                                                                                      res.json(
+                                                                                        {
+                                                                                          message:
+                                                                                            "General content deleted!",
+                                                                                          status:
+                                                                                            "200",
+                                                                                        }
+                                                                                      );
+                                                                                    }
+                                                                                  )
+                                                                                  .catch(
+                                                                                    (
+                                                                                      onGcDeleteError
+                                                                                    ) => {
+                                                                                      console.log(
+                                                                                        "gc delete error: ",
+                                                                                        onGcDeleteError
+                                                                                      );
+                                                                                    }
+                                                                                  );
+                                                                            }
+                                                                          )
+                                                                          .catch(
+                                                                            (
+                                                                              onMediaDeleteError
+                                                                            ) => {
+                                                                              console.log(
+                                                                                "media delete error: ",
+                                                                                onMediaDeleteError
+                                                                              );
+                                                                            }
+                                                                          );
+                                                                    }
+                                                                  )
+                                                                  .catch(
+                                                                    (
+                                                                      onTrailerDeleteError
+                                                                    ) => {
+                                                                      console.log(
+                                                                        "trailer delete error: ",
+                                                                        onTrailerDeleteError
+                                                                      );
+                                                                    }
+                                                                  );
+                                                            }
+                                                          )
+                                                          .catch(
+                                                            (
+                                                              onThumbnailDeleteError
+                                                            ) => {
+                                                              console.log(
+                                                                "On thumbnail delete error: ",
+                                                                onThumbnailDeleteError
+                                                              );
+                                                            }
+                                                          );
+                                                    }
+                                                  )
+                                                  .catch(
+                                                    async (
+                                                      onThumbnailDeleteJwError
+                                                    ) => {
+                                                      console.log(
+                                                        "on thumbnail delete jw error: ",
+                                                        onThumbnailDeleteJwError
+                                                      );
+                                                    }
+                                                  );
+                                              }
+                                            } else {
+                                              // empty thumbnail type means no thumbnail then continue the other delete process
+
+                                              var trailerDeleted =
+                                                await Trailer.findByIdAndDelete(
+                                                  {
+                                                    _id: general_content_obj.trailer,
+                                                  }
+                                                )
+                                                  .then(
+                                                    async (onTrailerDelete) => {
+                                                      console.log(
+                                                        "trailer deleted success: ",
+                                                        onTrailerDelete
+                                                      );
+
+                                                      var mediaDeleted =
+                                                        await Media.findByIdAndDelete(
+                                                          {
+                                                            _id: mediaObj._id,
+                                                          }
+                                                        )
+                                                          .then(
+                                                            async (
+                                                              onMediaDelete
+                                                            ) => {
+                                                              console.log(
+                                                                "media delete success: ",
+                                                                onMediaDelete
+                                                              );
+
+                                                              var deletedGeneralContent =
+                                                                await GeneralContent.findByIdAndDelete(
+                                                                  {
+                                                                    _id: general_content_obj._id,
+                                                                  }
+                                                                )
+                                                                  .then(
+                                                                    async (
+                                                                      onGcDelete
+                                                                    ) => {
+                                                                      console.log(
+                                                                        "gc deleted: ",
+                                                                        onGcDelete
+                                                                      );
+                                                                      res.json({
+                                                                        message:
+                                                                          "General content deleted!",
+                                                                        status:
+                                                                          "200",
+                                                                      });
+                                                                    }
+                                                                  )
+                                                                  .catch(
+                                                                    (
+                                                                      onGcDeleteError
+                                                                    ) => {
+                                                                      console.log(
+                                                                        "gc delete error: ",
+                                                                        onGcDeleteError
+                                                                      );
+                                                                    }
+                                                                  );
+                                                            }
+                                                          )
+                                                          .catch(
+                                                            (
+                                                              onMediaDeleteError
+                                                            ) => {
+                                                              console.log(
+                                                                "media delete error: ",
+                                                                onMediaDeleteError
+                                                              );
+                                                            }
+                                                          );
+                                                    }
+                                                  )
+                                                  .catch(
+                                                    (onTrailerDeleteError) => {
+                                                      console.log(
+                                                        "trailer delete error: ",
+                                                        onTrailerDeleteError
+                                                      );
+                                                    }
+                                                  );
+                                            }
+                                          })
+                                          .catch(
+                                            async (onThumbnailFoundError) => {
+                                              console.log(
+                                                "on thumbnail found error: ",
+                                                onThumbnailFoundError
+                                              );
+                                              res.json({
+                                                message: "Thumbnail not found!",
+                                                status: "400",
+                                                error: onThumbnailFoundError,
+                                              });
+                                            }
+                                          );
+                                    })
+                                    .catch((onSliderItemDeleteError) => {
+                                      console.log(onSliderItemDeleteError);
+                                    });
+                              })
+                              .catch((onNoLanguagesContentDelete) => {
+                                console.log(
+                                  "no languages content deleted: ",
+                                  onNoLanguagesContentDelete
+                                );
+                              });
+                        })
+                        .catch((onNoAudioTracksDelete) => {
+                          console.log(
+                            "no audio tracks deleted: ",
+                            onNoAudioTracksDelete
+                          );
+                        });
+                    })
+                    .catch((onNoSubtitlesDelete) => {
+                      console.log(onNoSubtitlesDelete);
+                    });
+                })
+                .catch((onJwMediaDeleteError) => {
+                  console.log(onJwMediaDeleteError);
+                  res.json({
+                    message:
+                      "Something went wrong while deleting media from JW Player!",
+                    status: "400",
+                    onJwMediaDeleteError,
+                  });
+                });
+            } else {
+              // no media id
+              var subtitlesDeleted = await Subtitles.deleteMany({
+                _id: { $in: subtitles },
+              }).then(async (onSubtitlesDelete) => {
+                console.log("Subtitles deleted: ", onSubtitlesDelete);
+
+                var audioTracksDeleted = await AudioTracks.deleteMany({
+                  _id: { $in: audio_tracks },
+                })
+                  .then(async (onAudioTracksDelete) => {
                     console.log("Audio tracks deleted: ", onAudioTracksDelete);
 
                     var languagesContentDeleted =
                       await LanguagesContent.deleteMany({
                         _id: { $in: languages_content },
-                      }).then(async (onLanguagesContentDelete) => {
-                        console.log(
-                          "languages content deleted: ",
-                          onLanguagesContentDelete
-                        );
-
-                        var deletedSliderItem = await Slider.findOneAndDelete({
-                          general_content: general_content_obj._id,
-                        }).then(async (onSliderItemDelete) => {
+                      })
+                        .then(async (onLanguagesContentDelete) => {
                           console.log(
-                            "slider item delete: ",
-                            onSliderItemDelete
+                            "languages content deleted: ",
+                            onLanguagesContentDelete
                           );
 
-                          var thumbnailDeleted =
-                            await Thumbnail.findOneAndDelete({
+                          var deletedSliderItem = await Slider.findOneAndDelete(
+                            {
                               general_content: general_content_obj._id,
-                            }).then(async (onThumbnailDelete) => {
+                            }
+                          )
+                            .then(async (onSliderItemDelete) => {
                               console.log(
-                                "thumbnail delete success: ",
-                                onThumbnailDelete
+                                "slider item delete: ",
+                                onSliderItemDelete
                               );
 
-                              var trailerDeleted =
-                                await Trailer.findByIdAndDelete({
-                                  _id: general_content_obj.trailer,
-                                }).then(async (onTrailerDelete) => {
+                              var thumbnail = general_content_obj.thumbnail;
+
+                              var searchedThumbnail = await Thumbnail.findById(
+                                thumbnail
+                              )
+                                .then(async (onThumbnailFound) => {
                                   console.log(
-                                    "trailer deleted success: ",
-                                    onTrailerDelete
+                                    "on thumbnail found: >>>> ",
+                                    onThumbnailFound
                                   );
 
-                                  var mediaDeleted =
-                                    await Media.findByIdAndDelete({
-                                      _id: mediaObj._id,
-                                    }).then(async (onMediaDelete) => {
-                                      console.log(
-                                        "media delete success: ",
-                                        onMediaDelete
-                                      );
-
-                                      var deletedGeneralContent =
-                                        await GeneralContent.findByIdAndDelete({
-                                          _id: general_content_obj._id,
-                                        }).then(async (onGcDelete) => {
+                                  if (onThumbnailFound.thumbnail_type !== "") {
+                                    if (
+                                      onThumbnailFound.thumbnail_type ===
+                                      "cloudinary"
+                                    ) {
+                                      // delete from cloudinary and continue the process
+                                      cloudinary.config(cloudinaryConfigObj);
+                                      cloudinary.uploader
+                                        .destroy(
+                                          onThumbnailFound.cloudinary_public_id
+                                        )
+                                        .then(async (onCloudinaryDelete) => {
                                           console.log(
-                                            "gc deleted: ",
-                                            onGcDelete
+                                            "on cloudinary delete: ",
+                                            onCloudinaryDelete
                                           );
-                                          res.json({
-                                            message: "General content deleted!",
-                                            status: "200",
-                                          });
-                                        });
-                                      // .catch(onGcDeleteError=>{
-                                      //   console.log("gc delete error: ", onGcDeleteError);
-                                      // })
-                                    });
-                                  // .catch(onMediaDeleteError=>{
-                                  //   console.log("media delete error: ", onMediaDeleteError);
-                                  // })
-                                });
-                              // .catch(onTrailerDeleteError=>{
-                              //   console.log("trailer delete error: ", onTrailerDeleteError);
-                              // })
-                            });
-                          // .catch(onThumbnailDeleteError=>{
-                          //   console.log("On thumbnail delete error: ", onThumbnailDeleteError);
-                          // })
-                        });
-                        // .catch(onSliderItemDeleteError=>{
-                        //   console.log(onSliderItemDeleteError);
+                                          var thumbnailDeleted =
+                                            await Thumbnail.findOneAndDelete({
+                                              general_content:
+                                                general_content_obj._id,
+                                            })
+                                              .then(
+                                                async (onThumbnailDelete) => {
+                                                  console.log(
+                                                    "thumbnail delete success: ",
+                                                    onThumbnailDelete
+                                                  );
 
-                        // })
-                      });
-                    // .catch(onNoLanguagesContentDelete=>{
-                    //   console.log("no languages content deleted: ", onNoLanguagesContentDelete);
-                    // })
+                                                  var trailerDeleted =
+                                                    await Trailer.findByIdAndDelete(
+                                                      {
+                                                        _id: general_content_obj.trailer,
+                                                      }
+                                                    )
+                                                      .then(
+                                                        async (
+                                                          onTrailerDelete
+                                                        ) => {
+                                                          console.log(
+                                                            "trailer deleted success: ",
+                                                            onTrailerDelete
+                                                          );
+
+                                                          var mediaDeleted =
+                                                            await Media.findByIdAndDelete(
+                                                              {
+                                                                _id: mediaObj._id,
+                                                              }
+                                                            )
+                                                              .then(
+                                                                async (
+                                                                  onMediaDelete
+                                                                ) => {
+                                                                  console.log(
+                                                                    "media delete success: ",
+                                                                    onMediaDelete
+                                                                  );
+
+                                                                  var deletedGeneralContent =
+                                                                    await GeneralContent.findByIdAndDelete(
+                                                                      {
+                                                                        _id: general_content_obj._id,
+                                                                      }
+                                                                    )
+                                                                      .then(
+                                                                        async (
+                                                                          onGcDelete
+                                                                        ) => {
+                                                                          console.log(
+                                                                            "gc deleted: ",
+                                                                            onGcDelete
+                                                                          );
+                                                                          res.json(
+                                                                            {
+                                                                              message:
+                                                                                "General content deleted!",
+                                                                              status:
+                                                                                "200",
+                                                                            }
+                                                                          );
+                                                                        }
+                                                                      )
+                                                                      .catch(
+                                                                        (
+                                                                          onGcDeleteError
+                                                                        ) => {
+                                                                          console.log(
+                                                                            "gc delete error: ",
+                                                                            onGcDeleteError
+                                                                          );
+                                                                        }
+                                                                      );
+                                                                }
+                                                              )
+                                                              .catch(
+                                                                (
+                                                                  onMediaDeleteError
+                                                                ) => {
+                                                                  console.log(
+                                                                    "media delete error: ",
+                                                                    onMediaDeleteError
+                                                                  );
+                                                                }
+                                                              );
+                                                        }
+                                                      )
+                                                      .catch(
+                                                        (
+                                                          onTrailerDeleteError
+                                                        ) => {
+                                                          console.log(
+                                                            "trailer delete error: ",
+                                                            onTrailerDeleteError
+                                                          );
+                                                        }
+                                                      );
+                                                }
+                                              )
+                                              .catch(
+                                                (onThumbnailDeleteError) => {
+                                                  console.log(
+                                                    "On thumbnail delete error: ",
+                                                    onThumbnailDeleteError
+                                                  );
+                                                }
+                                              );
+                                        });
+                                    } else {
+                                      // delete from
+
+                                      var trailerDeleted =
+                                        await Trailer.findByIdAndDelete({
+                                          _id: general_content_obj.trailer,
+                                        })
+                                          .then(async (onTrailerDelete) => {
+                                            console.log(
+                                              "trailer deleted success: ",
+                                              onTrailerDelete
+                                            );
+
+                                            var mediaDeleted =
+                                              await Media.findByIdAndDelete({
+                                                _id: mediaObj._id,
+                                              })
+                                                .then(async (onMediaDelete) => {
+                                                  console.log(
+                                                    "media delete success: ",
+                                                    onMediaDelete
+                                                  );
+
+                                                  var deletedGeneralContent =
+                                                    await GeneralContent.findByIdAndDelete(
+                                                      {
+                                                        _id: general_content_obj._id,
+                                                      }
+                                                    )
+                                                      .then(
+                                                        async (onGcDelete) => {
+                                                          console.log(
+                                                            "gc deleted: ",
+                                                            onGcDelete
+                                                          );
+                                                          res.json({
+                                                            message:
+                                                              "General content deleted!",
+                                                            status: "200",
+                                                          });
+                                                        }
+                                                      )
+                                                      .catch(
+                                                        (onGcDeleteError) => {
+                                                          console.log(
+                                                            "gc delete error: ",
+                                                            onGcDeleteError
+                                                          );
+                                                        }
+                                                      );
+                                                })
+                                                .catch((onMediaDeleteError) => {
+                                                  console.log(
+                                                    "media delete error: ",
+                                                    onMediaDeleteError
+                                                  );
+                                                });
+                                          })
+                                          .catch((onTrailerDeleteError) => {
+                                            console.log(
+                                              "trailer delete error: ",
+                                              onTrailerDeleteError
+                                            );
+                                          });
+
+                                      // var site_id = process.env.SITE_ID;
+                                      // var thumbnail_id =
+                                      //   onThumbnailFound.thumbnail_id;
+
+                                      // var apiResponse_7 = await axios
+                                      //   .delete(
+                                      //     `https://api.jwplayer.com/v2/sites/${site_id}/thumbnails/${thumbnail_id}/`,
+                                      //     {
+                                      //       headers: headers,
+                                      //     }
+                                      //   )
+                                      //   .then(async (onThumbnailDeleteJw) => {
+                                      //     console.log(
+                                      //       "on thumbnail delete jw: ",
+                                      //       onThumbnailDeleteJw
+                                      //     );
+                                      //     var thumbnailDeleted =
+                                      //       await Thumbnail.findOneAndDelete({
+                                      //         general_content:
+                                      //           general_content_obj._id,
+                                      //       })
+                                      //         .then(
+                                      //           async (onThumbnailDelete) => {
+                                      //             console.log(
+                                      //               "thumbnail delete success: ",
+                                      //               onThumbnailDelete
+                                      //             );
+
+                                      //             var trailerDeleted =
+                                      //               await Trailer.findByIdAndDelete(
+                                      //                 {
+                                      //                   _id: general_content_obj.trailer,
+                                      //                 }
+                                      //               )
+                                      //                 .then(
+                                      //                   async (
+                                      //                     onTrailerDelete
+                                      //                   ) => {
+                                      //                     console.log(
+                                      //                       "trailer deleted success: ",
+                                      //                       onTrailerDelete
+                                      //                     );
+
+                                      //                     var mediaDeleted =
+                                      //                       await Media.findByIdAndDelete(
+                                      //                         {
+                                      //                           _id: mediaObj._id,
+                                      //                         }
+                                      //                       )
+                                      //                         .then(
+                                      //                           async (
+                                      //                             onMediaDelete
+                                      //                           ) => {
+                                      //                             console.log(
+                                      //                               "media delete success: ",
+                                      //                               onMediaDelete
+                                      //                             );
+
+                                      //                             var deletedGeneralContent =
+                                      //                               await GeneralContent.findByIdAndDelete(
+                                      //                                 {
+                                      //                                   _id: general_content_obj._id,
+                                      //                                 }
+                                      //                               )
+                                      //                                 .then(
+                                      //                                   async (
+                                      //                                     onGcDelete
+                                      //                                   ) => {
+                                      //                                     console.log(
+                                      //                                       "gc deleted: ",
+                                      //                                       onGcDelete
+                                      //                                     );
+                                      //                                     res.json(
+                                      //                                       {
+                                      //                                         message:
+                                      //                                           "General content deleted!",
+                                      //                                         status:
+                                      //                                           "200",
+                                      //                                       }
+                                      //                                     );
+                                      //                                   }
+                                      //                                 )
+                                      //                                 .catch(
+                                      //                                   (
+                                      //                                     onGcDeleteError
+                                      //                                   ) => {
+                                      //                                     console.log(
+                                      //                                       "gc delete error: ",
+                                      //                                       onGcDeleteError
+                                      //                                     );
+                                      //                                   }
+                                      //                                 );
+                                      //                           }
+                                      //                         )
+                                      //                         .catch(
+                                      //                           (
+                                      //                             onMediaDeleteError
+                                      //                           ) => {
+                                      //                             console.log(
+                                      //                               "media delete error: ",
+                                      //                               onMediaDeleteError
+                                      //                             );
+                                      //                           }
+                                      //                         );
+                                      //                   }
+                                      //                 )
+                                      //                 .catch(
+                                      //                   (
+                                      //                     onTrailerDeleteError
+                                      //                   ) => {
+                                      //                     console.log(
+                                      //                       "trailer delete error: ",
+                                      //                       onTrailerDeleteError
+                                      //                     );
+                                      //                   }
+                                      //                 );
+                                      //           }
+                                      //         )
+                                      //         .catch(
+                                      //           (onThumbnailDeleteError) => {
+                                      //             console.log(
+                                      //               "On thumbnail delete error: ",
+                                      //               onThumbnailDeleteError
+                                      //             );
+                                      //           }
+                                      //         );
+                                      //   })
+                                      //   .catch(
+                                      //     async (onThumbnailDeleteJwError) => {
+                                      //       console.log(
+                                      //         "on thumbnail delete jw error: ",
+                                      //         onThumbnailDeleteJwError
+                                      //       );
+                                      //     }
+                                      //   );
+                                    }
+                                  } else {
+                                    // empty thumbnail type means no thumbnail then continue the other delete process
+
+                                    var trailerDeleted =
+                                      await Trailer.findByIdAndDelete({
+                                        _id: general_content_obj.trailer,
+                                      })
+                                        .then(async (onTrailerDelete) => {
+                                          console.log(
+                                            "trailer deleted success: ",
+                                            onTrailerDelete
+                                          );
+
+                                          var mediaDeleted =
+                                            await Media.findByIdAndDelete({
+                                              _id: mediaObj._id,
+                                            })
+                                              .then(async (onMediaDelete) => {
+                                                console.log(
+                                                  "media delete success: ",
+                                                  onMediaDelete
+                                                );
+
+                                                var deletedGeneralContent =
+                                                  await GeneralContent.findByIdAndDelete(
+                                                    {
+                                                      _id: general_content_obj._id,
+                                                    }
+                                                  )
+                                                    .then(
+                                                      async (onGcDelete) => {
+                                                        console.log(
+                                                          "gc deleted: ",
+                                                          onGcDelete
+                                                        );
+                                                        res.json({
+                                                          message:
+                                                            "General content deleted!",
+                                                          status: "200",
+                                                        });
+                                                      }
+                                                    )
+                                                    .catch(
+                                                      (onGcDeleteError) => {
+                                                        console.log(
+                                                          "gc delete error: ",
+                                                          onGcDeleteError
+                                                        );
+                                                      }
+                                                    );
+                                              })
+                                              .catch((onMediaDeleteError) => {
+                                                console.log(
+                                                  "media delete error: ",
+                                                  onMediaDeleteError
+                                                );
+                                              });
+                                        })
+                                        .catch((onTrailerDeleteError) => {
+                                          console.log(
+                                            "trailer delete error: ",
+                                            onTrailerDeleteError
+                                          );
+                                        });
+                                  }
+                                })
+                                .catch(async (onThumbnailFoundError) => {
+                                  console.log(
+                                    "on thumbnail found error: ",
+                                    onThumbnailFoundError
+                                  );
+                                  res.json({
+                                    message: "Thumbnail not found!",
+                                    status: "400",
+                                    error: onThumbnailFoundError,
+                                  });
+                                });
+                            })
+                            .catch((onSliderItemDeleteError) => {
+                              console.log(onSliderItemDeleteError);
+                            });
+                        })
+                        .catch((onNoLanguagesContentDelete) => {
+                          console.log(
+                            "no languages content deleted: ",
+                            onNoLanguagesContentDelete
+                          );
+                        });
+                  })
+                  .catch((onNoAudioTracksDelete) => {
+                    console.log(
+                      "no audio tracks deleted: ",
+                      onNoAudioTracksDelete
+                    );
                   });
-                  // .catch(onNoAudioTracksDelete=>{
-                  //   console.log("no audio tracks deleted: ", onNoAudioTracksDelete);
-                  // })
-                });
-                // .catch(onNoSubtitlesDelete=>{
-                //   console.log(onNoSubtitlesDelete);
-                // })
-              })
-              .catch((onJwMediaDeleteError) => {
-                console.log(onJwMediaDeleteError);
-                res.json({
-                  message:
-                    "Something went wrong while deleting media from JW Player!",
-                  status: "400",
-                  onJwMediaDeleteError,
-                });
               });
+            }
           });
           // .catch(onMediaNotFound=>{
           //   console.log(onMediaNotFound);
