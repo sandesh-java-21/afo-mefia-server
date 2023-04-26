@@ -24,8 +24,9 @@ const mediaSchema = mongoose.Schema({
   },
   release_year: {
     type: Date,
-    get: (val) => val.getFullYear(),
-    set: (val) => new Date(val, 0, 1),
+    required: false,
+    // get: (val) => val.getFullYear(),
+    // set: (val) => new Date(val, 0, 1),
   },
   media_id: {
     type: String,

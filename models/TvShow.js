@@ -19,8 +19,9 @@ const tvShowSchema = mongoose.Schema({
   seo_tags: [String],
   release_year: {
     type: Date,
-    get: (val) => val.getFullYear(),
-    set: (val) => new Date(val, 0, 1),
+    required: false,
+    // get: (val) => val.getFullYear(),
+    // set: (val) => new Date(val, 0, 1),
   },
   category: {
     type: String,

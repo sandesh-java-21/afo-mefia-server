@@ -1151,6 +1151,8 @@ const updateGeneralContent = async (req, res) => {
       isThumbnailUpdated,
     } = req.body;
 
+    category = "movie";
+
     if (isThumbnailUpdated) {
       var { thumbnailImageBase64 } = req.body;
 
@@ -1325,6 +1327,16 @@ const updateGeneralContent = async (req, res) => {
                                                   var filter = {
                                                     _id: mediaObj._id,
                                                   };
+
+                                                  var customTags =
+                                                    req.body.jw_tags.map(
+                                                      (tag) =>
+                                                        tag + `-${category}`
+                                                    );
+                                                  var jw_tags = [
+                                                    ...req.body.jw_tags,
+                                                    ...customTags,
+                                                  ];
 
                                                   var updateData = {
                                                     title,
