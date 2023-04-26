@@ -43,7 +43,7 @@ io.on("connection", () => {
   console.log("user connected!");
 });
 
-server.listen(4000, (err) => {
+server.listen(3005, (err) => {
   if (err) {
     console.log("Error Occurred: ", err);
   } else {
