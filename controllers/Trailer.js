@@ -175,55 +175,134 @@ const uploadTrailerOfGeneralContentUpdated = async (req, res) => {
                 .then(async (thumbnailResult) => {
                   var { thumbnails } = thumbnailResult.data;
 
-                  var thumbnailObj = new Thumbnail({
-                    general_content: generalContentObj._id,
-                    trailer_motion_url:
-                      thumbnailResult.data.thumbnails[0].delivery_url,
+                  var thumbnail = await Thumbnail.findById(
+                    generalContentObj.thumbnail
+                  ).then(async (onThumbnailFound) => {
+                    var thumbnailFilter = {
+                      _id: onThumbnailFound._id,
+                    };
+
+                    var thumbnailUpdate = {
+                      trailer_motion_url:
+                        thumbnailResult.data.thumbnails[0].delivery_url,
+                    };
+
+                    var updatedThumbnail = await Thumbnail.findByIdAndUpdate(
+                      thumbnailFilter,
+                      thumbnailUpdate,
+                      {
+                        new: true,
+                      }
+                    )
+                      .then(async (onThumbnailUpdate) => {
+                        console.log("on thumbnail update: ", onThumbnailUpdate);
+
+                        var trailerObj = new Trailer({
+                          media_id: trailer_media_id,
+                          subtitles: [],
+                          audio_tracks: [],
+                          type: "Trailer",
+                        });
+
+                        var savedTrailer = await trailerObj.save();
+
+                        var filter = {
+                          _id: generalContentObj._id,
+                        };
+                        var updateGcData = {
+                          trailer: savedTrailer._id,
+                        };
+
+                        var updatedGc = await GeneralContent.findByIdAndUpdate(
+                          filter,
+                          updateGcData,
+                          {
+                            new: true,
+                          }
+                        )
+                          .then((result2) => {
+                            res.json({
+                              message: "Trailer uploaded!",
+                              status: "200",
+                              savedTrailer,
+                              updatedGc: result2,
+                              trailer_motion_url:
+                                thumbnailResult.data.thumbnails[0].delivery_url,
+                            });
+                          })
+                          .catch((error) => {
+                            console.log("Database update error: ", error);
+                            res.json({
+                              message:
+                                "Something went wrong while saving trailet to database!",
+                              status: "400",
+                              error,
+                            });
+                          });
+                      })
+                      .catch(async (onThumbnailUpdateError) => {
+                        console.log(
+                          "on thumbnail update error: ",
+                          onThumbnailUpdateError
+                        );
+                        res.json({
+                          message:
+                            "Something went wrong while updating trailer thumbnail!",
+                          status: "400",
+                          error: onThumbnailUpdateError,
+                        });
+                      });
                   });
 
-                  var savedThumbnail = await thumbnailObj.save();
+                  // var thumbnailObj = new Thumbnail({
+                  //   general_content: generalContentObj._id,
+                  //   trailer_motion_url:
+                  //     thumbnailResult.data.thumbnails[0].delivery_url,
+                  // });
 
-                  var trailerObj = new Trailer({
-                    media_id: trailer_media_id,
-                    subtitles: [],
-                    audio_tracks: [],
-                    type: "Trailer",
-                  });
+                  // var savedThumbnail = await thumbnailObj.save();
 
-                  var savedTrailer = await trailerObj.save();
+                  // var trailerObj = new Trailer({
+                  //   media_id: trailer_media_id,
+                  //   subtitles: [],
+                  //   audio_tracks: [],
+                  //   type: "Trailer",
+                  // });
 
-                  var filter = {
-                    _id: generalContentObj._id,
-                  };
-                  var updateGcData = {
-                    trailer: savedTrailer._id,
-                  };
+                  // var savedTrailer = await trailerObj.save();
 
-                  var updatedGc = await GeneralContent.findByIdAndUpdate(
-                    filter,
-                    updateGcData,
-                    {
-                      new: true,
-                    }
-                  )
-                    .then((result2) => {
-                      res.json({
-                        message: "Trailer uploaded!",
-                        status: "200",
-                        savedTrailer,
-                        updatedGc: result2,
-                        trailer_motion_url: thumbnails[1].delivery_url,
-                      });
-                    })
-                    .catch((error) => {
-                      console.log("Database update error: ", error);
-                      res.json({
-                        message:
-                          "Something went wrong while saving trailet to database!",
-                        status: "400",
-                        error,
-                      });
-                    });
+                  // var filter = {
+                  //   _id: generalContentObj._id,
+                  // };
+                  // var updateGcData = {
+                  //   trailer: savedTrailer._id,
+                  // };
+
+                  // var updatedGc = await GeneralContent.findByIdAndUpdate(
+                  //   filter,
+                  //   updateGcData,
+                  //   {
+                  //     new: true,
+                  //   }
+                  // )
+                  //   .then((result2) => {
+                  //     res.json({
+                  //       message: "Trailer uploaded!",
+                  //       status: "200",
+                  //       savedTrailer,
+                  //       updatedGc: result2,
+                  //       trailer_motion_url: thumbnails[1].delivery_url,
+                  //     });
+                  //   })
+                  //   .catch((error) => {
+                  //     console.log("Database update error: ", error);
+                  //     res.json({
+                  //       message:
+                  //         "Something went wrong while saving trailet to database!",
+                  //       status: "400",
+                  //       error,
+                  //     });
+                  //   });
                 })
 
                 // var apiResponse = await axios
