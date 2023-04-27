@@ -617,8 +617,10 @@ const addAudioTrackUpdated_V2 = async (req, res) => {
       });
 
       var translated_content_obj = new LanguagesContent({
-        title_translated: translated_title,
-        description_translated: translated_description,
+        title_translated: mediaObj.title,
+        description_translated: mediaObj.description,
+        // title_translated: translated_title,
+        // description_translated: translated_description,
         language_type: language,
         language_code: language_code,
       });
