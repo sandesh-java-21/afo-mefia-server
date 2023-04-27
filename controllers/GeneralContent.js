@@ -1369,7 +1369,7 @@ const updateGeneralContent = async (req, res) => {
                                                           availability,
                                                           content_type,
                                                           status,
-                                                          genres,
+                                                          genre: genres,
                                                         };
 
                                                         var updatedGc =
@@ -1647,7 +1647,7 @@ const updateGeneralContent = async (req, res) => {
                                                             availability,
                                                             content_type,
                                                             status,
-                                                            genres,
+                                                            genre: genres,
                                                           };
 
                                                           var updatedGc =
@@ -1933,7 +1933,7 @@ const updateGeneralContent = async (req, res) => {
                                                           availability,
                                                           content_type,
                                                           status,
-                                                          genres,
+                                                          genre: genres,
                                                         };
 
                                                         var updatedGc =
@@ -2177,7 +2177,7 @@ const updateGeneralContent = async (req, res) => {
                                               availability,
                                               content_type,
                                               status,
-                                              genres,
+                                              genre: genres,
                                             };
 
                                             var updatedGc =
@@ -2342,7 +2342,7 @@ const updateGeneralContent = async (req, res) => {
                                         availability,
                                         content_type,
                                         status,
-                                        genres,
+                                        genre: genres,
                                       };
 
                                       var updatedGc =
@@ -2494,7 +2494,7 @@ const updateGeneralContent = async (req, res) => {
                     availability,
                     content_type,
                     status,
-                    genres,
+                    genre: genres,
                   };
 
                   var updatedGc = await GeneralContent.findByIdAndUpdate(
