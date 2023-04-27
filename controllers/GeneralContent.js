@@ -1109,8 +1109,7 @@ const getGeneralContent = async (req, res) => {
         .then(async (onGcFound) => {
           var generalContentObj = onGcFound;
           res.json({
-            savedMedia: onGcFound.media,
-            savedGeneralContent: onGcFound,
+            generalContentObj,
           });
         })
         .catch((error) => {
