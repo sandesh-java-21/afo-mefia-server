@@ -2091,7 +2091,7 @@ const updateGeneralContent = async (req, res) => {
                       cloudinary.config(cloudinaryConfigObj);
 
                       cloudinary.uploader
-                        .upload(thumbnailObj.public_id)
+                        .destroy(thumbnailObj.public_id)
                         .then(async (deleteCloudinarySuccess) => {
                           console.log(
                             "delete cloudinary success: ",
