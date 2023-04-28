@@ -215,7 +215,7 @@ const uploadTrailerOfGeneralContentUpdated = async (req, res) => {
                             };
 
                             var updatedTraile = await Trailer.findByIdAndUpdate(
-                              thumbnailFilter,
+                              trailerFilter,
                               trailerUpdate,
                               {
                                 new: true,
