@@ -200,67 +200,92 @@ const deleteGeneralContentById = async (req, res) => {
                                                                 onThumbnailDelete
                                                               );
 
-                                                              var trailerDeleted =
-                                                                await Trailer.findByIdAndDelete(
-                                                                  {
-                                                                    _id: general_content_obj.trailer,
-                                                                  }
+                                                              var trailerAvailable =
+                                                                await Trailer.findById(
+                                                                  general_content_obj.trailer
                                                                 )
                                                                   .then(
                                                                     async (
-                                                                      onTrailerDelete
+                                                                      onTrailerFound
                                                                     ) => {
                                                                       console.log(
-                                                                        "trailer deleted success: ",
-                                                                        onTrailerDelete
+                                                                        "on trailer found 2: ",
+                                                                        onTrailerFound
                                                                       );
 
-                                                                      var mediaDeleted =
-                                                                        await Media.findByIdAndDelete(
+                                                                      var trailerDeleted =
+                                                                        await Trailer.findByIdAndDelete(
                                                                           {
-                                                                            _id: mediaObj._id,
+                                                                            _id: general_content_obj.trailer,
                                                                           }
                                                                         )
                                                                           .then(
                                                                             async (
-                                                                              onMediaDelete
+                                                                              onTrailerDelete
                                                                             ) => {
                                                                               console.log(
-                                                                                "media delete success: ",
-                                                                                onMediaDelete
+                                                                                "trailer deleted success: ",
+                                                                                onTrailerDelete
                                                                               );
 
-                                                                              var deletedGeneralContent =
-                                                                                await GeneralContent.findByIdAndDelete(
+                                                                              var mediaDeleted =
+                                                                                await Media.findByIdAndDelete(
                                                                                   {
-                                                                                    _id: general_content_obj._id,
+                                                                                    _id: mediaObj._id,
                                                                                   }
                                                                                 )
                                                                                   .then(
                                                                                     async (
-                                                                                      onGcDelete
+                                                                                      onMediaDelete
                                                                                     ) => {
                                                                                       console.log(
-                                                                                        "gc deleted: ",
-                                                                                        onGcDelete
+                                                                                        "media delete success: ",
+                                                                                        onMediaDelete
                                                                                       );
-                                                                                      res.json(
-                                                                                        {
-                                                                                          message:
-                                                                                            "General content deleted!",
-                                                                                          status:
-                                                                                            "200",
-                                                                                        }
-                                                                                      );
+
+                                                                                      var deletedGeneralContent =
+                                                                                        await GeneralContent.findByIdAndDelete(
+                                                                                          {
+                                                                                            _id: general_content_obj._id,
+                                                                                          }
+                                                                                        )
+                                                                                          .then(
+                                                                                            async (
+                                                                                              onGcDelete
+                                                                                            ) => {
+                                                                                              console.log(
+                                                                                                "gc deleted: ",
+                                                                                                onGcDelete
+                                                                                              );
+                                                                                              res.json(
+                                                                                                {
+                                                                                                  message:
+                                                                                                    "General content deleted!",
+                                                                                                  status:
+                                                                                                    "200",
+                                                                                                }
+                                                                                              );
+                                                                                            }
+                                                                                          )
+                                                                                          .catch(
+                                                                                            (
+                                                                                              onGcDeleteError
+                                                                                            ) => {
+                                                                                              console.log(
+                                                                                                "gc delete error: ",
+                                                                                                onGcDeleteError
+                                                                                              );
+                                                                                            }
+                                                                                          );
                                                                                     }
                                                                                   )
                                                                                   .catch(
                                                                                     (
-                                                                                      onGcDeleteError
+                                                                                      onMediaDeleteError
                                                                                     ) => {
                                                                                       console.log(
-                                                                                        "gc delete error: ",
-                                                                                        onGcDeleteError
+                                                                                        "media delete error: ",
+                                                                                        onMediaDeleteError
                                                                                       );
                                                                                     }
                                                                                   );
@@ -268,24 +293,30 @@ const deleteGeneralContentById = async (req, res) => {
                                                                           )
                                                                           .catch(
                                                                             (
-                                                                              onMediaDeleteError
+                                                                              onTrailerDeleteError
                                                                             ) => {
                                                                               console.log(
-                                                                                "media delete error: ",
-                                                                                onMediaDeleteError
+                                                                                "trailer delete error: ",
+                                                                                onTrailerDeleteError
                                                                               );
                                                                             }
                                                                           );
                                                                     }
                                                                   )
                                                                   .catch(
-                                                                    (
-                                                                      onTrailerDeleteError
+                                                                    async (
+                                                                      onTrailerFoundError
                                                                     ) => {
                                                                       console.log(
-                                                                        "trailer delete error: ",
-                                                                        onTrailerDeleteError
+                                                                        "on trailer found error 4: ",
+                                                                        onTrailerFoundError
                                                                       );
+                                                                      res.json({
+                                                                        message:
+                                                                          "Trailer found error 4!",
+                                                                        error:
+                                                                          onTrailerFoundError,
+                                                                      });
                                                                     }
                                                                   );
                                                             }
@@ -341,67 +372,92 @@ const deleteGeneralContentById = async (req, res) => {
                                                                 onThumbnailDelete
                                                               );
 
-                                                              var trailerDeleted =
-                                                                await Trailer.findByIdAndDelete(
-                                                                  {
-                                                                    _id: general_content_obj.trailer,
-                                                                  }
+                                                              var trailerAvailable =
+                                                                await Trailer.findById(
+                                                                  general_content_obj.trailer
                                                                 )
                                                                   .then(
                                                                     async (
-                                                                      onTrailerDelete
+                                                                      onTrailerFound
                                                                     ) => {
                                                                       console.log(
-                                                                        "trailer deleted success: ",
-                                                                        onTrailerDelete
+                                                                        "on trailer found 2: ",
+                                                                        onTrailerFound
                                                                       );
 
-                                                                      var mediaDeleted =
-                                                                        await Media.findByIdAndDelete(
+                                                                      var trailerDeleted =
+                                                                        await Trailer.findByIdAndDelete(
                                                                           {
-                                                                            _id: mediaObj._id,
+                                                                            _id: onTrailerFound._id,
                                                                           }
                                                                         )
                                                                           .then(
                                                                             async (
-                                                                              onMediaDelete
+                                                                              onTrailerDelete
                                                                             ) => {
                                                                               console.log(
-                                                                                "media delete success: ",
-                                                                                onMediaDelete
+                                                                                "trailer deleted success: ",
+                                                                                onTrailerDelete
                                                                               );
 
-                                                                              var deletedGeneralContent =
-                                                                                await GeneralContent.findByIdAndDelete(
+                                                                              var mediaDeleted =
+                                                                                await Media.findByIdAndDelete(
                                                                                   {
-                                                                                    _id: general_content_obj._id,
+                                                                                    _id: mediaObj._id,
                                                                                   }
                                                                                 )
                                                                                   .then(
                                                                                     async (
-                                                                                      onGcDelete
+                                                                                      onMediaDelete
                                                                                     ) => {
                                                                                       console.log(
-                                                                                        "gc deleted: ",
-                                                                                        onGcDelete
+                                                                                        "media delete success: ",
+                                                                                        onMediaDelete
                                                                                       );
-                                                                                      res.json(
-                                                                                        {
-                                                                                          message:
-                                                                                            "General content deleted!",
-                                                                                          status:
-                                                                                            "200",
-                                                                                        }
-                                                                                      );
+
+                                                                                      var deletedGeneralContent =
+                                                                                        await GeneralContent.findByIdAndDelete(
+                                                                                          {
+                                                                                            _id: general_content_obj._id,
+                                                                                          }
+                                                                                        )
+                                                                                          .then(
+                                                                                            async (
+                                                                                              onGcDelete
+                                                                                            ) => {
+                                                                                              console.log(
+                                                                                                "gc deleted: ",
+                                                                                                onGcDelete
+                                                                                              );
+                                                                                              res.json(
+                                                                                                {
+                                                                                                  message:
+                                                                                                    "General content deleted!",
+                                                                                                  status:
+                                                                                                    "200",
+                                                                                                }
+                                                                                              );
+                                                                                            }
+                                                                                          )
+                                                                                          .catch(
+                                                                                            (
+                                                                                              onGcDeleteError
+                                                                                            ) => {
+                                                                                              console.log(
+                                                                                                "gc delete error: ",
+                                                                                                onGcDeleteError
+                                                                                              );
+                                                                                            }
+                                                                                          );
                                                                                     }
                                                                                   )
                                                                                   .catch(
                                                                                     (
-                                                                                      onGcDeleteError
+                                                                                      onMediaDeleteError
                                                                                     ) => {
                                                                                       console.log(
-                                                                                        "gc delete error: ",
-                                                                                        onGcDeleteError
+                                                                                        "media delete error: ",
+                                                                                        onMediaDeleteError
                                                                                       );
                                                                                     }
                                                                                   );
@@ -409,24 +465,30 @@ const deleteGeneralContentById = async (req, res) => {
                                                                           )
                                                                           .catch(
                                                                             (
-                                                                              onMediaDeleteError
+                                                                              onTrailerDeleteError
                                                                             ) => {
                                                                               console.log(
-                                                                                "media delete error: ",
-                                                                                onMediaDeleteError
+                                                                                "trailer delete error: ",
+                                                                                onTrailerDeleteError
                                                                               );
                                                                             }
                                                                           );
                                                                     }
                                                                   )
                                                                   .catch(
-                                                                    (
-                                                                      onTrailerDeleteError
+                                                                    async (
+                                                                      onTrailerFoundError
                                                                     ) => {
                                                                       console.log(
-                                                                        "trailer delete error: ",
-                                                                        onTrailerDeleteError
+                                                                        "on trailer found error 5",
+                                                                        onTrailerFoundError
                                                                       );
+                                                                      res.json({
+                                                                        message:
+                                                                          "Trailer found error 5",
+                                                                        error:
+                                                                          onTrailerFoundError,
+                                                                      });
                                                                     }
                                                                   );
                                                             }
@@ -457,63 +519,90 @@ const deleteGeneralContentById = async (req, res) => {
                                             } else {
                                               // empty thumbnail type means no thumbnail then continue the other delete process
 
-                                              var trailerDeleted =
-                                                await Trailer.findByIdAndDelete(
-                                                  {
-                                                    _id: general_content_obj.trailer,
-                                                  }
+                                              var trailerAvailable =
+                                                await Trailer.findById(
+                                                  general_content_obj.trailer
                                                 )
                                                   .then(
-                                                    async (onTrailerDelete) => {
+                                                    async (onTrailerFound) => {
                                                       console.log(
-                                                        "trailer deleted success: ",
-                                                        onTrailerDelete
+                                                        "on trailer found 6: ",
+                                                        onTrailerFound
                                                       );
 
-                                                      var mediaDeleted =
-                                                        await Media.findByIdAndDelete(
+                                                      var trailerDeleted =
+                                                        await Trailer.findByIdAndDelete(
                                                           {
-                                                            _id: mediaObj._id,
+                                                            _id: general_content_obj.trailer,
                                                           }
                                                         )
                                                           .then(
                                                             async (
-                                                              onMediaDelete
+                                                              onTrailerDelete
                                                             ) => {
                                                               console.log(
-                                                                "media delete success: ",
-                                                                onMediaDelete
+                                                                "trailer deleted success: ",
+                                                                onTrailerDelete
                                                               );
 
-                                                              var deletedGeneralContent =
-                                                                await GeneralContent.findByIdAndDelete(
+                                                              var mediaDeleted =
+                                                                await Media.findByIdAndDelete(
                                                                   {
-                                                                    _id: general_content_obj._id,
+                                                                    _id: mediaObj._id,
                                                                   }
                                                                 )
                                                                   .then(
                                                                     async (
-                                                                      onGcDelete
+                                                                      onMediaDelete
                                                                     ) => {
                                                                       console.log(
-                                                                        "gc deleted: ",
-                                                                        onGcDelete
+                                                                        "media delete success: ",
+                                                                        onMediaDelete
                                                                       );
-                                                                      res.json({
-                                                                        message:
-                                                                          "General content deleted!",
-                                                                        status:
-                                                                          "200",
-                                                                      });
+
+                                                                      var deletedGeneralContent =
+                                                                        await GeneralContent.findByIdAndDelete(
+                                                                          {
+                                                                            _id: general_content_obj._id,
+                                                                          }
+                                                                        )
+                                                                          .then(
+                                                                            async (
+                                                                              onGcDelete
+                                                                            ) => {
+                                                                              console.log(
+                                                                                "gc deleted: ",
+                                                                                onGcDelete
+                                                                              );
+                                                                              res.json(
+                                                                                {
+                                                                                  message:
+                                                                                    "General content deleted!",
+                                                                                  status:
+                                                                                    "200",
+                                                                                }
+                                                                              );
+                                                                            }
+                                                                          )
+                                                                          .catch(
+                                                                            (
+                                                                              onGcDeleteError
+                                                                            ) => {
+                                                                              console.log(
+                                                                                "gc delete error: ",
+                                                                                onGcDeleteError
+                                                                              );
+                                                                            }
+                                                                          );
                                                                     }
                                                                   )
                                                                   .catch(
                                                                     (
-                                                                      onGcDeleteError
+                                                                      onMediaDeleteError
                                                                     ) => {
                                                                       console.log(
-                                                                        "gc delete error: ",
-                                                                        onGcDeleteError
+                                                                        "media delete error: ",
+                                                                        onMediaDeleteError
                                                                       );
                                                                     }
                                                                   );
@@ -521,22 +610,30 @@ const deleteGeneralContentById = async (req, res) => {
                                                           )
                                                           .catch(
                                                             (
-                                                              onMediaDeleteError
+                                                              onTrailerDeleteError
                                                             ) => {
                                                               console.log(
-                                                                "media delete error: ",
-                                                                onMediaDeleteError
+                                                                "trailer delete error: ",
+                                                                onTrailerDeleteError
                                                               );
                                                             }
                                                           );
                                                     }
                                                   )
                                                   .catch(
-                                                    (onTrailerDeleteError) => {
+                                                    async (
+                                                      onTrailerFoundError
+                                                    ) => {
                                                       console.log(
-                                                        "trailer delete error: ",
-                                                        onTrailerDeleteError
+                                                        "on trailer found error 6: ",
+                                                        onTrailerFoundError
                                                       );
+                                                      res.json({
+                                                        message:
+                                                          "Trailer found error 6",
+                                                        error:
+                                                          onTrailerFoundError,
+                                                      });
                                                     }
                                                   );
                                             }
@@ -659,67 +756,91 @@ const deleteGeneralContentById = async (req, res) => {
                                                     onThumbnailDelete
                                                   );
 
-                                                  var trailerDeleted =
-                                                    await Trailer.findByIdAndDelete(
-                                                      {
-                                                        _id: general_content_obj.trailer,
-                                                      }
+                                                  var trailerAvailable =
+                                                    await Trailer.findById(
+                                                      general_content_obj.trailer
                                                     )
                                                       .then(
                                                         async (
-                                                          onTrailerDelete
+                                                          onTrailerFound
                                                         ) => {
                                                           console.log(
-                                                            "trailer deleted success: ",
-                                                            onTrailerDelete
+                                                            "on trailer found: ",
+                                                            onThumbnailFound
                                                           );
-
-                                                          var mediaDeleted =
-                                                            await Media.findByIdAndDelete(
+                                                          var trailerDeleted =
+                                                            await Trailer.findByIdAndDelete(
                                                               {
-                                                                _id: mediaObj._id,
+                                                                _id: general_content_obj.trailer,
                                                               }
                                                             )
                                                               .then(
                                                                 async (
-                                                                  onMediaDelete
+                                                                  onTrailerDelete
                                                                 ) => {
                                                                   console.log(
-                                                                    "media delete success: ",
-                                                                    onMediaDelete
+                                                                    "trailer deleted success: ",
+                                                                    onTrailerDelete
                                                                   );
 
-                                                                  var deletedGeneralContent =
-                                                                    await GeneralContent.findByIdAndDelete(
+                                                                  var mediaDeleted =
+                                                                    await Media.findByIdAndDelete(
                                                                       {
-                                                                        _id: general_content_obj._id,
+                                                                        _id: mediaObj._id,
                                                                       }
                                                                     )
                                                                       .then(
                                                                         async (
-                                                                          onGcDelete
+                                                                          onMediaDelete
                                                                         ) => {
                                                                           console.log(
-                                                                            "gc deleted: ",
-                                                                            onGcDelete
+                                                                            "media delete success: ",
+                                                                            onMediaDelete
                                                                           );
-                                                                          res.json(
-                                                                            {
-                                                                              message:
-                                                                                "General content deleted!",
-                                                                              status:
-                                                                                "200",
-                                                                            }
-                                                                          );
+
+                                                                          var deletedGeneralContent =
+                                                                            await GeneralContent.findByIdAndDelete(
+                                                                              {
+                                                                                _id: general_content_obj._id,
+                                                                              }
+                                                                            )
+                                                                              .then(
+                                                                                async (
+                                                                                  onGcDelete
+                                                                                ) => {
+                                                                                  console.log(
+                                                                                    "gc deleted: ",
+                                                                                    onGcDelete
+                                                                                  );
+                                                                                  res.json(
+                                                                                    {
+                                                                                      message:
+                                                                                        "General content deleted!",
+                                                                                      status:
+                                                                                        "200",
+                                                                                    }
+                                                                                  );
+                                                                                }
+                                                                              )
+                                                                              .catch(
+                                                                                (
+                                                                                  onGcDeleteError
+                                                                                ) => {
+                                                                                  console.log(
+                                                                                    "gc delete error: ",
+                                                                                    onGcDeleteError
+                                                                                  );
+                                                                                }
+                                                                              );
                                                                         }
                                                                       )
                                                                       .catch(
                                                                         (
-                                                                          onGcDeleteError
+                                                                          onMediaDeleteError
                                                                         ) => {
                                                                           console.log(
-                                                                            "gc delete error: ",
-                                                                            onGcDeleteError
+                                                                            "media delete error: ",
+                                                                            onMediaDeleteError
                                                                           );
                                                                         }
                                                                       );
@@ -727,24 +848,37 @@ const deleteGeneralContentById = async (req, res) => {
                                                               )
                                                               .catch(
                                                                 (
-                                                                  onMediaDeleteError
+                                                                  onTrailerDeleteError
                                                                 ) => {
                                                                   console.log(
-                                                                    "media delete error: ",
-                                                                    onMediaDeleteError
+                                                                    "trailer delete error: ",
+                                                                    onTrailerDeleteError
                                                                   );
+
+                                                                  res.json({
+                                                                    message:
+                                                                      "Trailer Not Available!",
+                                                                    error:
+                                                                      onTrailerDeleteError,
+                                                                  });
                                                                 }
                                                               );
                                                         }
                                                       )
                                                       .catch(
-                                                        (
-                                                          onTrailerDeleteError
+                                                        async (
+                                                          onThumbnailFoundError
                                                         ) => {
                                                           console.log(
-                                                            "trailer delete error: ",
-                                                            onTrailerDeleteError
+                                                            "on trailer found error: ",
+                                                            onThumbnailFoundError
                                                           );
+                                                          res.json({
+                                                            message:
+                                                              "Thumbnail Not Available!",
+                                                            error:
+                                                              onThumbnailFoundError,
+                                                          });
                                                         }
                                                       );
                                                 }
@@ -761,67 +895,109 @@ const deleteGeneralContentById = async (req, res) => {
                                     } else {
                                       // delete from
 
-                                      var trailerDeleted =
-                                        await Trailer.findByIdAndDelete({
-                                          _id: general_content_obj.trailer,
-                                        })
-                                          .then(async (onTrailerDelete) => {
+                                      var trailerAvailable =
+                                        await Trailer.findById(
+                                          general_content_obj.trailer
+                                        )
+                                          .then(async (onTrailerFound) => {
                                             console.log(
-                                              "trailer deleted success: ",
-                                              onTrailerDelete
+                                              "on trailer found 2: ",
+                                              onTrailerFound
                                             );
 
-                                            var mediaDeleted =
-                                              await Media.findByIdAndDelete({
-                                                _id: mediaObj._id,
+                                            var trailerDeleted =
+                                              await Trailer.findByIdAndDelete({
+                                                _id: general_content_obj.trailer,
                                               })
-                                                .then(async (onMediaDelete) => {
-                                                  console.log(
-                                                    "media delete success: ",
-                                                    onMediaDelete
-                                                  );
+                                                .then(
+                                                  async (onTrailerDelete) => {
+                                                    console.log(
+                                                      "trailer deleted success: ",
+                                                      onTrailerDelete
+                                                    );
 
-                                                  var deletedGeneralContent =
-                                                    await GeneralContent.findByIdAndDelete(
-                                                      {
-                                                        _id: general_content_obj._id,
-                                                      }
-                                                    )
-                                                      .then(
-                                                        async (onGcDelete) => {
-                                                          console.log(
-                                                            "gc deleted: ",
-                                                            onGcDelete
-                                                          );
-                                                          res.json({
-                                                            message:
-                                                              "General content deleted!",
-                                                            status: "200",
-                                                          });
+                                                    var mediaDeleted =
+                                                      await Media.findByIdAndDelete(
+                                                        {
+                                                          _id: mediaObj._id,
                                                         }
                                                       )
-                                                      .catch(
-                                                        (onGcDeleteError) => {
-                                                          console.log(
-                                                            "gc delete error: ",
-                                                            onGcDeleteError
-                                                          );
-                                                        }
-                                                      );
-                                                })
-                                                .catch((onMediaDeleteError) => {
-                                                  console.log(
-                                                    "media delete error: ",
-                                                    onMediaDeleteError
-                                                  );
-                                                });
+                                                        .then(
+                                                          async (
+                                                            onMediaDelete
+                                                          ) => {
+                                                            console.log(
+                                                              "media delete success: ",
+                                                              onMediaDelete
+                                                            );
+
+                                                            var deletedGeneralContent =
+                                                              await GeneralContent.findByIdAndDelete(
+                                                                {
+                                                                  _id: general_content_obj._id,
+                                                                }
+                                                              )
+                                                                .then(
+                                                                  async (
+                                                                    onGcDelete
+                                                                  ) => {
+                                                                    console.log(
+                                                                      "gc deleted: ",
+                                                                      onGcDelete
+                                                                    );
+                                                                    res.json({
+                                                                      message:
+                                                                        "General content deleted!",
+                                                                      status:
+                                                                        "200",
+                                                                    });
+                                                                  }
+                                                                )
+                                                                .catch(
+                                                                  (
+                                                                    onGcDeleteError
+                                                                  ) => {
+                                                                    console.log(
+                                                                      "gc delete error: ",
+                                                                      onGcDeleteError
+                                                                    );
+                                                                  }
+                                                                );
+                                                          }
+                                                        )
+                                                        .catch(
+                                                          (
+                                                            onMediaDeleteError
+                                                          ) => {
+                                                            console.log(
+                                                              "media delete error: ",
+                                                              onMediaDeleteError
+                                                            );
+                                                          }
+                                                        );
+                                                  }
+                                                )
+                                                .catch(
+                                                  (onTrailerDeleteError) => {
+                                                    console.log(
+                                                      "trailer delete error: ",
+                                                      onTrailerDeleteError
+                                                    );
+                                                  }
+                                                );
                                           })
-                                          .catch((onTrailerDeleteError) => {
-                                            console.log(
-                                              "trailer delete error: ",
-                                              onTrailerDeleteError
-                                            );
-                                          });
+                                          .catch(
+                                            async (onTrailerFoundError) => {
+                                              console.log(
+                                                "on trailer found error 2: ",
+                                                onTrailerFoundError
+                                              );
+                                              res.json({
+                                                message: "Trailer not found: ",
+                                                error: onTrailerFoundError,
+                                              });
+                                            }
+                                          );
 
                                       // var site_id = process.env.SITE_ID;
                                       // var thumbnail_id =
@@ -962,66 +1138,92 @@ const deleteGeneralContentById = async (req, res) => {
                                   } else {
                                     // empty thumbnail type means no thumbnail then continue the other delete process
 
-                                    var trailerDeleted =
-                                      await Trailer.findByIdAndDelete({
-                                        _id: general_content_obj.trailer,
-                                      })
-                                        .then(async (onTrailerDelete) => {
-                                          console.log(
-                                            "trailer deleted success: ",
-                                            onTrailerDelete
-                                          );
-
-                                          var mediaDeleted =
-                                            await Media.findByIdAndDelete({
-                                              _id: mediaObj._id,
+                                    var trailerAvailable =
+                                      await Trailer.findById(
+                                        general_content_obj.trailer
+                                      )
+                                        .then(async (onTrailerFound) => {
+                                          var trailerDeleted =
+                                            await Trailer.findByIdAndDelete({
+                                              _id: general_content_obj.trailer,
                                             })
-                                              .then(async (onMediaDelete) => {
+                                              .then(async (onTrailerDelete) => {
                                                 console.log(
-                                                  "media delete success: ",
-                                                  onMediaDelete
+                                                  "trailer deleted success: ",
+                                                  onTrailerDelete
                                                 );
 
-                                                var deletedGeneralContent =
-                                                  await GeneralContent.findByIdAndDelete(
+                                                var mediaDeleted =
+                                                  await Media.findByIdAndDelete(
                                                     {
-                                                      _id: general_content_obj._id,
+                                                      _id: mediaObj._id,
                                                     }
                                                   )
                                                     .then(
-                                                      async (onGcDelete) => {
+                                                      async (onMediaDelete) => {
                                                         console.log(
-                                                          "gc deleted: ",
-                                                          onGcDelete
+                                                          "media delete success: ",
+                                                          onMediaDelete
                                                         );
-                                                        res.json({
-                                                          message:
-                                                            "General content deleted!",
-                                                          status: "200",
-                                                        });
+
+                                                        var deletedGeneralContent =
+                                                          await GeneralContent.findByIdAndDelete(
+                                                            {
+                                                              _id: general_content_obj._id,
+                                                            }
+                                                          )
+                                                            .then(
+                                                              async (
+                                                                onGcDelete
+                                                              ) => {
+                                                                console.log(
+                                                                  "gc deleted: ",
+                                                                  onGcDelete
+                                                                );
+                                                                res.json({
+                                                                  message:
+                                                                    "General content deleted!",
+                                                                  status: "200",
+                                                                });
+                                                              }
+                                                            )
+                                                            .catch(
+                                                              (
+                                                                onGcDeleteError
+                                                              ) => {
+                                                                console.log(
+                                                                  "gc delete error: ",
+                                                                  onGcDeleteError
+                                                                );
+                                                              }
+                                                            );
                                                       }
                                                     )
                                                     .catch(
-                                                      (onGcDeleteError) => {
+                                                      (onMediaDeleteError) => {
                                                         console.log(
-                                                          "gc delete error: ",
-                                                          onGcDeleteError
+                                                          "media delete error: ",
+                                                          onMediaDeleteError
                                                         );
                                                       }
                                                     );
                                               })
-                                              .catch((onMediaDeleteError) => {
+                                              .catch((onTrailerDeleteError) => {
                                                 console.log(
-                                                  "media delete error: ",
-                                                  onMediaDeleteError
+                                                  "trailer delete error: ",
+                                                  onTrailerDeleteError
                                                 );
                                               });
                                         })
-                                        .catch((onTrailerDeleteError) => {
+                                        .catch(async (onTrailerFoundError) => {
                                           console.log(
-                                            "trailer delete error: ",
-                                            onTrailerDeleteError
+                                            "on trailer found error 3: ",
+                                            onTrailerFoundError
                                           );
+                                          res.json({
+                                            message: "Trailer not found 3!",
+                                            error: onTrailerFoundError,
+                                          });
                                         });
                                   }
                                 })
