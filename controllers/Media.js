@@ -971,7 +971,7 @@ const uploadMediaId = async (req, res) => {
   try {
     var mediaObjId = req.params.media_Obj_Id;
 
-    var { media_id } = req.body;
+    var { media_id, duration } = req.body;
 
     console.log(">>>>>>>>>  ", media_id, mediaObjId);
 
@@ -988,6 +988,7 @@ const uploadMediaId = async (req, res) => {
 
         var updateData = {
           media_id: media_id,
+          duration: duration,
         };
 
         var updatedMedia = await Media.findByIdAndUpdate(filter, updateData, {
