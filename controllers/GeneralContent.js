@@ -758,7 +758,7 @@ const deleteGeneralContentById = async (req, res) => {
 
                                                   var trailerAvailable =
                                                     await Trailer.findById(
-                                                      general_content_obj.trailer
+                                                      general_content_obj?.trailer
                                                     )
                                                       .then(
                                                         async (

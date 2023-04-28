@@ -2,7 +2,7 @@ const Media = require("../models/Media");
 const GeneralContent = require("../models/GeneralContent");
 const LanguagesContent = require("../models/LanguagesContent");
 const Thumbnail = require("../models/Thumbnail");
-
+const Trailer = require("../models/Trailer");
 const { getVideoDurationInSeconds } = require("get-video-duration");
 
 const cloudinary = require("cloudinary").v2;
@@ -657,6 +657,15 @@ const createMediaUpdated = async (req, res) => {
 
             var savedMedia = await mediaObj.save();
 
+            var trailerObj = new Trailer({
+              media_id: "",
+              subtitles: [],
+              audio_tracks: [],
+              type: "Trailer",
+            });
+
+            var savedTrailer = await trailerObj.save();
+
             var generalContentObj = new GeneralContent({
               media: savedMedia._id,
               category: "movie",
@@ -666,6 +675,7 @@ const createMediaUpdated = async (req, res) => {
               thumbnail: savedThumbnail._id,
               content_type: content_type,
               availability: availability,
+              trailer: savedTrailer._id,
             });
 
             var savedGeneralContent = await generalContentObj.save();
@@ -916,6 +926,15 @@ const createMediaUpdated = async (req, res) => {
 
         var savedThumbnail = await thumbnail.save();
 
+        var trailerObj = new Trailer({
+          media_id: "",
+          subtitles: [],
+          audio_tracks: [],
+          type: "Trailer",
+        });
+
+        var savedTrailer = await trailerObj.save();
+
         var generalContentObj = new GeneralContent({
           media: savedMedia._id,
           category: "movie",
@@ -925,6 +944,7 @@ const createMediaUpdated = async (req, res) => {
           thumbnail: savedThumbnail._id,
           content_type: content_type,
           availability: availability,
+          trailer: savedTrailer._id,
         });
 
         var savedGeneralContent = await generalContentObj.save();

@@ -197,48 +197,141 @@ const uploadTrailerOfGeneralContentUpdated = async (req, res) => {
                       .then(async (onThumbnailUpdate) => {
                         console.log("on thumbnail update: ", onThumbnailUpdate);
 
-                        var trailerObj = new Trailer({
-                          media_id: trailer_media_id,
-                          subtitles: [],
-                          audio_tracks: [],
-                          type: "Trailer",
-                        });
-
-                        var savedTrailer = await trailerObj.save();
-
-                        var filter = {
-                          _id: generalContentObj._id,
-                        };
-                        var updateGcData = {
-                          trailer: savedTrailer._id,
-                        };
-
-                        var updatedGc = await GeneralContent.findByIdAndUpdate(
-                          filter,
-                          updateGcData,
-                          {
-                            new: true,
-                          }
+                        var foundTrailer = await Trailer.findById(
+                          generalContentObj.trailer
                         )
-                          .then((result2) => {
-                            res.json({
-                              message: "Trailer uploaded!",
-                              status: "200",
-                              savedTrailer,
-                              updatedGc: result2,
-                              trailer_motion_url:
-                                thumbnailResult.data.thumbnails[0].delivery_url,
-                            });
+                          .then(async (onTrailerFound) => {
+                            console.log("on trailer found: ", onTrailerFound);
+
+                            var trailerFilter = {
+                              _id: onTrailerFound._id,
+                            };
+
+                            var trailerUpdate = {
+                              media_id: trailer_media_id,
+                              subtitles: [],
+                              audio_tracks: [],
+                              type: "Trailer",
+                            };
+
+                            var updatedTraile = await Trailer.findByIdAndUpdate(
+                              thumbnailFilter,
+                              trailerUpdate,
+                              {
+                                new: true,
+                              }
+                            )
+                              .then(async (onTrailerUpdate) => {
+                                console.log(
+                                  "on trailer update: ",
+                                  onTrailerUpdate
+                                );
+
+                                var filter = {
+                                  _id: generalContentObj._id,
+                                };
+                                var updateGcData = {
+                                  trailer: onTrailerUpdate._id,
+                                };
+
+                                var updatedGc =
+                                  await GeneralContent.findByIdAndUpdate(
+                                    filter,
+                                    updateGcData,
+                                    {
+                                      new: true,
+                                    }
+                                  )
+                                    .then((result2) => {
+                                      res.json({
+                                        message: "Trailer uploaded!",
+                                        status: "200",
+                                        savedTrailer: onTrailerUpdate,
+                                        updatedGc: result2,
+                                        trailer_motion_url:
+                                          thumbnailResult.data.thumbnails[0]
+                                            .delivery_url,
+                                      });
+                                    })
+                                    .catch((error) => {
+                                      console.log(
+                                        "Database update error: ",
+                                        error
+                                      );
+                                      res.json({
+                                        message:
+                                          "Something went wrong while saving trailet to database!",
+                                        status: "400",
+                                        error,
+                                      });
+                                    });
+                              })
+                              .catch(async (onTrailerUpdateError) => {
+                                console.log(
+                                  "on trailer update error: ",
+                                  onTrailerUpdateError
+                                );
+                                res.json({
+                                  message: "Trailer update error!",
+                                  status: "400",
+                                  error: onTrailerUpdateError,
+                                });
+                              });
                           })
-                          .catch((error) => {
-                            console.log("Database update error: ", error);
+                          .catch(async (onTrailerFoundError) => {
+                            console.log(
+                              "on trailer found error: ",
+                              onTrailerFoundError
+                            );
                             res.json({
-                              message:
-                                "Something went wrong while saving trailet to database!",
-                              status: "400",
-                              error,
+                              message: "Trailer not found!",
+                              status: "404",
+                              error: onTrailerFoundError,
                             });
                           });
+
+                        // var trailerObj = new Trailer({
+                        //   media_id: trailer_media_id,
+                        //   subtitles: [],
+                        //   audio_tracks: [],
+                        //   type: "Trailer",
+                        // });
+
+                        // var savedTrailer = await trailerObj.save();
+
+                        // var filter = {
+                        //   _id: generalContentObj._id,
+                        // };
+                        // var updateGcData = {
+                        //   trailer: savedTrailer._id,
+                        // };
+
+                        // var updatedGc = await GeneralContent.findByIdAndUpdate(
+                        //   filter,
+                        //   updateGcData,
+                        //   {
+                        //     new: true,
+                        //   }
+                        // )
+                        //   .then((result2) => {
+                        //     res.json({
+                        //       message: "Trailer uploaded!",
+                        //       status: "200",
+                        //       savedTrailer,
+                        //       updatedGc: result2,
+                        //       trailer_motion_url:
+                        //         thumbnailResult.data.thumbnails[0].delivery_url,
+                        //     });
+                        //   })
+                        //   .catch((error) => {
+                        //     console.log("Database update error: ", error);
+                        //     res.json({
+                        //       message:
+                        //         "Something went wrong while saving trailet to database!",
+                        //       status: "400",
+                        //       error,
+                        //     });
+                        //   });
                       })
                       .catch(async (onThumbnailUpdateError) => {
                         console.log(
