@@ -216,7 +216,7 @@ const deleteGeneralContentById = async (req, res) => {
                                                                       var trailerDeleted =
                                                                         await Trailer.findByIdAndDelete(
                                                                           {
-                                                                            _id: general_content_obj.trailer,
+                                                                            _id: onTrailerFound._id,
                                                                           }
                                                                         )
                                                                           .then(
@@ -533,7 +533,7 @@ const deleteGeneralContentById = async (req, res) => {
                                                       var trailerDeleted =
                                                         await Trailer.findByIdAndDelete(
                                                           {
-                                                            _id: general_content_obj.trailer,
+                                                            _id: onTrailerFound._id,
                                                           }
                                                         )
                                                           .then(
@@ -771,7 +771,7 @@ const deleteGeneralContentById = async (req, res) => {
                                                           var trailerDeleted =
                                                             await Trailer.findByIdAndDelete(
                                                               {
-                                                                _id: general_content_obj.trailer,
+                                                                _id: onTrailerFound._id,
                                                               }
                                                             )
                                                               .then(
@@ -907,7 +907,7 @@ const deleteGeneralContentById = async (req, res) => {
 
                                             var trailerDeleted =
                                               await Trailer.findByIdAndDelete({
-                                                _id: general_content_obj.trailer,
+                                                _id: onTrailerFound._id,
                                               })
                                                 .then(
                                                   async (onTrailerDelete) => {
@@ -1143,9 +1143,14 @@ const deleteGeneralContentById = async (req, res) => {
                                         general_content_obj.trailer
                                       )
                                         .then(async (onTrailerFound) => {
+                                          console.log(
+                                            "on trailer found 7: ",
+                                            onTrailerFound
+                                          );
+
                                           var trailerDeleted =
                                             await Trailer.findByIdAndDelete({
-                                              _id: general_content_obj.trailer,
+                                              _id: onTrailerFound._id,
                                             })
                                               .then(async (onTrailerDelete) => {
                                                 console.log(
