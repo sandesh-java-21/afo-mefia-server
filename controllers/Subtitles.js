@@ -510,8 +510,10 @@ const addSubtitlesUpdated_V2 = async (req, res) => {
                 var updatedMedia = await Media.findByIdAndUpdate(
                   filter,
                   {
-                    $push: { subtitles: onSaveSubtitle._id },
-                    $push: { translated_content: onSaveTranslation._id },
+                    $push: {
+                      subtitles: onSaveSubtitle._id,
+                      translated_content: onSaveTranslation._id,
+                    },
                   },
                   {
                     new: true,
