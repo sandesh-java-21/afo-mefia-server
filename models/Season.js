@@ -1,6 +1,11 @@
 const mongoose = require("mongoose");
 
 const seasonSchema = mongoose.Schema({
+  title: {
+    type: String,
+    required: false,
+    default: "",
+  },
   tv_show: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "tv_shows",

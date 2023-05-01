@@ -24,7 +24,7 @@ const signUrl = async (req, res) => {
 
     console.log("media id: ", media_id);
 
-    var response = get_response(media_id, "P6dCVDaO");
+    var response = get_response(media_id, "4t00MwmP");
     res.json({
       message: "Signed URL Generated!",
       status: "200",

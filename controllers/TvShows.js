@@ -2,6 +2,7 @@ const TvShow = require("../models/TvShow");
 const Season = require("../models/Season");
 const LanguagesContent = require("../models/LanguagesContent");
 const Thumbnail = require("../models/Thumbnail");
+const Trailer = require("../models/Trailer");
 
 const cloudinary = require("cloudinary").v2;
 
@@ -94,6 +95,15 @@ const createTvShow = async (req, res) => {
             );
             var jw_tags = [...req.body.jw_tags, ...customTags];
 
+            var tvShowTrailer = new Trailer({
+              media_id: "",
+              audio_tracks: [],
+              subtitles: [],
+              type: "trailer",
+            });
+
+            var savedTrailerTvShow = await tvShowTrailer.save();
+
             var tvShowObj = new TvShow({
               title: title,
               description: description,
@@ -118,6 +128,7 @@ const createTvShow = async (req, res) => {
               total_likes: 0,
               crew_members: [],
               seasons: [],
+              trailer: savedTrailerTvShow._id,
             });
 
             var savedTvShow = await tvShowObj.save();
@@ -364,6 +375,15 @@ const createTvShow = async (req, res) => {
         var customTags = req.body.jw_tags.map((tag) => tag + `-${category}`);
         var jw_tags = [...req.body.jw_tags, ...customTags];
 
+        var tvShowTrailer = new Trailer({
+          media_id: "",
+          audio_tracks: [],
+          subtitles: [],
+          type: "trailer",
+        });
+
+        var savedTrailerTvShow = await tvShowTrailer.save();
+
         var tvShowObj = new TvShow({
           title: title,
           description: description,
@@ -388,6 +408,7 @@ const createTvShow = async (req, res) => {
           total_likes: 0,
           crew_members: [],
           seasons: [],
+          trailer: savedTrailerTvShow._id,
         });
 
         var savedTvShow = await tvShowObj.save();
@@ -442,6 +463,220 @@ const createTvShow = async (req, res) => {
   }
 };
 
+const geAllTvShows = async (req, res) => {
+  try {
+    var tvshows = await TvShow.find()
+      .populate("thumbnail")
+      .then(async (onFound) => {
+        console.log("on tv show found: ", onFound);
+
+        var allTvShows = onFound;
+
+        if (allTvShows.length <= 0) {
+          res.json({
+            message: "No Tv Show Found!",
+            status: "404",
+            allTvShows: [],
+          });
+        } else {
+          res.json({
+            message: "No Tv Show Found!",
+            status: "404",
+            allTvShows: allTvShows,
+          });
+        }
+      })
+      .catch(async (onFoundError) => {
+        console.log("on tv show found error: ", onFoundError);
+        res.json({
+          message: "Something went wrong while getting tv show!",
+          status: "400",
+          error: onFoundError,
+        });
+      });
+  } catch (error) {
+    res.json({
+      message: "Internal server error!",
+      status: "500",
+      error,
+    });
+  }
+};
+
+const getSeasonsOfATvShow = async (req, res) => {
+  try {
+    var tv_show_id = req.params.tv_show_id;
+    if (!tv_show_id || tv_show_id === "") {
+      res.json({
+        message: "Required fields are empty!",
+        status: "400",
+      });
+    } else {
+      var tvshow = await TvShow.findById(tv_show_id)
+        .populate("seasons", {
+          title: 1,
+          _id: 1,
+        })
+        .then(async (onTvShowFound) => {
+          console.log("on tv show found: ", onTvShowFound);
+
+          res.json({
+            message: "Tv show seasons found!",
+            status: "200",
+            seasons: onTvShowFound.seasons,
+          });
+        })
+        .catch(async (onTvShowFoundError) => {
+          console.log("on tv show found error: ", onTvShowFoundError);
+          res.json({
+            message: "Something went wrong while getting tv show seasons!",
+            status: "400",
+            error: onTvShowFoundError,
+          });
+        });
+    }
+  } catch (error) {
+    res.json({
+      message: "Internal server error!",
+      status: "500",
+      error,
+    });
+  }
+};
+
+const createSeasonOfAtvShow = async (req, res) => {
+  try {
+    var tv_show_id = req.params.tv_show_id;
+    var { title } = req.body;
+    if (!tv_show_id || tv_show_id === "") {
+      res.json({
+        message: "Required field are empty!",
+        status: "400",
+      });
+    } else {
+      var tv_show = await TvShow.findById(tv_show_id)
+        .then(async (onTvShowFound) => {
+          console.log("on tv show found: ", onTvShowFound);
+
+          var seasonTrailer = new Trailer({
+            media_id: "",
+            audio_tracks: [],
+            subtitles: [],
+            type: "trailer",
+          });
+
+          var savedTrailerSeason = await seasonTrailer.save();
+
+          var seasonObj = new Season({
+            title: title,
+            tv_show: onTvShowFound._id,
+            trailer: savedTrailerSeason._id,
+          });
+
+          var savedSeason = await seasonObj
+            .save()
+            .then(async (onSeasonSave) => {
+              console.log("on season save: ", onSeasonSave);
+
+              var filter = {
+                _id: onTvShowFound._id,
+              };
+
+              var updatedTvShow = await TvShow.findByIdAndUpdate(
+                filter,
+                {
+                  $push: {
+                    seasons: onSeasonSave._id,
+                  },
+                },
+                {
+                  new: true,
+                }
+              )
+                .then(async (onTvShowUpdate) => {
+                  console.log("on tv show update: ", onTvShowUpdate);
+                  res.json({
+                    message: "New season created for the tv show!",
+                    status: "200",
+                    savedSeason: {
+                      title: onSeasonSave.title,
+                      _id: onSeasonSave._id,
+                    },
+                  });
+                })
+                .catch(async (onTvShowUpdateError) => {
+                  console.log("on tv show update error: ", onTvShowUpdateError);
+                  res.json({
+                    message: "Something went wrong while creating season!",
+                    status: "400",
+                    error: onTvShowUpdateError,
+                  });
+                });
+            })
+            .catch(async (onSeasonSaveError) => {
+              console.log("on season save error: ", onSeasonSaveError);
+              res.json({
+                message: "Something went wrong while saving season!",
+                status: "400",
+                error: onSeasonSaveError,
+              });
+            });
+        })
+        .catch(async (onTvShowFoundError) => {
+          console.log("on tv show found error: ", onTvShowFoundError);
+          res.json({
+            message: "Tv show not found!",
+            status: "404",
+            error: onTvShowFoundError,
+          });
+        });
+    }
+  } catch (error) {
+    res.json({
+      message: "Internal server error!",
+      status: "500",
+      error,
+    });
+  }
+};
+
+const updateTvShow = async (req, res) => {
+  try {
+    var tv_show_id = req.params.tv_show_id;
+
+    if (!tv_show_id || tv_show_id === "") {
+      res.json({
+        message: "Required fields are empty!",
+        status: "400",
+      });
+    } else {
+      var tv_show = await TvShow.findById(tv_show_id)
+        .then(async (onTvShowFound) => {
+          console.log("on tv show found: ", onTvShowFound);
+
+          // remaining code
+        })
+        .catch(async (onTvShowFoundError) => {
+          console.log("on tv show found error: ", onTvShowFoundError);
+          res.json({
+            message: "Tv Show Not Found!",
+            status: "404",
+            error: onTvShowFoundError,
+          });
+        });
+    }
+  } catch (error) {
+    res.json({
+      message: "Internal server error!",
+      status: "500",
+      error,
+    });
+  }
+};
+
 module.exports = {
   createTvShow,
+  geAllTvShows,
+  getSeasonsOfATvShow,
+  createSeasonOfAtvShow,
 };

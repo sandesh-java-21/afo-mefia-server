@@ -24,8 +24,7 @@ const episodeSchema = mongoose.Schema({
   },
   release_year: {
     type: Date,
-    get: (val) => val.getFullYear(),
-    set: (val) => new Date(val, 0, 1),
+    required: false,
   },
   media_id: {
     type: String,
@@ -71,6 +70,7 @@ const episodeSchema = mongoose.Schema({
     ref: "thumbnails",
     required: false,
   },
+
   createdAt: {
     type: Date,
     default: Date.now(),

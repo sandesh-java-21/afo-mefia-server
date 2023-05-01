@@ -17,6 +17,9 @@ const usersRoutes = require("../routes/Users");
 const homeRoutes = require("../routes/Home");
 const videoRoutes = require("../routes/Videos");
 const adminRoutes = require("../routes/Admin");
+const tvShowsRoutes = require("../routes/TvShows");
+const seasonsRoutes = require("../routes/Seasons");
+const episodesRoutes = require("../routes/Episodes");
 
 router.use("/general-content", generalContentRoutes);
 router.use("/media", mediaRoutes);
@@ -34,5 +37,8 @@ router.use("/user", usersRoutes);
 router.use("/home", homeRoutes);
 router.use("/video", videoRoutes);
 router.use("/admin", adminRoutes);
+router.use("/tv-shows", tvShowsRoutes);
+router.use("/seasons", seasonsRoutes);
+router.use("/episodes", episodesRoutes);
 
 module.exports = router;

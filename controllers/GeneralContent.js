@@ -2962,18 +2962,22 @@ const getTopRatedMovies = async (req, res) => {
                   },
                 },
               ])
+              .populate("thumbnail")
               .then(async (onGcsFound) => {
                 console.log("on general contents found: ", onGcsFound);
 
                 const filteredContent = onGcsFound.filter((content) => {
                   return content.media.translated_content.length > 0;
                 });
+
+                console.log(" filtered: ", filteredContent);
                 res.json({
                   message: "Top rated content found!",
                   status: "200",
                   rows: rows,
                   media_ids: media_ids,
                   general_contents: filteredContent,
+                  total: filteredContent.length,
                 });
               })
               .catch(async (onGcsNotFound) => {
