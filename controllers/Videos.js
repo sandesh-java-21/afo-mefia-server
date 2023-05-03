@@ -567,7 +567,12 @@ const updateVideoContent = async (req, res) => {
       rating,
       status,
       isThumbnailUpdated,
+      content_type,
+      availability,
+      monetization,
     } = req.body;
+
+    category = "video";
 
     if (isThumbnailUpdated) {
       var { thumbnailImageBase64 } = req.body;
@@ -745,6 +750,16 @@ const updateVideoContent = async (req, res) => {
                                                       _id: mediaObj._id,
                                                     };
 
+                                                    var customTags =
+                                                      req.body.jw_tags.map(
+                                                        (tag) =>
+                                                          tag + `-${category}`
+                                                      );
+                                                    var jw_tags = [
+                                                      ...req.body.jw_tags,
+                                                      ...customTags,
+                                                    ];
+
                                                     var updateData = {
                                                       title,
                                                       description,
@@ -755,7 +770,7 @@ const updateVideoContent = async (req, res) => {
                                                       genres,
                                                       seo_tags,
                                                       rating,
-                                                      status,
+                                                      monetization,
                                                     };
 
                                                     var updatedMedia =
@@ -772,15 +787,69 @@ const updateVideoContent = async (req, res) => {
                                                               "on gc update: ",
                                                               onGcUpdate
                                                             );
-                                                            res.json({
-                                                              message:
-                                                                "General info updated!",
-                                                              status: "200",
-                                                              updatedMedia:
-                                                                onGcUpdate,
-                                                              updatedThumbnail:
-                                                                updatedThumbnailObj,
-                                                            });
+
+                                                            var gcFilter = {
+                                                              _id: general_content_obj._id,
+                                                            };
+
+                                                            var gcUpdateData = {
+                                                              availability,
+                                                              content_type,
+                                                              status,
+                                                              genre: genres,
+                                                            };
+
+                                                            var updatedGc =
+                                                              await GeneralContent.findByIdAndUpdate(
+                                                                gcFilter,
+                                                                gcUpdateData,
+                                                                {
+                                                                  new: true,
+                                                                }
+                                                              )
+                                                                .then(
+                                                                  async (
+                                                                    onNewGc
+                                                                  ) => {
+                                                                    console.log(
+                                                                      "on new gc: ",
+                                                                      onNewGc
+                                                                    );
+                                                                    console.log(
+                                                                      "on gc update: ",
+                                                                      onGcUpdate
+                                                                    );
+                                                                    res.json({
+                                                                      message:
+                                                                        "General info updated!",
+                                                                      status:
+                                                                        "200",
+                                                                      updatedMedia:
+                                                                        onGcUpdate,
+                                                                      updatedThumbnail:
+                                                                        updatedThumbnailObj,
+                                                                    });
+                                                                  }
+                                                                )
+                                                                .catch(
+                                                                  async (
+                                                                    onNewGcError
+                                                                  ) => {
+                                                                    console.log(
+                                                                      "on new gc error: ",
+                                                                      onNewGcError
+                                                                    );
+                                                                  }
+                                                                );
+                                                            // res.json({
+                                                            //   message:
+                                                            //     "General info updated!",
+                                                            //   status: "200",
+                                                            //   updatedMedia:
+                                                            //     onGcUpdate,
+                                                            //   updatedThumbnail:
+                                                            //     updatedThumbnailObj,
+                                                            // });
                                                           }
                                                         )
                                                         .catch(
@@ -993,7 +1062,7 @@ const updateVideoContent = async (req, res) => {
                                                     genres,
                                                     seo_tags,
                                                     rating,
-                                                    status,
+                                                    monetization,
                                                   };
 
                                                   var updatedMedia =
@@ -1010,15 +1079,71 @@ const updateVideoContent = async (req, res) => {
                                                             "on media gc update: ",
                                                             onMediaGcUpdate
                                                           );
-                                                          res.json({
-                                                            message:
-                                                              "General info and thumbnail updated!",
-                                                            status: "200",
-                                                            updatedMedia:
-                                                              onMediaGcUpdate,
-                                                            updatedThumbnail:
-                                                              onThumbnailUpdate,
-                                                          });
+
+                                                          var gcFilter = {
+                                                            _id: general_content_obj._id,
+                                                          };
+
+                                                          var gcUpdateData = {
+                                                            availability,
+                                                            content_type,
+                                                            status,
+                                                            genre: genres,
+                                                          };
+
+                                                          var updatedGc =
+                                                            await Video.findByIdAndUpdate(
+                                                              gcFilter,
+                                                              gcUpdateData,
+                                                              {
+                                                                new: true,
+                                                              }
+                                                            )
+                                                              .then(
+                                                                async (
+                                                                  onNewGc_2
+                                                                ) => {
+                                                                  console.log(
+                                                                    "on new gc 2: ",
+                                                                    onNewGc_2
+                                                                  );
+
+                                                                  console.log(
+                                                                    "on media gc update: ",
+                                                                    onMediaGcUpdate
+                                                                  );
+                                                                  res.json({
+                                                                    message:
+                                                                      "General info and thumbnail updated!",
+                                                                    status:
+                                                                      "200",
+                                                                    updatedMedia:
+                                                                      onMediaGcUpdate,
+                                                                    updatedThumbnail:
+                                                                      onThumbnailUpdate,
+                                                                  });
+                                                                }
+                                                              )
+                                                              .catch(
+                                                                async (
+                                                                  onNewGc_2Error
+                                                                ) => {
+                                                                  console.log(
+                                                                    "on new gc error 2: ",
+                                                                    onNewGc_2Error
+                                                                  );
+                                                                }
+                                                              );
+
+                                                          // res.json({
+                                                          //   message:
+                                                          //     "General info and thumbnail updated!",
+                                                          //   status: "200",
+                                                          //   updatedMedia:
+                                                          //     onMediaGcUpdate,
+                                                          //   updatedThumbnail:
+                                                          //     onThumbnailUpdate,
+                                                          // });
                                                         }
                                                       )
                                                       .catch(
@@ -2110,7 +2235,6 @@ const createVideoUpdated = async (req, res) => {
           thumbnail: savedThumbnail._id,
           content_type: content_type,
           availability: availability,
-          trailer: savedTrailer._id,
         });
 
         var savedVideoContent = await generalVideoObj.save();
