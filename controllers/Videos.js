@@ -2396,7 +2396,7 @@ const createVideoUpdated = async (req, res) => {
 
         var generalVideoObj = new Video({
           media: savedMedia._id,
-          category: "movie",
+          category: category,
           genre: genres,
           rating: rating,
           status: status,
