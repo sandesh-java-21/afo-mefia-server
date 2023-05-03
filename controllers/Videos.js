@@ -9,6 +9,10 @@ const AudioTracks = require("../models/AudioTracks");
 const Slider = require("../models/Slider");
 const Trailer = require("../models/Trailer");
 
+const cloudinary = require("cloudinary").v2;
+
+const cloudinaryConfigObj = require("../configurations/Cloudinary");
+
 const createVideo = async (req, res) => {
   try {
     var {
