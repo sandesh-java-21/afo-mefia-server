@@ -1219,12 +1219,12 @@ const updateVideoContent = async (req, res) => {
                                   "on cloudinary upload error: ",
                                   onCloudinaryUploadError
                                 );
-                                res.json({
-                                  message:
-                                    "Something went wrong while updating thumbnail!",
-                                  status: "400",
-                                  error: onCloudinaryUploadError,
-                                });
+                                // res.json({
+                                //   message:
+                                //     "Something went wrong while updating thumbnail!",
+                                //   status: "400",
+                                //   error: onCloudinaryUploadError,
+                                // });
                               });
                           })
                           .catch(async (onJwThumbnailDeleteError) => {
@@ -1507,12 +1507,12 @@ const updateVideoContent = async (req, res) => {
                             "on cloudinary upload error: ",
                             onCloudinaryUploadError
                           );
-                          res.json({
-                            message:
-                              "Something went wrong while updating thumbnail!",
-                            status: "400",
-                            error: onCloudinaryUploadError,
-                          });
+                          // res.json({
+                          //   message:
+                          //     "Something went wrong while updating thumbnail!",
+                          //   status: "400",
+                          //   error: onCloudinaryUploadError,
+                          // });
                         });
                     }
                   })
@@ -1707,12 +1707,12 @@ const updateVideoContent = async (req, res) => {
                                 "on cloudinary upload error: ",
                                 onCloudinaryUploadError
                               );
-                              res.json({
-                                message:
-                                  "Something went wrong while updating thumbnail!",
-                                status: "400",
-                                error: onCloudinaryUploadError,
-                              });
+                              // res.json({
+                              //   message:
+                              //     "Something went wrong while updating thumbnail!",
+                              //   status: "400",
+                              //   error: onCloudinaryUploadError,
+                              // });
                             });
                         })
                         .catch(async (deleteCloudinaryError) => {
