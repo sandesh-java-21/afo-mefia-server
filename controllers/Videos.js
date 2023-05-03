@@ -1253,7 +1253,7 @@ const updateVideoContent = async (req, res) => {
                             "on cloudinary upload success: ",
                             onCloudinaryUploadSuccess
                           );
-                          var public_id_3 = onCloudinaryUpload.public_id;
+                          var public_id_3 = onCloudinaryUploadSuccess.public_id;
 
                           var data = {
                             relationships: {
