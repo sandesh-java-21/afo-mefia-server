@@ -27,6 +27,11 @@ router.put(
 );
 
 router.put(
+  "/update-video-content/:video_content_id",
+  videoContentControllers.updateVideoContent
+);
+
+router.put(
   "/upload-media-id/:media_Obj_Id",
   videoContentControllers.uploadMediaId
 );
