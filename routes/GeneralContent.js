@@ -27,7 +27,7 @@ router.put(
 
 router.put(
   "/add-crew-members/:general_content_id",
-  crewMembersControllers.addCrewMembers
+  crewMembersControllers.addCrewMembersMovie
 );
 
 router.post(

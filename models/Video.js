@@ -47,6 +47,28 @@ const videoSchema = mongoose.Schema({
     required: false,
     default: 0,
   },
+  crew_members: [
+    {
+      member_name: {
+        type: String,
+        required: false,
+      },
+      member_role: {
+        type: String,
+        required: false,
+      },
+    },
+  ],
+  content_type: {
+    type: String,
+    required: false,
+    default: "",
+  },
+  availability: {
+    type: String,
+    required: false,
+    default: "",
+  },
   createdAt: {
     type: Date,
     default: Date.now(),
