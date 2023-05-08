@@ -70,10 +70,30 @@ const episodeSchema = mongoose.Schema({
     ref: "thumbnails",
     required: false,
   },
-
+  likes: {
+    type: Number,
+    required: false,
+    default: 0,
+  },
+  comments: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "comments",
+      default: [],
+    },
+  ],
   createdAt: {
     type: Date,
     default: Date.now(),
+  },
+
+  tv_show: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "tv_shows",
+  },
+  season: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "seasons",
   },
 });
 

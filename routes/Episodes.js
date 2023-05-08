@@ -13,4 +13,9 @@ router.post(
 
 router.patch("/upload-media-id/:episode_id", episodesControllers.uploadMediaId);
 
+router.delete(
+  "/delete-episode/:episode_id/:season_id",
+  episodesControllers.deleteEpisode
+);
+
 module.exports = router;

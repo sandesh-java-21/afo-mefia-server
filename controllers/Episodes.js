@@ -29,6 +29,7 @@ const createEpisodeOfASeason = async (req, res) => {
       imageBase64,
       language_code,
       duration,
+      tv_show_id,
     } = req.body;
 
     if (!season_id || season_id === "") {
@@ -97,6 +98,8 @@ const createEpisodeOfASeason = async (req, res) => {
                   comments: [],
                   likes: 0,
                   monetization: monetization,
+                  tv_show: tv_show_id,
+                  season: season_id,
                 });
 
                 var savedEpisode = await episodeObj.save();
@@ -187,6 +190,8 @@ const createEpisodeOfASeason = async (req, res) => {
               comments: [],
               likes: 0,
               monetization: monetization,
+              tv_show: tv_show_id,
+              season: season_id,
             });
 
             var savedEpisode = await episodeObj.save();
@@ -279,6 +284,8 @@ const deleteEpisode = async (req, res) => {
       Authorization: `Bearer ${process.env.JW_PLAYER_API_KEY}`,
     };
 
+    var site_id = process.env.SITE_ID;
+
     if (!episode_id || episode_id === "" || !season_id || season_id === "") {
       res.json({
         message: "Required fields are empty!",
@@ -370,8 +377,7 @@ const deleteEpisode = async (req, res) => {
                                             );
                                             var thumbnailDeleted =
                                               await Thumbnail.findOneAndDelete({
-                                                general_content:
-                                                  general_content_obj._id,
+                                                _id: onThumbnailFound._id,
                                               })
                                                 .then(
                                                   async (onThumbnailDelete) => {
@@ -523,8 +529,7 @@ const deleteEpisode = async (req, res) => {
 
                                           var thumbnailDeleted =
                                             await Thumbnail.findOneAndDelete({
-                                              general_content:
-                                                general_content_obj._id,
+                                              _id: onThumbnailFound._id,
                                             })
                                               .then(
                                                 async (onThumbnailDelete) => {
@@ -658,8 +663,7 @@ const deleteEpisode = async (req, res) => {
 
                                     var thumbnailDeleted =
                                       await Thumbnail.findOneAndDelete({
-                                        general_content:
-                                          general_content_obj._id,
+                                        _id: onThumbnailFound._id,
                                       })
                                         .then(async (onThumbnailDelete) => {
                                           console.log(
@@ -881,8 +885,7 @@ const deleteEpisode = async (req, res) => {
                                         );
                                         var thumbnailDeleted =
                                           await Thumbnail.findOneAndDelete({
-                                            general_content:
-                                              general_content_obj._id,
+                                            _id: onThumbnailFound._id,
                                           })
                                             .then(async (onThumbnailDelete) => {
                                               console.log(
@@ -1027,8 +1030,7 @@ const deleteEpisode = async (req, res) => {
 
                                       var thumbnailDeleted =
                                         await Thumbnail.findOneAndDelete({
-                                          general_content:
-                                            general_content_obj._id,
+                                          _id: onThumbnailFound._id,
                                         })
                                           .then(async (onThumbnailDelete) => {
                                             console.log(
@@ -1151,7 +1153,7 @@ const deleteEpisode = async (req, res) => {
 
                                 var thumbnailDeleted =
                                   await Thumbnail.findOneAndDelete({
-                                    general_content: general_content_obj._id,
+                                    _id: onThumbnailFound._id,
                                   })
                                     .then(async (onThumbnailDelete) => {
                                       console.log(
