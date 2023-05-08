@@ -11,4 +11,6 @@ router.post(
   episodesControllers.createEpisodeOfASeason
 );
 
+router.patch("/upload-media-id/:episode_id", episodesControllers.uploadMediaId);
+
 module.exports = router;

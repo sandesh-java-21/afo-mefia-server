@@ -2765,21 +2765,38 @@ const getUpcomingGeneralContent = async (req, res) => {
   try {
     const language_code = req.params.language_code;
 
-    const upcomingContent = await GeneralContent.find({
-      availability: "upcoming",
-    })
+    const upcomingContent = await GeneralContent.find(
+      {
+        availability: "upcoming",
+        status: "true",
+      },
+      {
+        crew_members: 0,
+        comments: 0,
+        rating: 0,
+        availability: 0,
+        createdAt: 0,
+        total_likes: 0,
+        trailer: 0,
+        category: 0,
+        genre: 0,
+      }
+    )
       .populate([
         {
           path: "media",
+          select: "title description duration",
           populate: {
             path: "translated_content",
+            select: "language_code",
             match: { language_code: language_code },
           },
         },
-        { path: "genre" },
-        { path: "trailer" },
-        { path: "thumbnail" },
-        { path: "comments" },
+        {
+          path: "thumbnail",
+          select:
+            "static_thumbnail_url motion_thumbnail_url banner_thumbnail_url",
+        },
       ])
       .exec();
 
