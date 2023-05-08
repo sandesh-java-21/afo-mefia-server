@@ -315,7 +315,7 @@ const deleteEpisode = async (req, res) => {
                 }
               )
               .then(async (onJwMediaDelete) => {
-                console.log("on jw media delete: ", onJwMediaDelete);
+                console.log("on jw media delete: ", onJwMediaDelete.data);
 
                 var subtitlesDeleted = await Subtitles.deleteMany({
                   _id: { $in: subtitles },
@@ -430,12 +430,57 @@ const deleteEpisode = async (req, res) => {
                                                                       "on episode delete: ",
                                                                       onEpisodeDelete
                                                                     );
-                                                                    res.json({
-                                                                      message:
-                                                                        "Episode Deleted!",
-                                                                      status:
-                                                                        "200",
-                                                                    });
+
+                                                                    var deletedEpisode =
+                                                                      await Episode.findByIdAndDelete(
+                                                                        {
+                                                                          _id: episode_obj._id,
+                                                                        }
+                                                                      )
+                                                                        .then(
+                                                                          async (
+                                                                            onEpisodeDeleteSuccess
+                                                                          ) => {
+                                                                            console.log(
+                                                                              "on episode delete success: ",
+                                                                              onEpisodeDeleteSuccess
+                                                                            );
+                                                                            res.json(
+                                                                              {
+                                                                                message:
+                                                                                  "Episode Deleted!",
+                                                                                status:
+                                                                                  "200",
+                                                                              }
+                                                                            );
+                                                                          }
+                                                                        )
+                                                                        .catch(
+                                                                          async (
+                                                                            onEpisodeDeleteSuccessError
+                                                                          ) => {
+                                                                            console.log(
+                                                                              "on episode delete success error: ",
+                                                                              onEpisodeDeleteSuccessError
+                                                                            );
+                                                                            res.json(
+                                                                              {
+                                                                                message:
+                                                                                  "Something went wrong while deleting episode from database!",
+                                                                                status:
+                                                                                  "400",
+                                                                                error:
+                                                                                  onEpisodeDeleteSuccessError,
+                                                                              }
+                                                                            );
+                                                                          }
+                                                                        );
+                                                                    // res.json({
+                                                                    //   message:
+                                                                    //     "Episode Deleted!",
+                                                                    //   status:
+                                                                    //     "200",
+                                                                    // });
                                                                   }
                                                                 )
                                                                 .catch(
@@ -581,12 +626,57 @@ const deleteEpisode = async (req, res) => {
                                                                     "on episode delete: ",
                                                                     onEpisodeDelete
                                                                   );
-                                                                  res.json({
-                                                                    message:
-                                                                      "Episode Deleted!",
-                                                                    status:
-                                                                      "200",
-                                                                  });
+
+                                                                  var deletedEpisode =
+                                                                    await Episode.findByIdAndDelete(
+                                                                      {
+                                                                        _id: episode_obj._id,
+                                                                      }
+                                                                    )
+                                                                      .then(
+                                                                        async (
+                                                                          onEpisodeDeleteSuccess
+                                                                        ) => {
+                                                                          console.log(
+                                                                            "on episode delete success: ",
+                                                                            onEpisodeDeleteSuccess
+                                                                          );
+                                                                          res.json(
+                                                                            {
+                                                                              message:
+                                                                                "Episode Deleted!",
+                                                                              status:
+                                                                                "200",
+                                                                            }
+                                                                          );
+                                                                        }
+                                                                      )
+                                                                      .catch(
+                                                                        async (
+                                                                          onEpisodeDeleteSuccessError
+                                                                        ) => {
+                                                                          console.log(
+                                                                            "on episode delete success error: ",
+                                                                            onEpisodeDeleteSuccessError
+                                                                          );
+                                                                          res.json(
+                                                                            {
+                                                                              message:
+                                                                                "Something went wrong while deleting episode from database!",
+                                                                              status:
+                                                                                "400",
+                                                                              error:
+                                                                                onEpisodeDeleteSuccessError,
+                                                                            }
+                                                                          );
+                                                                        }
+                                                                      );
+                                                                  // res.json({
+                                                                  //   message:
+                                                                  //     "Episode Deleted!",
+                                                                  //   status:
+                                                                  //     "200",
+                                                                  // });
                                                                 }
                                                               )
                                                               .catch(
@@ -710,11 +800,45 @@ const deleteEpisode = async (req, res) => {
                                                           "on episode delete: ",
                                                           onEpisodeDelete
                                                         );
-                                                        res.json({
-                                                          message:
-                                                            "Episode Deleted!",
-                                                          status: "200",
-                                                        });
+
+                                                        var deletedEpisode =
+                                                          await Episode.findByIdAndDelete(
+                                                            {
+                                                              _id: episode_obj._id,
+                                                            }
+                                                          )
+                                                            .then(
+                                                              async (
+                                                                onEpisodeDeleteSuccess
+                                                              ) => {
+                                                                console.log(
+                                                                  "on episode delete success: ",
+                                                                  onEpisodeDeleteSuccess
+                                                                );
+                                                                res.json({
+                                                                  message:
+                                                                    "Episode Deleted!",
+                                                                  status: "200",
+                                                                });
+                                                              }
+                                                            )
+                                                            .catch(
+                                                              async (
+                                                                onEpisodeDeleteSuccessError
+                                                              ) => {
+                                                                console.log(
+                                                                  "on episode delete success error: ",
+                                                                  onEpisodeDeleteSuccessError
+                                                                );
+                                                                res.json({
+                                                                  message:
+                                                                    "Something went wrong while deleting episode from database!",
+                                                                  status: "400",
+                                                                  error:
+                                                                    onEpisodeDeleteSuccessError,
+                                                                });
+                                                              }
+                                                            );
                                                       }
                                                     )
                                                     .catch(
@@ -814,16 +938,16 @@ const deleteEpisode = async (req, res) => {
                       error: onSubtitlesDeleteError,
                     });
                   });
-              })
-              .catch(async (onJwMediaDeleteError) => {
-                console.log("on jw media delete error: ", onJwMediaDeleteError);
-                res.json({
-                  message:
-                    "Something went wrong while deleting from jw player!",
-                  status: "400",
-                  error: onJwMediaDeleteError.response.data,
-                });
               });
+            // .catch(async (onJwMediaDeleteError) => {
+            //   console.log("on jw media delete error: ", onJwMediaDeleteError);
+            //   res.json({
+            //     message:
+            //       "Something went wrong while deleting from jw player!",
+            //     status: "400",
+            //     error: onJwMediaDeleteError.response.data,
+            //   });
+            // });
           } else {
             // not episode media id
 
@@ -934,11 +1058,52 @@ const deleteEpisode = async (req, res) => {
                                                                 "on episode delete: ",
                                                                 onEpisodeDelete
                                                               );
-                                                              res.json({
-                                                                message:
-                                                                  "Episode Deleted!",
-                                                                status: "200",
-                                                              });
+
+                                                              var deletedEpisode =
+                                                                await Episode.findByIdAndDelete(
+                                                                  {
+                                                                    _id: episode_obj._id,
+                                                                  }
+                                                                )
+                                                                  .then(
+                                                                    async (
+                                                                      onEpisodeDeleteSuccess
+                                                                    ) => {
+                                                                      console.log(
+                                                                        "on episode delete success: ",
+                                                                        onEpisodeDeleteSuccess
+                                                                      );
+                                                                      res.json({
+                                                                        message:
+                                                                          "Episode Deleted!",
+                                                                        status:
+                                                                          "200",
+                                                                      });
+                                                                    }
+                                                                  )
+                                                                  .catch(
+                                                                    async (
+                                                                      onEpisodeDeleteSuccessError
+                                                                    ) => {
+                                                                      console.log(
+                                                                        "on episode delete success error: ",
+                                                                        onEpisodeDeleteSuccessError
+                                                                      );
+                                                                      res.json({
+                                                                        message:
+                                                                          "Something went wrong while deleting episode from database!",
+                                                                        status:
+                                                                          "400",
+                                                                        error:
+                                                                          onEpisodeDeleteSuccessError,
+                                                                      });
+                                                                    }
+                                                                  );
+                                                              // res.json({
+                                                              //   message:
+                                                              //     "Episode Deleted!",
+                                                              //   status: "200",
+                                                              // });
                                                             }
                                                           )
                                                           .catch(
@@ -1079,11 +1244,53 @@ const deleteEpisode = async (req, res) => {
                                                               "on episode delete: ",
                                                               onEpisodeDelete
                                                             );
-                                                            res.json({
-                                                              message:
-                                                                "Episode Deleted!",
-                                                              status: "200",
-                                                            });
+
+                                                            var deletedEpisode =
+                                                              await Episode.findByIdAndDelete(
+                                                                {
+                                                                  _id: episode_obj._id,
+                                                                }
+                                                              )
+                                                                .then(
+                                                                  async (
+                                                                    onEpisodeDeleteSuccess
+                                                                  ) => {
+                                                                    console.log(
+                                                                      "on episode delete success: ",
+                                                                      onEpisodeDeleteSuccess
+                                                                    );
+                                                                    res.json({
+                                                                      message:
+                                                                        "Episode Deleted!",
+                                                                      status:
+                                                                        "200",
+                                                                    });
+                                                                  }
+                                                                )
+                                                                .catch(
+                                                                  async (
+                                                                    onEpisodeDeleteSuccessError
+                                                                  ) => {
+                                                                    console.log(
+                                                                      "on episode delete success error: ",
+                                                                      onEpisodeDeleteSuccessError
+                                                                    );
+                                                                    res.json({
+                                                                      message:
+                                                                        "Something went wrong while deleting episode from database!",
+                                                                      status:
+                                                                        "400",
+                                                                      error:
+                                                                        onEpisodeDeleteSuccessError,
+                                                                    });
+                                                                  }
+                                                                );
+
+                                                            // res.json({
+                                                            //   message:
+                                                            //     "Episode Deleted!",
+                                                            //   status: "200",
+                                                            // });
                                                           }
                                                         )
                                                         .catch(
@@ -1198,11 +1405,51 @@ const deleteEpisode = async (req, res) => {
                                                       "on episode delete: ",
                                                       onEpisodeDelete
                                                     );
-                                                    res.json({
-                                                      message:
-                                                        "Episode Deleted!",
-                                                      status: "200",
-                                                    });
+
+                                                    var deletedEpisode =
+                                                      await Episode.findByIdAndDelete(
+                                                        {
+                                                          _id: episode_obj._id,
+                                                        }
+                                                      )
+                                                        .then(
+                                                          async (
+                                                            onEpisodeDeleteSuccess
+                                                          ) => {
+                                                            console.log(
+                                                              "on episode delete success: ",
+                                                              onEpisodeDeleteSuccess
+                                                            );
+                                                            res.json({
+                                                              message:
+                                                                "Episode Deleted!",
+                                                              status: "200",
+                                                            });
+                                                          }
+                                                        )
+                                                        .catch(
+                                                          async (
+                                                            onEpisodeDeleteSuccessError
+                                                          ) => {
+                                                            console.log(
+                                                              "on episode delete success error: ",
+                                                              onEpisodeDeleteSuccessError
+                                                            );
+                                                            res.json({
+                                                              message:
+                                                                "Something went wrong while deleting episode from database!",
+                                                              status: "400",
+                                                              error:
+                                                                onEpisodeDeleteSuccessError,
+                                                            });
+                                                          }
+                                                        );
+
+                                                    // res.json({
+                                                    //   message:
+                                                    //     "Episode Deleted!",
+                                                    //   status: "200",
+                                                    // });
                                                   }
                                                 )
                                                 .catch(
