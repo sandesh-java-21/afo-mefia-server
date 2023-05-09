@@ -1712,8 +1712,6 @@ const getEpisodeById = async (req, res) => {
     } else {
       var episode = await Episode.findById(episode_id)
         .populate([
-          "season",
-          "tv_show",
           "thumbnail",
           "translated_content",
           "audio_tracks",
@@ -1758,6 +1756,7 @@ const getEpisodesListByTvShowId = async (req, res) => {
       var episodes = await Episode.find({
         tv_show: tv_show_id,
       })
+        .populate("thumbnail")
         .then(async (onEpisodesFound) => {
           console.log("on episodes found: ", onEpisodesFound);
           res.json({

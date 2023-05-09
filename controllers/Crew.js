@@ -1,5 +1,6 @@
 const GeneralContent = require("../models/GeneralContent");
 const Video = require("../models/Video");
+const TvShow = require("../models/TvShow");
 
 const addCrewMembersMovie = async (req, res) => {
   try {
@@ -99,7 +100,57 @@ const addCrewMembersVideo = async (req, res) => {
   }
 };
 
+const addCrewMembersTvShow = async (req, res) => {
+  try {
+    var tv_show_id = req.params.tv_show_id;
+    var { crew_members } = req.body;
+
+    var tv_show_content = await TvShow.findById(tv_show_id)
+      .then(async (onTvFound) => {
+        console.log("on tv found: ", onTvFound);
+
+        var updated = await TvShow.findByIdAndUpdate(
+          onTvFound._id,
+          { $push: { crew_members: { $each: crew_members } } },
+          { new: true }
+        )
+          .then(async (onTvUpdate) => {
+            console.log("on tv update: ", onTvUpdate);
+
+            res.json({
+              message: "Crew members added!",
+              status: "200",
+              updatedTvShow: onTvUpdate,
+            });
+          })
+          .catch(async (onGcNotUpdate) => {
+            console.log("on vc not update: ", onGcNotUpdate);
+            res.json({
+              message: "Something went wrong while updating video content!",
+              status: "400",
+              error: onGcNotUpdate,
+            });
+          });
+      })
+      .catch(async (onGcNotFound) => {
+        console.log("on gc not found: ", onGcNotFound);
+        res.json({
+          message: "Video not found!",
+          status: "404",
+          error: onGcNotFound,
+        });
+      });
+  } catch (error) {
+    res.json({
+      message: "Internal server error!",
+      status: "500",
+      error,
+    });
+  }
+};
+
 module.exports = {
   addCrewMembersMovie,
   addCrewMembersVideo,
+  addCrewMembersTvShow,
 };
