@@ -674,9 +674,47 @@ const updateTvShow = async (req, res) => {
   }
 };
 
+const getTvShow = async (req, res) => {
+  try {
+    var tv_show_id = req.params.tv_show_id;
+
+    if (!tv_show_id || tv_show_id === "") {
+      res.json({
+        message: "Required fields are empty!",
+        status: "400",
+      });
+    } else {
+      var tv_show = await TvShow.findById({
+        _id: tv_show_id,
+      })
+        .populate(["genre", "trailer", "thumbnail", "seasons"])
+        .then(async (onTvShowFound) => {
+          var tv_show_obj = onTvShowFound;
+          res.json({
+            tv_show_obj,
+          });
+        })
+        .catch((error) => {
+          res.json({
+            message: "General content not found!",
+            status: "404",
+            error,
+          });
+        });
+    }
+  } catch (error) {
+    res.json({
+      message: "Internal Server Error!",
+      status: "400",
+      error,
+    });
+  }
+};
+
 module.exports = {
   createTvShow,
   geAllTvShows,
   getSeasonsOfATvShow,
   createSeasonOfAtvShow,
+  getTvShow,
 };

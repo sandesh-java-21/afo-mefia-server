@@ -5,6 +5,9 @@ const router = express.Router();
 const tvShowsControllers = require("../controllers/TvShows");
 
 router.get("/get-all-tv-shows-list", tvShowsControllers.geAllTvShows);
+
+router.get("/get-tv-show/:tv_show_id", tvShowsControllers.getTvShow);
+
 router.post("/create-tv-show", tvShowsControllers.createTvShow);
 router.get(
   "/get-seasons-of-a-tv-show/:tv_show_id",

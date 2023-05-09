@@ -10,6 +10,7 @@ const cloudinary = require("cloudinary").v2;
 
 const cloudinaryConfigObj = require("../configurations/Cloudinary");
 const { default: axios } = require("axios");
+const { mongo, default: mongoose } = require("mongoose");
 
 const createEpisodeOfASeason = async (req, res) => {
   try {
@@ -1700,8 +1701,94 @@ const uploadMediaId = async (req, res) => {
   }
 };
 
+const getEpisodeById = async (req, res) => {
+  try {
+    var episode_id = req.params.episode_id;
+    if (!episode_id || episode_id === "") {
+      res.json({
+        message: "Required fields are empty!",
+        status: "400",
+      });
+    } else {
+      var episode = await Episode.findById(episode_id)
+        .populate([
+          "season",
+          "tv_show",
+          "thumbnail",
+          "translated_content",
+          "audio_tracks",
+          "subtitles",
+        ])
+        .then(async (onEpisodeFound) => {
+          console.log("on episode found: ", onEpisodeFound);
+          res.json({
+            message: "Episode found!",
+            status: "200",
+            episodeObj: onEpisodeFound,
+          });
+        })
+        .catch(async (onEpisodeFoundError) => {
+          console.log("on episode found error: ", onEpisodeFoundError);
+          res.json({
+            message: "Episode not found!",
+            status: "404",
+            error: onEpisodeFoundError,
+          });
+        });
+    }
+  } catch (error) {
+    res.json({
+      message: "Internal server error!",
+      status: "500",
+      error,
+    });
+  }
+};
+
+const getEpisodesListByTvShowId = async (req, res) => {
+  try {
+    var tv_show_id = req.params.tv_show_id;
+
+    if (!tv_show_id || tv_show_id === "") {
+      res.json({
+        message: "Required fields are empty!",
+        status: "400",
+      });
+    } else {
+      var episodes = await Episode.find({
+        tv_show: tv_show_id,
+      })
+        .then(async (onEpisodesFound) => {
+          console.log("on episodes found: ", onEpisodesFound);
+          res.json({
+            message: "Episodes found for tv show!",
+            status: "200",
+            episodes: onEpisodesFound,
+          });
+        })
+        .catch(async (onEpisodesFoundError) => {
+          console.log("on episode found error: ", onEpisodesFoundError);
+          res.json({
+            message:
+              "Something went wrong while finding episodes for a tv show!",
+            status: "400",
+            error: onEpisodesFoundError,
+          });
+        });
+    }
+  } catch (error) {
+    res.json({
+      message: "Internal server error!",
+      status: "500",
+      error,
+    });
+  }
+};
+
 module.exports = {
   createEpisodeOfASeason,
   deleteEpisode,
   uploadMediaId,
+  getEpisodeById,
+  getEpisodesListByTvShowId,
 };

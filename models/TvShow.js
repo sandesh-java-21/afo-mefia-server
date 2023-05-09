@@ -98,6 +98,13 @@ const tvShowSchema = mongoose.Schema({
       default: [],
     },
   ],
+  episodes: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "episodes",
+      default: [],
+    },
+  ],
 
   createdAt: {
     type: Date,
