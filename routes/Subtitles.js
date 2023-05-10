@@ -10,6 +10,11 @@ router.post(
   subtitlesControllers.addSubtitlesUpdated_V2
 );
 
+router.post(
+  "/add-subtitles-for-episode/:episode_id",
+  subtitlesControllers.addSubtitlesForEpisode
+);
+
 router.delete(
   "/delete-subtitles/:media_object_id/:subtitles_id",
   subtitlesControllers.deletedSubtitles
