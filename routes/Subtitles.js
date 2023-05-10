@@ -35,7 +35,7 @@ router.get(
 );
 
 router.get(
-  "/get-subtitles-by-episodd/:episode_id",
+  "/get-subtitles-by-episode/:episode_id",
   subtitlesControllers.getSubtitlesByEpisodeId
 );
 
