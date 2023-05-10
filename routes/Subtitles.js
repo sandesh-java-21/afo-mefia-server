@@ -20,6 +20,11 @@ router.delete(
   subtitlesControllers.deletedSubtitles
 );
 
+router.delete(
+  "/delete-subtitles-of-episode/:episode_id/:subtitles_id",
+  subtitlesControllers.deletedSubtitlesOfEpisode
+);
+
 router.get(
   "/get-subtitles-by-general-content/:general_content_id",
   subtitlesControllers.getSubtitlesByGeneralContentId
@@ -27,6 +32,11 @@ router.get(
 router.get(
   "/get-subtitles-by-media/:media_id",
   subtitlesControllers.getSubtitlesByMediaId
+);
+
+router.get(
+  "/get-subtitles-by-episodd/:episode_id",
+  subtitlesControllers.getSubtitlesByEpisodeId
 );
 
 router.put(

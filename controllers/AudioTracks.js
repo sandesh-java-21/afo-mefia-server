@@ -3,6 +3,7 @@ const Media = require("../models/Media");
 const GeneralContent = require("../models/GeneralContent");
 const LanguagesContent = require("../models/LanguagesContent");
 const Video = require("../models/Video");
+const Episode = require("../models/Episode");
 
 const { translate } = require("free-translate");
 
@@ -781,6 +782,337 @@ const updateAudioTrack = async (req, res) => {
   }
 };
 
+const addAudioTrackForEpisode = async (req, res) => {
+  // try {
+  var episode_id = req.params.episode_id;
+  var { original_id, name, type, language, language_code } = req.body;
+
+  var mediaObj = await Episode.findById({
+    _id: episode_id,
+  }).populate(["audio_tracks", "translated_content"]);
+
+  if (!mediaObj) {
+    res.json({
+      message: "No media found!",
+      status: "404",
+    });
+  } else {
+    var translated_contents = mediaObj.translated_content;
+
+    var isTranslationAvailable = translated_contents.some(
+      (obj) => obj.language_type === language
+    );
+
+    console.log(isTranslationAvailable);
+
+    if (isTranslationAvailable) {
+      var audioTrack = new AudioTracks({
+        original_id: original_id,
+        name,
+        type,
+        language,
+        language_code,
+        media: mediaObj._id,
+      });
+
+      var savedAudioTrack = await audioTrack.save();
+
+      var filter = {
+        _id: mediaObj._id,
+      };
+
+      var updatedMedia = await Episode.findByIdAndUpdate(
+        filter,
+        {
+          $push: { audio_tracks: savedAudioTrack._id },
+        },
+        {
+          new: true,
+        }
+      )
+        .then((updatedMediaResult) => {
+          console.log("Saved audio tracks: ", savedAudioTrack);
+          res.json({
+            message: "Audio track Created!",
+            status: "200",
+            savedAudioTrack,
+            updatedMediaResult,
+          });
+        })
+        .catch((error) => {
+          res.json({
+            error,
+          });
+        });
+    } else {
+      // var translated_title = await translate(mediaObj.title, {
+      //   to: language_code,
+      // });
+      // var translated_description = await translate(mediaObj.description, {
+      //   to: language_code,
+      // });
+
+      var translated_content_obj = new LanguagesContent({
+        title_translated: mediaObj.title,
+        description_translated: mediaObj.description,
+        // title_translated: translated_title,
+        // description_translated: translated_description,
+        language_type: language,
+        language_code: language_code,
+      });
+
+      var savedTranslation = translated_content_obj
+        .save()
+        .then(async (onSaveTranslation) => {
+          var audioTrackObj = new AudioTracks({
+            original_id: original_id,
+            name,
+            type,
+            language,
+            language_code,
+            media: mediaObj._id,
+          });
+
+          var savedAudioTrackObj = await audioTrackObj
+            .save()
+            .then(async (onSaveAudioTrack) => {
+              var filter = {
+                _id: mediaObj._id,
+              };
+              console.log(
+                "subtitles and content:  ",
+                onSaveAudioTrack._id,
+                onSaveTranslation._id
+              );
+
+              var updatedMedia = await Episode.findByIdAndUpdate(
+                filter,
+                {
+                  $push: {
+                    audio_tracks: onSaveAudioTrack._id,
+                    translated_content: onSaveTranslation._id,
+                  },
+                },
+                {
+                  new: true,
+                }
+              )
+                .then((updatedMediaResult) => {
+                  console.log("Saved Subtitles: ", onSaveAudioTrack);
+                  res.json({
+                    message: "Subtitles Created!",
+                    status: "200",
+                    updatedMediaResult,
+                    onSaveAudioTrack,
+                    onSaveTranslation,
+                  });
+                })
+                .catch((error) => {
+                  res.json({
+                    error,
+                  });
+                });
+            });
+        })
+        .catch((onSaveTranslationError) => {
+          res.json({
+            onSaveTranslationError,
+          });
+        });
+    }
+
+    // var subtitlesObj = new Subtitles({
+    //   track_id: track_id,
+    //   delivery_url: delivery_url,
+    //   track_kind: track_kind,
+    //   language: language,
+    //   media: media_obj_id,
+    // });
+
+    // var savedSubtitles = subtitlesObj.save();
+
+    // var filter = {
+    //   _id: mediaObj._id,
+    // };
+
+    // var updatedMedia = await Media.findByIdAndUpdate(
+    //   filter,
+    //   {
+    //     $push: { subtitles: subtitlesObj._id },
+    //   },
+    //   {
+    //     new: true,
+    //   }
+    // )
+    //   .then((updatedMediaResult) => {
+    //     console.log("Saved Subtitles: ", savedSubtitles);
+    //     res.json({
+    //       message: "Subtitles Created!",
+    //       status: "200",
+    //       savedSubtitles,
+    //       updatedMediaResult,
+    //     });
+    //   })
+    //   .catch((error) => {
+    //     res.json({
+    //       error,
+    //     });
+    //   });
+  }
+  // } catch (error) {
+  //   res.json({
+  //     message: "Internal server error!",
+  //     status: "500",
+  //     error,
+  //   });
+  // }
+};
+
+const deleteAudioTrackOfEpisode = async (req, res) => {
+  try {
+    var episode_id = req.params.episode_id;
+    var audio_track_id = req.params.audio_track_id;
+
+    if (!episode_id || episode_id === "") {
+      res.json({
+        message: "Required fields are empty, please provide a movie id!",
+        status: "400",
+      });
+    } else {
+      var mediaObj = await Episode.findById({
+        _id: episode_id,
+      });
+
+      if (!mediaObj) {
+        res.json({
+          message: "No media found with provided media id!",
+          status: "404",
+        });
+      } else {
+        var site_id = process.env.SITE_ID;
+        var media_id = mediaObj.media_id;
+
+        var audioTrack = await AudioTracks.findOne({
+          _id: audio_track_id,
+        });
+        if (!audioTrack) {
+          res.json({
+            message: "No audio track found with provided media id!",
+            status: "404",
+          });
+        } else {
+          var original_id = audioTrack.original_id;
+          var headers = {
+            Authorization: `Bearer ${process.env.JW_PLAYER_API_KEY}`,
+          };
+          var apiResponse = await axios
+            .delete(
+              `https://api.jwplayer.com/v2/sites/${site_id}/media/${media_id}/originals/${original_id}/`,
+              {
+                headers: headers,
+              }
+            )
+            .then(async (result) => {
+              console.log("JW API Success: ", result.data);
+
+              var updatedMedia = Episode.updateOne(
+                {
+                  _id: mediaObj._id,
+                },
+                {
+                  $pull: {
+                    audio_tracks: audioTrack._id,
+                  },
+                },
+                {
+                  new: true,
+                }
+              )
+
+                .then(async (result) => {
+                  var deletedAudioTrack = await AudioTracks.findByIdAndDelete({
+                    _id: audioTrack._id,
+                  })
+
+                    .then((result) => {
+                      console.log("Database success: ", result);
+                      res.json({
+                        message: "Audio track deleted!",
+                        status: "200",
+                      });
+                    })
+                    .catch((error) => {
+                      console.log("Database error delete audio: ", error);
+                      res.json({
+                        message: "Something went wrong!",
+                        status: "400",
+                      });
+                    });
+                })
+                .catch((error) => {
+                  console.log("Database error: ", error);
+                  res.json({
+                    message: "Something went wrong!",
+                    status: "503",
+                  });
+                });
+            })
+            .catch((error) => {
+              console.log("JW API Error: ", error);
+              res.json({
+                message: "Something went wrong!",
+                status: "503",
+              });
+            });
+        }
+      }
+    }
+  } catch (error) {
+    res.json({
+      message: "Internal server error!",
+      status: "500",
+      error,
+    });
+  }
+};
+
+const getAudioTracksByEpisodeId = async (req, res) => {
+  try {
+    var episode_id = req.params.episode_id;
+
+    if (!episode_id || episode_id === "") {
+      res.json({
+        message: "Required fields are empty!",
+        status: "400",
+      });
+    } else {
+      var media = await Episode.findById({
+        _id: episode_id,
+      }).populate("audio_tracks");
+
+      if (media) {
+        res.json({
+          message: "Audio tracks found!",
+          status: "200",
+          audio_tracks: media.audio_tracks,
+        });
+      } else {
+        res.json({
+          message: "No audio tracks found!",
+          status: "404",
+          audio_tracks: [],
+        });
+      }
+    }
+  } catch (error) {
+    res.json({
+      message: "Internal server error!",
+      status: "500",
+      error,
+    });
+  }
+};
+
 module.exports = {
   addAudioTrack,
   deletedAudioTrack,
@@ -791,4 +1123,7 @@ module.exports = {
   addAudioTrackUpdated_V2,
   updateAudioTrack_V2,
   getAudioTracksByVideoContentId,
+  addAudioTrackForEpisode,
+  deleteAudioTrackOfEpisode,
+  getAudioTracksByEpisodeId,
 };

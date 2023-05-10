@@ -864,6 +864,117 @@ const addSubtitlesForEpisode = async (req, res) => {
   }
 };
 
+const deletedSubtitlesOfEpisode = async (req, res) => {
+  try {
+    var episode_id = req.params.episode_id;
+    var subtitles_id = req.params.subtitles_id;
+
+    var mediaObj = await Episode.findById({
+      _id: episode_id,
+    });
+    var media_id = mediaObj.media_id;
+    var subtitles = await Subtitles.findOne({
+      _id: subtitles_id,
+    });
+
+    var site_id = process.env.SITE_ID;
+    var track_id = subtitles?.track_id;
+
+    var headers = {
+      Authorization: `Bearer ${process.env.JW_PLAYER_API_KEY}`,
+    };
+
+    var apiResponse = await axios
+      .delete(
+        `https://api.jwplayer.com/v2/sites/${site_id}/media/${media_id}/text_tracks/${track_id}/`,
+        {
+          headers: headers,
+        }
+      )
+      .then((result) => {
+        var updatedMedia = Episode.updateOne(
+          {
+            _id: mediaObj._id,
+          },
+          {
+            $pull: {
+              subtitles: subtitles._id,
+            },
+          },
+          {
+            new: true,
+          }
+        )
+          .then(async (result) => {
+            var deletedSubtitles = await Subtitles.findByIdAndDelete({
+              _id: subtitles._id,
+            });
+
+            res.json({
+              message: "Subtitles deleted!",
+              status: "200",
+              result: result.data,
+            });
+          })
+          .catch((error) => {
+            console.log("Database Error: ", error);
+            res.json({
+              message: "No media found with provided id!",
+              status: "404",
+              error,
+            });
+          });
+      })
+      .catch((error) => {
+        console.log("JW Error: ", error);
+        res.send(error);
+      });
+  } catch (error) {
+    res.json({
+      message: "Internal server error!",
+      status: "500",
+      error,
+    });
+  }
+};
+
+const getSubtitlesByEpisodeId = async (req, res) => {
+  try {
+    var episode_id = req.params.episode_id;
+
+    if (!episode_id || episode_id === "") {
+      res.json({
+        message: "Required fields are empty!",
+        status: "400",
+      });
+    } else {
+      var media = await Episode.findById({
+        _id: episode_id,
+      }).populate("subtitles");
+
+      if (media) {
+        res.json({
+          message: "Subtitles found!",
+          status: "200",
+          subtitles: media.subtitles,
+        });
+      } else {
+        res.json({
+          message: "Media not found!",
+          status: "404",
+          subtitles: [],
+        });
+      }
+    }
+  } catch (error) {
+    res.json({
+      message: "Internal server error!",
+      status: "500",
+      error,
+    });
+  }
+};
+
 module.exports = {
   addSubtitles,
   deletedSubtitles,
@@ -874,4 +985,6 @@ module.exports = {
   addSubtitlesUpdated_V2,
   updateSubtitles_V2,
   addSubtitlesForEpisode,
+  deletedSubtitlesOfEpisode,
+  getSubtitlesByEpisodeId,
 };
