@@ -3,10 +3,11 @@ const Time = new Date();
 
 function signed_url(
   path,
-  expires = 10000,
-  secret = process.env.JW_PLAYER_API_KEY,
-  host = "https://cdn.jwplayer.com"
+  expires,
+  secret = process.env.JW_PLAYER_API_SECRET,
+  host = 'https://cdn.jwplayer.com'
 ) {
+  console.log(expires);
   const base = `${path}:${expires}:${secret}`;
   const signature = MD5(base);
   return `${host}/${path}?exp=${expires}&sig=${signature}`;
@@ -14,16 +15,15 @@ function signed_url(
 
 function get_response(mediaid, playerid) {
   const path = `players/${mediaid}-${playerid}.js`;
-  const expires = Math.ceil((Time.getTime() + 3600) / 300) * 300;
+  let ts = parseInt((Date.now() + 3600) / 1000);
+  const expires = ts + 50;//Math.ceil((Time.getTime()/1000 + 3600) / 300) * 300;
+  console.log(ts, expires);
   return signed_url(path, expires);
 }
 
 const signUrl = async (req, res) => {
   try {
     var media_id = req.params.media_id;
-
-    console.log("media id: ", media_id);
-
     var response = get_response(media_id, "4t00MwmP");
     res.json({
       message: "Signed URL Generated!",

@@ -16,7 +16,6 @@ const mediaSchema = mongoose.Schema({
     required: false,
     default: 0,
   },
-
   default_language: {
     type: String,
     required: false,
@@ -40,7 +39,6 @@ const mediaSchema = mongoose.Schema({
       default: [],
     },
   ],
-
   audio_tracks: [
     {
       type: mongoose.Schema.Types.ObjectId,

@@ -4,9 +4,9 @@ const User = require("../models/User");
 const addToHistory = async (req, res) => {
   try {
     var user_id = req.params.user_id;
-    var { media_obj_id } = req.body;
+    var { general_content_id } = req.body;
 
-    if (!user_id || user_id === "" || !media_obj_id || media_obj_id === "") {
+    if (!user_id || user_id === "" || !general_content_id || general_content_id === "") {
       res.json({
         message: "Required fields are empty!",
         status: "400",
@@ -17,7 +17,7 @@ const addToHistory = async (req, res) => {
           console.log("on user found: ", onUserFound);
 
           var history = new History({
-            media: media_obj_id,
+            general_content: general_content_id,
             user: onUserFound._id,
           });
 

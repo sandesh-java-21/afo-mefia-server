@@ -2805,30 +2805,39 @@ const getUpcomingGeneralContent = async (req, res) => {
 
 const getLatestGeneralContent = async (req, res) => {
   // try {
+  let cd = new Date();
+  cd.setMonth(cd.getMonth() - 1)
   const language_code = req.params.language_code;
-
-  const currentDate = new Date();
-  const currentYear = currentDate.getFullYear();
-  const currentMonth = currentDate.getMonth() + 1;
-
-  const generalContent = await GeneralContent.find({
-    "translated_content.language_code": language_code,
-  })
-    .populate("media")
-    .exec();
-
-  const filteredGeneralContent = generalContent.filter((content) => {
-    const releaseYear = content.media.release_year.getFullYear();
-    const releaseMonth = content.media.release_year.getMonth() + 1;
-    return releaseYear === currentYear && releaseMonth === currentMonth;
-  });
-
-  console.log("upcoming content: ", filteredGeneralContent);
-  res.send(filteredGeneralContent);
-
-  // const filteredContent = upcomingContent.filter((content) => {
-  //   return content.media.translated_content.length > 0;
-  // });
+  GeneralContent.find({
+    $and: [
+      { availability: "released" },
+      { status: true }
+    ]
+  }, { category: true, content_type: true })
+    .populate([
+      {
+        path: "media",
+        match: { release_year: { $gte: new Date(cd) } },
+        select: "title",
+        populate: {
+          path: "translated_content",
+          select: "language_code",
+          match: { language_code: language_code },
+        },
+      },
+      { path: "genre", select: "name" },
+      { path: "thumbnail", select: "static_thumbnail_url motion_thumbnail_url banner_thumbnail_url" }
+    ])
+    .exec().then(generalContent => {
+      console.log(cd);
+      res.send(generalContent);
+    }).catch(err => {
+      res.json({
+        message: "Internal server error!",
+        status: "500",
+        err,
+      });
+    })
   // } catch (error) {
   //   res.json({
   //     message: "Internal server error!",
@@ -2840,28 +2849,42 @@ const getLatestGeneralContent = async (req, res) => {
 
 const getListOfGeneralContentByGenre = async (req, res) => {
   try {
-    const genres = await Genre.find({});
-
+    let language_code = req.params.language_code
+    const genres = await Genre.find();
     // Create an array to store the list of lists
     const generalContentList = [];
 
     // Loop through each genre
     for (const genre of genres) {
       // Find all general contents for this genre
-      const generalContents = await GeneralContent.find({
-        genre: genre._id,
-      })
-        .populate("genre")
-        .populate("media")
-        .populate("thumbnail");
-
-      // Add the list of general contents to the list of lists
-      generalContentList.push(generalContents);
+      // await genres.map(async (genre) => {
+      const generalContents = await GeneralContent.find(
+        { $and: [{ genre: genre._id, }, { status: true }] },
+        { crew_members: false, comments: false })
+        .populate([
+          {
+            path: "media",
+            select: "title",
+            populate: {
+              path: "translated_content",
+              select: "language_code",
+              match: { language_code: language_code },
+            },
+          },
+          { path: "thumbnail", select: "static_thumbnail_url motion_thumbnail_url banner_thumbnail_url" },
+        ]).exec();
+      if (generalContents.length)
+        generalContentList.push({ genre: genre.name, generalContents });
     }
+    // .then(() => {
+    // console.log(generalContents);
+    res.json(generalContentList);
+    // }))
+    // }
 
     // Return the list of lists
-    res.json(generalContentList);
   } catch (error) {
+    console.log(error);
     res.json({
       message: "Internal server error!",
       status: "500",

@@ -41,7 +41,7 @@ router.post(
 );
 
 router.post(
-  "/get-movies-by-genre",
+  "/get-movies-by-genre/:language_code",
   generalContentControllers.getListOfGeneralContentByGenre
 );
 

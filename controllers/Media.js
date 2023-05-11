@@ -574,28 +574,10 @@ const createMediaUpdated = async (req, res) => {
       monetization,
     } = req.body;
 
-    console.log(
-      "Data body: ",
-      title,
-      description,
-      jw_tags,
-      category,
-      default_language,
-      release_year,
-      genres,
-      seo_tags,
-      rating,
-      status,
-      isThumbnailSelected,
-      content_type,
-      availability,
-      monetization
-    );
-
-    console.log("body req: ", req.body);
-
+    console.log(req.body);
     category = "movie";
 
+    // if (!title || !description || !jw_tags || !category || !default_language || !release_year || !genres || !seo_tags || !rating || !status || !isThumbnailSelected || !language_code || !imageBase64 || !content_type || !availability || !monetization) {
     if (!title) {
       res.json({
         message: "Required fields are empty!",
