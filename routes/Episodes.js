@@ -25,4 +25,6 @@ router.delete(
   episodesControllers.deleteEpisode
 );
 
+router.put("/update-episode/:episode_id", episodesControllers.updatedEpisode);
+
 module.exports = router;

@@ -109,13 +109,15 @@ const deleteSeasonById = async (req, res) => {
               onSeasonFound._id
             )
               .then(async (onSeasonDelete) => {
+                console.log("on season delete: ", onSeasonDelete);
+
                 var updatedTvShow = await TvShow.findOneAndUpdate(
                   {
                     season: onSeasonFound._id,
                   },
                   {
                     $pull: {
-                      seasons: season_id,
+                      seasons: onSeasonDelete._id,
                     },
                   },
                   {

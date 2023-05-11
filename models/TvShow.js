@@ -106,6 +106,11 @@ const tvShowSchema = mongoose.Schema({
     },
   ],
 
+  monetization: {
+    type: Boolean,
+    required: false,
+  },
+
   createdAt: {
     type: Date,
     default: Date.now(),

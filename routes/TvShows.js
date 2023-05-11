@@ -26,4 +26,6 @@ router.patch(
   trailerControllers.uploadTrailerOfTvShow
 );
 
+router.put("/update-tv-show/:tv_show_id", tvShowsControllers.updateTvShow);
+
 module.exports = router;
