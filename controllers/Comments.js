@@ -230,9 +230,9 @@ const updateComment = async (req, res) => {
               var updatedComment_obj = await Comment.findByIdAndUpdate(
                 filter,
                 updateCommentData,
-                {
-                  new: true,
-                }
+                // {
+                //   new: true,
+                // }
               )
                 .then(async (onCommentUpdate) => {
                   console.log("on comment update: ", onCommentUpdate);
