@@ -11,4 +11,18 @@ router.post(
   episodesControllers.createEpisodeOfASeason
 );
 
+router.get("/get-episode/:episode_id", episodesControllers.getEpisodeById);
+
+router.get(
+  "/get-episode-list/:tv_show_id",
+  episodesControllers.getEpisodesListByTvShowId
+);
+
+router.patch("/upload-media-id/:episode_id", episodesControllers.uploadMediaId);
+
+router.delete(
+  "/delete-episode/:episode_id/:season_id",
+  episodesControllers.deleteEpisode
+);
+
 module.exports = router;

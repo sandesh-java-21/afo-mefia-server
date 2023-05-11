@@ -640,9 +640,9 @@ const updateVideoContent = async (req, res) => {
                                 var publicId =
                                   cloudinaryUploadSuccess.public_id;
 
-                                var headers = {
-                                  Authorization: `Bearer ${process.env.JW_PLAYER_API_KEY}`,
-                                };
+                                // var headers = {
+                                //   Authorization: `Bearer ${process.env.JW_PLAYER_API_KEY}`,
+                                // };
 
                                 var data = {
                                   relationships: {
@@ -945,9 +945,9 @@ const updateVideoContent = async (req, res) => {
 
                         var thumbnail_id = thumbnailObj.thumbnail_id;
                         var site_id = process.env.SITE_ID;
-                        var headers = {
-                          Authorization: `Bearer ${process.env.JW_PLAYER_API_KEY}`,
-                        };
+                        // var headers = {
+                        //   Authorization: `Bearer ${process.env.JW_PLAYER_API_KEY}`,
+                        // };
 
                         var apiResponse_3 = await axios
                           .delete(
@@ -1136,18 +1136,19 @@ const updateVideoContent = async (req, res) => {
                                                                     "on new gc error 2: ",
                                                                     onNewGc_2Error
                                                                   );
+
+                                                                  res.json({
+                                                                    message:
+                                                                      "General info and thumbnail updated!",
+                                                                    status:
+                                                                      "200",
+                                                                    updatedMedia:
+                                                                      onMediaGcUpdate,
+                                                                    updatedThumbnail:
+                                                                      onThumbnailUpdate,
+                                                                  });
                                                                 }
                                                               );
-
-                                                          // res.json({
-                                                          //   message:
-                                                          //     "General info and thumbnail updated!",
-                                                          //   status: "200",
-                                                          //   updatedMedia:
-                                                          //     onMediaGcUpdate,
-                                                          //   updatedThumbnail:
-                                                          //     onThumbnailUpdate,
-                                                          // });
                                                         }
                                                       )
                                                       .catch(
@@ -1219,12 +1220,12 @@ const updateVideoContent = async (req, res) => {
                                   "on cloudinary upload error: ",
                                   onCloudinaryUploadError
                                 );
-                                res.json({
-                                  message:
-                                    "Something went wrong while updating thumbnail!",
-                                  status: "400",
-                                  error: onCloudinaryUploadError,
-                                });
+                                // res.json({
+                                //   message:
+                                //     "Something went wrong while updating thumbnail!",
+                                //   status: "400",
+                                //   error: onCloudinaryUploadError,
+                                // });
                               });
                           })
                           .catch(async (onJwThumbnailDeleteError) => {
@@ -1253,7 +1254,7 @@ const updateVideoContent = async (req, res) => {
                             "on cloudinary upload success: ",
                             onCloudinaryUploadSuccess
                           );
-                          var public_id_3 = onCloudinaryUpload.public_id;
+                          var public_id_3 = onCloudinaryUploadSuccess.public_id;
 
                           var data = {
                             relationships: {
@@ -1415,6 +1416,16 @@ const updateVideoContent = async (req, res) => {
                                                                   "on new gc error: ",
                                                                   onNewGc_3Error
                                                                 );
+
+                                                                // res.json({
+                                                                //   message:
+                                                                //     "General info and thumbnail updated!",
+                                                                //   status: "200",
+                                                                //   updatedMedia:
+                                                                //     onGcMediaUpdateSuccess,
+                                                                //   updatedThumbnail:
+                                                                //     onThumbnailUpdateSuccess,
+                                                                // });
                                                               }
                                                             );
 
@@ -1507,12 +1518,12 @@ const updateVideoContent = async (req, res) => {
                             "on cloudinary upload error: ",
                             onCloudinaryUploadError
                           );
-                          res.json({
-                            message:
-                              "Something went wrong while updating thumbnail!",
-                            status: "400",
-                            error: onCloudinaryUploadError,
-                          });
+                          // res.json({
+                          //   message:
+                          //     "Something went wrong while updating thumbnail!",
+                          //   status: "400",
+                          //   error: onCloudinaryUploadError,
+                          // });
                         });
                     }
                   })
@@ -1662,6 +1673,16 @@ const updateVideoContent = async (req, res) => {
                                                       "on new gc error: ",
                                                       onNewGc_4Error
                                                     );
+
+                                                    res.json({
+                                                      message:
+                                                        "General info and thumbnail updated!",
+                                                      status: "200",
+                                                      updatedMedia:
+                                                        onGcMediaUpdateSuccess,
+                                                      updatedThumbnail:
+                                                        onThumbnailUpdate,
+                                                    });
                                                   }
                                                 );
 
@@ -1707,12 +1728,12 @@ const updateVideoContent = async (req, res) => {
                                 "on cloudinary upload error: ",
                                 onCloudinaryUploadError
                               );
-                              res.json({
-                                message:
-                                  "Something went wrong while updating thumbnail!",
-                                status: "400",
-                                error: onCloudinaryUploadError,
-                              });
+                              // res.json({
+                              //   message:
+                              //     "Something went wrong while updating thumbnail!",
+                              //   status: "400",
+                              //   error: onCloudinaryUploadError,
+                              // });
                             });
                         })
                         .catch(async (deleteCloudinaryError) => {
@@ -1837,6 +1858,14 @@ const updateVideoContent = async (req, res) => {
                                               "on new gc error 5: ",
                                               onNewGc_5Error
                                             );
+
+                                            // res.json({
+                                            //   message:
+                                            //     "General info and thumbnail updated!",
+                                            //   status: "200",
+                                            //   updatedMedia: onGcMediaUpdateSuccess,
+                                            //   updatedThumbnail: onThumbnailUpdate,
+                                            // });
                                           });
 
                                       // res.json({
@@ -2396,7 +2425,7 @@ const createVideoUpdated = async (req, res) => {
 
         var generalVideoObj = new Video({
           media: savedMedia._id,
-          category: "movie",
+          category: category,
           genre: genres,
           rating: rating,
           status: status,

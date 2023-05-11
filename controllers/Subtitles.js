@@ -3,6 +3,7 @@ const Media = require("../models/Media");
 const GeneralContent = require("../models/GeneralContent");
 const LanguagesContent = require("../models/LanguagesContent");
 const Video = require("../models/Video");
+const Episode = require("../models/Episode");
 
 const { translate } = require("free-translate");
 
@@ -673,6 +674,307 @@ const updateSubtitles_V2 = async (req, res) => {
   }
 };
 
+const addSubtitlesForEpisode = async (req, res) => {
+  try {
+    var episode_id = req.params.episode_id;
+    var {
+      track_id,
+      delivery_url,
+      track_kind,
+      language,
+      media_obj_id,
+      language_code,
+    } = req.body;
+    var mediaObj = await Episode.findById({
+      _id: episode_id,
+    }).populate(["subtitles", "translated_content"]);
+
+    if (!mediaObj) {
+      res.json({
+        message: "No episode found!",
+        status: "404",
+      });
+    } else {
+      var translated_contents = mediaObj.translated_content;
+
+      var isTranslationAvailable = translated_contents.some(
+        (obj) => obj.language_type === language
+      );
+
+      console.log(isTranslationAvailable);
+
+      if (isTranslationAvailable) {
+        var subtitlesObj = new Subtitles({
+          track_id: track_id,
+          delivery_url: delivery_url,
+          track_kind: track_kind,
+          language: language,
+          media: mediaObj._id,
+        });
+
+        var savedSubtitles = await subtitlesObj.save();
+
+        var filter = {
+          _id: mediaObj._id,
+        };
+
+        var updatedMedia = await Episode.findByIdAndUpdate(
+          filter,
+          {
+            $push: { subtitles: subtitlesObj._id },
+          },
+          {
+            new: true,
+          }
+        )
+          .then((updatedMediaResult) => {
+            console.log("Saved Subtitles: ", savedSubtitles);
+            res.json({
+              message: "Subtitles Created!",
+              status: "200",
+              savedSubtitles,
+              updatedMediaResult,
+            });
+          })
+          .catch((error) => {
+            res.json({
+              error,
+            });
+          });
+      } else {
+        // var translated_title = await translate(mediaObj.title, {
+        //   to: language_code,
+        // });
+        // var translated_description = await translate(mediaObj.description, {
+        //   to: language_code,
+        // });
+
+        var translated_content_obj = new LanguagesContent({
+          // title_translated: translated_title,
+          // description_translated: translated_description,
+          title_translated: mediaObj.title,
+          description_translated: mediaObj.description,
+          language_type: language,
+          language_code: language_code,
+        });
+
+        var savedTranslation = translated_content_obj
+          .save()
+          .then(async (onSaveTranslation) => {
+            var subtitlesObj = new Subtitles({
+              track_id: track_id,
+              delivery_url: delivery_url,
+              track_kind: track_kind,
+              language: language,
+              media: mediaObj._id,
+            });
+
+            var savedSubtitles = subtitlesObj
+              .save()
+              .then(async (onSaveSubtitle) => {
+                var filter = {
+                  _id: mediaObj._id,
+                };
+                console.log(
+                  "subtitles and content:  ",
+                  onSaveSubtitle._id,
+                  onSaveTranslation._id
+                );
+
+                var updatedMedia = await Episode.findByIdAndUpdate(
+                  filter,
+                  {
+                    $push: {
+                      subtitles: onSaveSubtitle._id,
+                      translated_content: onSaveTranslation._id,
+                    },
+                  },
+                  {
+                    new: true,
+                  }
+                )
+                  .then((updatedMediaResult) => {
+                    console.log("Saved Subtitles: ", onSaveSubtitle);
+                    res.json({
+                      message: "Subtitles Created!",
+                      status: "200",
+                      updatedMediaResult,
+                      onSaveSubtitle,
+                      onSaveTranslation,
+                    });
+                  })
+                  .catch((error) => {
+                    res.json({
+                      error,
+                    });
+                  });
+              });
+          })
+          .catch((onSaveTranslationError) => {
+            res.json({
+              onSaveTranslationError,
+            });
+          });
+      }
+
+      // var subtitlesObj = new Subtitles({
+      //   track_id: track_id,
+      //   delivery_url: delivery_url,
+      //   track_kind: track_kind,
+      //   language: language,
+      //   media: media_obj_id,
+      // });
+
+      // var savedSubtitles = subtitlesObj.save();
+
+      // var filter = {
+      //   _id: mediaObj._id,
+      // };
+
+      // var updatedMedia = await Media.findByIdAndUpdate(
+      //   filter,
+      //   {
+      //     $push: { subtitles: subtitlesObj._id },
+      //   },
+      //   {
+      //     new: true,
+      //   }
+      // )
+      //   .then((updatedMediaResult) => {
+      //     console.log("Saved Subtitles: ", savedSubtitles);
+      //     res.json({
+      //       message: "Subtitles Created!",
+      //       status: "200",
+      //       savedSubtitles,
+      //       updatedMediaResult,
+      //     });
+      //   })
+      //   .catch((error) => {
+      //     res.json({
+      //       error,
+      //     });
+      //   });
+    }
+  } catch (error) {
+    res.json({
+      message: "Internal server error!",
+      status: "500",
+      error,
+    });
+  }
+};
+
+const deletedSubtitlesOfEpisode = async (req, res) => {
+  try {
+    var episode_id = req.params.episode_id;
+    var subtitles_id = req.params.subtitles_id;
+
+    var mediaObj = await Episode.findById({
+      _id: episode_id,
+    });
+    var media_id = mediaObj.media_id;
+    var subtitles = await Subtitles.findOne({
+      _id: subtitles_id,
+    });
+
+    var site_id = process.env.SITE_ID;
+    var track_id = subtitles?.track_id;
+
+    var headers = {
+      Authorization: `Bearer ${process.env.JW_PLAYER_API_KEY}`,
+    };
+
+    var apiResponse = await axios
+      .delete(
+        `https://api.jwplayer.com/v2/sites/${site_id}/media/${media_id}/text_tracks/${track_id}/`,
+        {
+          headers: headers,
+        }
+      )
+      .then((result) => {
+        var updatedMedia = Episode.updateOne(
+          {
+            _id: mediaObj._id,
+          },
+          {
+            $pull: {
+              subtitles: subtitles._id,
+            },
+          },
+          {
+            new: true,
+          }
+        )
+          .then(async (result) => {
+            var deletedSubtitles = await Subtitles.findByIdAndDelete({
+              _id: subtitles._id,
+            });
+
+            res.json({
+              message: "Subtitles deleted!",
+              status: "200",
+              result: result.data,
+            });
+          })
+          .catch((error) => {
+            console.log("Database Error: ", error);
+            res.json({
+              message: "No media found with provided id!",
+              status: "404",
+              error,
+            });
+          });
+      })
+      .catch((error) => {
+        console.log("JW Error: ", error);
+        res.send(error);
+      });
+  } catch (error) {
+    res.json({
+      message: "Internal server error!",
+      status: "500",
+      error,
+    });
+  }
+};
+
+const getSubtitlesByEpisodeId = async (req, res) => {
+  try {
+    var episode_id = req.params.episode_id;
+
+    if (!episode_id || episode_id === "") {
+      res.json({
+        message: "Required fields are empty!",
+        status: "400",
+      });
+    } else {
+      var media = await Episode.findById({
+        _id: episode_id,
+      }).populate("subtitles");
+
+      if (media) {
+        res.json({
+          message: "Subtitles found!",
+          status: "200",
+          subtitles: media.subtitles,
+        });
+      } else {
+        res.json({
+          message: "Media not found!",
+          status: "404",
+          subtitles: [],
+        });
+      }
+    }
+  } catch (error) {
+    res.json({
+      message: "Internal server error!",
+      status: "500",
+      error,
+    });
+  }
+};
+
 module.exports = {
   addSubtitles,
   deletedSubtitles,
@@ -682,4 +984,7 @@ module.exports = {
   updateSubtitles,
   addSubtitlesUpdated_V2,
   updateSubtitles_V2,
+  addSubtitlesForEpisode,
+  deletedSubtitlesOfEpisode,
+  getSubtitlesByEpisodeId,
 };

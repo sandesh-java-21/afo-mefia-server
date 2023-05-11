@@ -15,9 +15,19 @@ router.post(
   audioTracksControllers.addAudioTrackUpdated_V2
 );
 
+router.post(
+  "/add-audio-track-of-episode/:episode_id",
+  audioTracksControllers.addAudioTrackForEpisode
+);
+
 router.delete(
   "/delete-audio-track/:media_object_id/:audio_track_id",
   audioTracksControllers.deletedAudioTrack
+);
+
+router.delete(
+  "/delete-audio-track-of-episode/:episode_id/:audio_track_id",
+  audioTracksControllers.deleteAudioTrackOfEpisode
 );
 
 router.get(
@@ -28,6 +38,11 @@ router.get(
 router.get(
   "/get-audio-tracks-by-media/:media_id",
   audioTracksControllers.getAudioTracksByGeneralMediaId
+);
+
+router.get(
+  "/get-audio-tracks-by-episode/:episode_id",
+  audioTracksControllers.getAudioTracksByEpisodeId
 );
 
 router.put(

@@ -10,9 +10,19 @@ router.post(
   subtitlesControllers.addSubtitlesUpdated_V2
 );
 
+router.post(
+  "/add-subtitles-for-episode/:episode_id",
+  subtitlesControllers.addSubtitlesForEpisode
+);
+
 router.delete(
   "/delete-subtitles/:media_object_id/:subtitles_id",
   subtitlesControllers.deletedSubtitles
+);
+
+router.delete(
+  "/delete-subtitles-of-episode/:episode_id/:subtitles_id",
+  subtitlesControllers.deletedSubtitlesOfEpisode
 );
 
 router.get(
@@ -22,6 +32,11 @@ router.get(
 router.get(
   "/get-subtitles-by-media/:media_id",
   subtitlesControllers.getSubtitlesByMediaId
+);
+
+router.get(
+  "/get-subtitles-by-episode/:episode_id",
+  subtitlesControllers.getSubtitlesByEpisodeId
 );
 
 router.put(

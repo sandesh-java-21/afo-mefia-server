@@ -20,4 +20,6 @@ router.post(
   tvShowControllers.createSeasonOfAtvShow
 );
 
+router.delete("/delete-season/:season_id", seasonsControllers.deleteSeasonById);
+
 module.exports = router;
