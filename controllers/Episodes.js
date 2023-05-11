@@ -3135,7 +3135,7 @@ const updatedEpisode = async (req, res) => {
                 monetization,
               };
 
-              var updatedMedia = await TvShow.findByIdAndUpdate(
+              var updatedMedia = await Episode.findByIdAndUpdate(
                 filter,
                 updateData,
                 { new: true }
