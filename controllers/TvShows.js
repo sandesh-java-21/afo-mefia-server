@@ -9,6 +9,7 @@ const cloudinary = require("cloudinary").v2;
 const cloudinaryConfigObj = require("../configurations/Cloudinary");
 
 const axios = require("axios");
+const { ConnectionStates } = require("mongoose");
 
 const createTvShow = async (req, res) => {
   try {
@@ -2136,6 +2137,260 @@ const updateTvShow = async (req, res) => {
   }
 };
 
+const deleteTvShow = async (req, res) => {
+  try {
+    var tv_show_id = req.params.tv_show_id;
+    var headers = {
+      Authorization: `Bearer ${process.env.JW_PLAYER_API_KEY}`,
+    };
+
+    if (!tv_show_id || tv_show_id === "") {
+      res.json({
+        message: "Required Fields Are Empty!",
+        status: "400",
+      });
+    } else {
+      var tv_show = await TvShow.findById(tv_show_id)
+        .then(async (onTvShowFound) => {
+          console.log("on tv show found: ", onTvShowFound);
+
+          var thumbnail = onTvShowFound.thumbnail;
+          var trailer = onTvShowFound.trailer;
+          console.log("thumbnail and trailer: ", thumbnail, trailer);
+
+          if (onTvShowFound.seasons.length > 0) {
+            res.json({
+              message:
+                "Tv show has seasons available please delete seasons first!",
+              status: "400",
+            });
+          } else {
+            var thumbnailObj = await Thumbnail.findById(thumbnail)
+              .then(async (onThumbnailFound) => {
+                console.log("on thumbnail found: ", onThumbnailFound);
+
+                cloudinary.config(cloudinaryConfigObj);
+                cloudinary.uploader
+                  .destroy(onThumbnailFound.cloudinary_public_id)
+                  .then(async (onCloudinaryDelete) => {
+                    console.log("on cloudinary delete: ", onCloudinaryDelete);
+
+                    var deletedThumbnail = await Thumbnail.findByIdAndDelete(
+                      onThumbnailFound._id
+                    )
+                      .then(async (onThumbnailDelete) => {
+                        console.log("on thumbnail delete: ", onThumbnailDelete);
+                        var trailerObj = await Trailer.findById(trailer)
+                          .then(async (onTrailerFound) => {
+                            console.log("on trailer found: ", onTrailerFound);
+
+                            if (
+                              onTrailerFound.media_id &&
+                              onTrailerFound.media_id !== ""
+                            ) {
+                              // yes trailer media id
+                              var site_id = process.env.SITE_ID;
+                              var apiResponse = await axios
+                                .delete(
+                                  `https://api.jwplayer.com/v2/sites/${site_id}/media/${onTrailerFound.media_id}/`,
+                                  {
+                                    headers: headers,
+                                  }
+                                )
+                                .then(async (onJwDelete) => {
+                                  console.log(
+                                    "on jw media delete: ",
+                                    onJwDelete
+                                  );
+
+                                  var deletedTrailer =
+                                    await Trailer.findByIdAndDelete(
+                                      onTrailerFound._id
+                                    )
+                                      .then(async (onTrailerDelete) => {
+                                        console.log(
+                                          "on trailer delete: ",
+                                          onTrailerDelete
+                                        );
+
+                                        var deletedTvShow =
+                                          await TvShow.findByIdAndDelete(
+                                            onTvShowFound._id
+                                          )
+                                            .then(async (onTvShowDelete) => {
+                                              console.log(
+                                                "on tv show delete: ",
+                                                onTvShowDelete
+                                              );
+
+                                              res.json({
+                                                message: "Tv Show Deleted!",
+                                                status: "200",
+                                              });
+                                            })
+                                            .catch(
+                                              async (onTvShowDeleteError) => {
+                                                console.log(
+                                                  "on tv show delete error: ",
+                                                  onTvShowDeleteError
+                                                );
+                                                res.json({
+                                                  message:
+                                                    "Something went wrong while deleting tv show from database!",
+                                                  status: "400",
+                                                  error: onTvShowDeleteError,
+                                                });
+                                              }
+                                            );
+                                      })
+                                      .catch(async (onTrailerDeleteError) => {
+                                        console.log(
+                                          "on trailer delete error: ",
+                                          onTrailerDeleteError
+                                        );
+                                        res.json({
+                                          message:
+                                            "Something went wrong while deleting trailer from database!",
+                                          status: "400",
+                                          error: onTrailerDeleteError,
+                                        });
+                                      });
+                                })
+                                .catch(async (onJwDeleteError) => {
+                                  console.log(
+                                    "on jw delete error: ",
+                                    onJwDeleteError
+                                  );
+                                  res.json({
+                                    message:
+                                      "Something went wrong while deleting from jw player!",
+                                    status: "400",
+                                    error: onJwDeleteError.response.data,
+                                  });
+                                });
+                            } else {
+                              // no trailer media id
+
+                              var deletedTrailer =
+                                await Trailer.findByIdAndDelete(
+                                  onTrailerFound._id
+                                )
+                                  .then(async (onTrailerDelete2) => {
+                                    console.log(
+                                      "on trailer delete 2: ",
+                                      onTrailerDelete2
+                                    );
+
+                                    var deletedTvShow =
+                                      await TvShow.findByIdAndDelete(
+                                        onTvShowFound._id
+                                      )
+                                        .then(async (onTvShowDelete2) => {
+                                          console.log(
+                                            "on tv show delete 2: ",
+                                            onTvShowDelete2
+                                          );
+                                          res.json({
+                                            message: "Tv Show Deleted!",
+                                            status: "200",
+                                          });
+                                        })
+                                        .catch(async (onTvShowDeleteError2) => {
+                                          console.log(
+                                            "on tv show delete error 2: ",
+                                            onTvShowDeleteError2
+                                          );
+                                          res.json({
+                                            message:
+                                              "Something went wrong while deleting tv show from database 2!",
+                                            status: "400",
+                                            error: onTvShowDeleteError2,
+                                          });
+                                        });
+                                  })
+                                  .catch(async (onTrailerDeleteError2) => {
+                                    console.log(
+                                      "on trailer delete error 2: ",
+                                      onTrailerDeleteError2
+                                    );
+                                    res.json({
+                                      message:
+                                        "Something went wrong while deleting trailer from database!",
+                                      status: "400",
+                                      error: onTrailerDeleteError2,
+                                    });
+                                  });
+                            }
+                          })
+                          .catch(async (onTrailerFoundError) => {
+                            console.log(
+                              "on trailer found error: ",
+                              onTrailerFoundError
+                            );
+                            res.json({
+                              message: "Trailer not found!",
+                              status: "404",
+                              error: onTrailerFoundError,
+                            });
+                          });
+                      })
+                      .catch(async (onThumbnailDeleteError) => {
+                        console.log(
+                          "on thumbnail delete error: ",
+                          onThumbnailDeleteError
+                        );
+                        res.json({
+                          message:
+                            "Something went wrong while deleting thumbnail from database!",
+                          status: "400",
+                          error: onThumbnailDeleteError,
+                        });
+                      });
+                  })
+                  .catch(async (onCloudinaryDeleteError) => {
+                    console.log(
+                      "on cloudinary delete error: ",
+                      onCloudinaryDeleteError
+                    );
+                    res.json({
+                      message:
+                        "Something went wrong while deleting from cloudinary!",
+                      status: "400",
+                      error: onCloudinaryDeleteError,
+                    });
+                  });
+              })
+              .catch(async (onThumbnailFoundError) => {
+                console.log(
+                  "on thumbnail found error: ",
+                  onThumbnailFoundError
+                );
+                res.json({
+                  message: "Thumbnail not found!",
+                  status: "404",
+                  error: onThumbnailFoundError,
+                });
+              });
+          }
+        })
+        .catch(async (onTvShowFoundError) => {
+          console.log("on tv show found error: ", onTvShowFoundError);
+          res.json({
+            message: "Tv Show Not Found!",
+            status: "404",
+            error: onTvShowFoundError,
+          });
+        });
+    }
+  } catch (error) {
+    res.json({
+      message: "Internal Server Error!",
+      status: "500",
+      error,
+    });
+  }
+};
+
 module.exports = {
   createTvShow,
   geAllTvShows,
@@ -2143,4 +2398,5 @@ module.exports = {
   createSeasonOfAtvShow,
   getTvShow,
   updateTvShow,
+  deleteTvShow,
 };

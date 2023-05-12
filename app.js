@@ -1,5 +1,5 @@
 const express = require("express");
-const mongoose = require('mongoose')
+const mongoose = require("mongoose");
 const dotenv = require("dotenv").config();
 
 const morgan = require("morgan");
@@ -13,14 +13,20 @@ var DB_URL = process.env.DB_URL;
 // console.log(DB_URL);
 mongoose
   .connect(`${DB_URL}`, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(data => { console.log('Database Connected'); })
-  .catch(err => { console.log("Error Occurred While Establishing Connection: ", err) })
-
+  .then((data) => {
+    console.log("Database Connected");
+  })
+  .catch((err) => {
+    console.log("Error Occurred While Establishing Connection: ", err);
+  });
 
 app.use(cors());
 app.use(function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept"
+  );
   next();
 });
 

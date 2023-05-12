@@ -28,4 +28,6 @@ router.patch(
 
 router.put("/update-tv-show/:tv_show_id", tvShowsControllers.updateTvShow);
 
+router.delete("/delete-tv-show/:tv_show_id", tvShowsControllers.deleteTvShow);
+
 module.exports = router;
