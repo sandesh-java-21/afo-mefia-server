@@ -105,50 +105,51 @@ const deleteSeasonById = async (req, res) => {
               message: "Please remove the episodes of this season first!",
             });
           } else {
-            var deletedSeason = await Season.findByIdAndDelete(
-              onSeasonFound._id
+            var updatedTvShow = await TvShow.findOneAndUpdate(
+              {
+                _id: onSeasonFound.tv_show,
+              },
+              {
+                $pull: {
+                  seasons: onSeasonFound._id,
+                },
+              },
+              {
+                new: true,
+              }
             )
-              .then(async (onSeasonDelete) => {
-                console.log("on season delete: ", onSeasonDelete);
+              .then(async (onTvShowUpdate) => {
+                console.log("on tv show update: ", onTvShowUpdate);
 
-                var updatedTvShow = await TvShow.findOneAndUpdate(
-                  {
-                    season: onSeasonFound._id,
-                  },
-                  {
-                    $pull: {
-                      seasons: onSeasonDelete._id,
-                    },
-                  },
-                  {
-                    new: true,
-                  }
+                var deletedSeason = await Season.findByIdAndDelete(
+                  onSeasonFound._id
                 )
-                  .then(async (onTvShowUpdate) => {
-                    console.log("on tv show update: ", onTvShowUpdate);
+                  .then(async (onSeasonDelete) => {
+                    console.log("on season delete: ", onSeasonDelete);
+
                     res.json({
                       message: "Season deleted!",
                       status: "200",
                     });
                   })
-                  .catch(async (onTvShowUpdateError) => {
+                  .catch(async (onSeasonDeleteError) => {
                     console.log(
-                      "on tv show update error: ",
-                      onTvShowUpdateError
+                      "on season delete error: ",
+                      onSeasonDeleteError
                     );
                     res.json({
                       message: "Something went wrong while deleting season!",
                       status: "400",
-                      error: onTvShowUpdateError,
+                      error: onSeasonDeleteError,
                     });
                   });
               })
-              .catch(async (onSeasonDeleteError) => {
-                console.log("on season delete error: ", onSeasonDeleteError);
+              .catch(async (onTvShowUpdateError) => {
+                console.log("on tv show update error: ", onTvShowUpdateError);
                 res.json({
                   message: "Something went wrong while deleting season!",
                   status: "400",
-                  error: onSeasonDeleteError,
+                  error: onTvShowUpdateError,
                 });
               });
           }
